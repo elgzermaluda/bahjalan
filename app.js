@@ -3,7 +3,7 @@
 //  GitHub storage: update GH_USER and GH_REPO below
 // ════════════════════════════════════════════════════════
 
-const GH_USER = 'YOUR_GITHUB_USERNAME';  // ← change this
+const GH_USER = 'elgzermaluda';  // ← change this
 const GH_REPO = 'bahjalan';              // ← change this (your repo name)
 const GH_FILE = 'data.json';
 const GH_TOKEN_KEY = 'bjm_gh_token';
