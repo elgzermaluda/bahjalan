@@ -3,7 +3,7 @@
 //  GitHub storage: update GH_USER and GH_REPO below
 // ════════════════════════════════════════════════════════
 
-const GH_USER = 'elgzermaluda';  // ← change this
+const GH_USER = 'YOUR_GITHUB_USERNAME';  // ← change this
 const GH_REPO = 'bahjalan';              // ← change this (your repo name)
 const GH_FILE = 'data.json';
 const GH_TOKEN_KEY = 'bjm_gh_token';
@@ -92,30 +92,48 @@ async function saveData() {
 // ── USER LOCATION ─────────────────────────────────────────
 function placeUserPin(lat, lng) {
   if (userMarker) map.removeLayer(userMarker);
+  // Draggable person icon — clearly "you are here"
   const icon = L.divIcon({
     className: '',
-    html: `<div style="width:20px;height:20px;border-radius:50%;background:#993C1D;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3)" class="user-pin-pulse"></div>`,
-    iconSize: [20, 20], iconAnchor: [10, 10]
+    html: `<div style="
+      width:36px;height:36px;border-radius:50%;
+      background:#1a1a2e;border:3px solid #fff;
+      box-shadow:0 2px 10px rgba(0,0,0,0.35);
+      display:flex;align-items:center;justify-content:center;
+      font-size:18px;cursor:grab;user-select:none;
+      transition:box-shadow 0.2s;
+    " title="drag me to change location">🧍</div>`,
+    iconSize: [36, 36], iconAnchor: [18, 18]
   });
   userMarker = L.marker([lat, lng], { icon, draggable: true }).addTo(map);
-  userMarker.on('dragend', e => {
-    const p = e.target.getLatLng();
+  userMarker.on('drag', () => {
+    const p = userMarker.getLatLng();
+    userLat = p.lat; userLng = p.lng;
+    updateRadiusCircle();
+  });
+  userMarker.on('dragend', () => {
+    const p = userMarker.getLatLng();
     userLat = p.lat; userLng = p.lng;
     renderPlaces();
+    showToast('location moved — recalculating...');
   });
+  userMarker.bindTooltip('drag to move your location', { permanent: false, direction: 'top', offset: [0, -20] });
   updateRadiusCircle();
 }
 
 function useMyLocation() {
-  if (!navigator.geolocation) { showToast('geolocation not supported'); return; }
+  if (!navigator.geolocation) { showToast('geolocation not supported on this device'); return; }
+  showToast('getting your location...');
   navigator.geolocation.getCurrentPosition(pos => {
     userLat = pos.coords.latitude;
     userLng = pos.coords.longitude;
-    map.setView([userLat, userLng], 13);
+    map.setView([userLat, userLng], 14);
     placeUserPin(userLat, userLng);
     renderPlaces();
-    showToast('location updated');
-  }, () => showToast('could not get location'));
+    showToast('location updated ✓');
+  }, err => {
+    showToast('could not get location — drag the 🧍 icon instead');
+  }, { timeout: 8000 });
 }
 
 function updateRadiusCircle() {
@@ -123,8 +141,8 @@ function updateRadiusCircle() {
   if (filterState.mode === 'r' || filterState.mode === 'b') {
     radiusCircle = L.circle([userLat, userLng], {
       radius: filterState.km * 1000,
-      color: '#D85A30', fillColor: '#D85A30', fillOpacity: 0.05,
-      weight: 1.5, dashArray: '6 4'
+      color: '#7C3AED', fillColor: '#7C3AED', fillOpacity: 0.06,
+      weight: 2, dashArray: '6 5'
     }).addTo(map);
   }
 }
@@ -148,47 +166,73 @@ async function extractUrl() {
   btn.textContent = 'loading...';
   btn.classList.add('loading');
 
+  extractedLat = null; extractedLng = null; extractedName = null;
   extractedMapsUrl = raw;
 
-  // Try to extract coords directly from long-form URL
-  const coordMatch = raw.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+  let workingUrl = raw;
+
+  // ── Step 1: resolve short URLs (maps.app.goo.gl or goo.gl) via CORS proxy ──
+  if (raw.includes('goo.gl') || raw.includes('maps.app')) {
+    try {
+      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(raw)}`;
+      const res = await fetch(proxyUrl);
+      const data = await res.json();
+      // allorigins returns the final URL in the status field or we extract from contents
+      // Try to find a google maps URL in the returned content/headers
+      const finalUrl = data.status && data.status.url ? data.status.url : '';
+      if (finalUrl && finalUrl.includes('google.com/maps')) {
+        workingUrl = finalUrl;
+      } else {
+        // Try extracting from contents - look for canonical URL
+        const match = data.contents && data.contents.match(/href="(https:\/\/www\.google\.com\/maps\/[^"]+)"/);
+        if (match) workingUrl = match[1];
+      }
+    } catch(e) {
+      // fallback — try corsproxy.io
+      try {
+        const res2 = await fetch(`https://corsproxy.io/?${encodeURIComponent(raw)}`);
+        const text = await res2.text();
+        const match = text.match(/https:\/\/www\.google\.com\/maps\/place\/[^\s"']+/);
+        if (match) workingUrl = match[0];
+      } catch(e2) {}
+    }
+  }
+
+  // ── Step 2: extract coords from the resolved URL ──
+  const coordMatch = workingUrl.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
   if (coordMatch) {
     extractedLat = parseFloat(coordMatch[1]);
     extractedLng = parseFloat(coordMatch[2]);
   }
 
-  // Try to extract name from URL
-  const placeMatch = raw.match(/\/place\/([^/@]+)/);
+  // ── Step 3: extract name from URL ──
+  const placeMatch = workingUrl.match(/\/place\/([^/@?&]+)/);
   if (placeMatch) {
-    extractedName = decodeURIComponent(placeMatch[1].replace(/\+/g, ' '));
+    extractedName = decodeURIComponent(placeMatch[1].replace(/\+/g, ' '))
+      .replace(/_/g, ' ')
+      .replace(/\+/g, ' ')
+      .trim();
+    // Clean up — remove anything after a comma if it looks like address noise
+    if (extractedName.includes(',')) extractedName = extractedName.split(',')[0].trim();
   }
 
-  // If short URL or no coords, try to resolve via Nominatim using the name
+  // ── Step 4: also try query param q= for search-style URLs ──
+  if (!extractedName) {
+    const qMatch = workingUrl.match(/[?&]q=([^&]+)/);
+    if (qMatch) extractedName = decodeURIComponent(qMatch[1].replace(/\+/g, ' '));
+  }
+
+  // ── Step 5: if still no coords, search Nominatim with extracted name ──
   if (!extractedLat && extractedName) {
     try {
       const q = encodeURIComponent(extractedName);
       const r = await fetch(`https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`, {
-        headers: { 'Accept-Language': 'en' }
+        headers: { 'Accept-Language': 'en', 'User-Agent': 'BahJalanMana/1.0' }
       });
       const data = await r.json();
       if (data.length > 0) {
         extractedLat = parseFloat(data[0].lat);
         extractedLng = parseFloat(data[0].lon);
-        if (!extractedName) extractedName = data[0].display_name.split(',')[0];
-      }
-    } catch(e) {}
-  }
-
-  // If short URL and no name, try to fetch the redirect
-  if (!extractedLat && raw.includes('goo.gl')) {
-    try {
-      // Use Nominatim to look up from the URL text as a fallback
-      const r = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(raw)}&format=json&limit=1`);
-      const data = await r.json();
-      if (data.length > 0) {
-        extractedLat = parseFloat(data[0].lat);
-        extractedLng = parseFloat(data[0].lon);
-        extractedName = data[0].display_name.split(',')[0];
       }
     } catch(e) {}
   }
@@ -200,19 +244,18 @@ async function extractUrl() {
   const coordEl = document.getElementById('extracted-coords');
 
   if (extractedLat && extractedLng) {
-    nameEl.textContent = extractedName || 'name not detected — you can edit in notes';
+    nameEl.textContent = extractedName || 'name not detected — add a note below';
     nameEl.className = 'row-val extracted';
     coordEl.textContent = `${extractedLat.toFixed(5)}° N, ${extractedLng.toFixed(5)}° E`;
     coordEl.className = 'row-val extracted';
-    // Preview pin on map
     map.setView([extractedLat, extractedLng], 15);
-    showToast('place found — check the pin on the map');
+    showToast('place found ✓');
   } else {
-    nameEl.textContent = 'could not extract — try a different link';
+    nameEl.textContent = 'could not read link — try the full browser URL';
     nameEl.className = 'row-val auto';
-    coordEl.textContent = 'try a full maps.google.com link';
+    coordEl.textContent = 'open maps in browser → copy the full URL from address bar';
     coordEl.className = 'row-val auto';
-    showToast('paste a full Google Maps link or share link');
+    showToast('try the full URL from your browser instead');
   }
 }
 
@@ -504,10 +547,12 @@ async function renderPlaces() {
     if (isMatch) matchedPlaces.push({ ...p, isMatch });
   });
 
-  // Tentacle lines to matched places
+  // Tentacle lines to matched places — purple, distinct from OSM roads
   filtered.forEach(p => {
+    const isEatery = p.category === 'eatery';
+    const lineColor = isEatery ? '#7C3AED' : '#0EA5E9';
     const line = L.polyline([[userLat, userLng], [p.lat, p.lng]], {
-      color: '#D85A30', weight: 1.5, opacity: 0.6, dashArray: '0'
+      color: lineColor, weight: 2, opacity: 0.65
     }).addTo(map);
     tentacleLines.push(line);
   });
@@ -517,17 +562,37 @@ async function renderPlaces() {
 }
 
 function addMarker(place, isMatch, dist, travelMin) {
-  const color = isMatch ? '#993C1D' : '#c8b8a0';
-  const borderColor = isMatch ? '#fff' : '#e0d8cc';
-  const size = isMatch ? 14 : 10;
+  const isEatery = place.category === 'eatery';
+  // Colours: purple for eateries, teal/blue for activities — both distinct from OSM red roads
+  const matchColor = isEatery ? '#7C3AED' : '#0EA5E9';
+  const matchBorder = isEatery ? '#EDE9FE' : '#E0F2FE';
+  const dimColor = isEatery ? '#C4B5FD' : '#7DD3FC';
+  const icon_emoji = isEatery ? '🍴' : '⭐';
+
+  const color = isMatch ? matchColor : '#c8b8a0';
+  const border = isMatch ? matchBorder : '#f0ebe3';
+  const size = isMatch ? 30 : 22;
+  const emoji = isMatch ? icon_emoji : (isEatery ? '🍴' : '⭐');
+  const opacity = isMatch ? '1' : '0.45';
+
   const icon = L.divIcon({
     className: '',
-    html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:2px solid ${borderColor};box-shadow:0 1px 4px rgba(0,0,0,0.2);transition:all 0.2s"></div>`,
+    html: `<div style="
+      width:${size}px;height:${size}px;border-radius:50%;
+      background:${color};border:2.5px solid ${border};
+      box-shadow:0 2px 6px rgba(0,0,0,0.22);
+      display:flex;align-items:center;justify-content:center;
+      font-size:${isMatch?14:10}px;opacity:${opacity};
+      transition:all 0.2s;
+    ">${emoji}</div>`,
     iconSize: [size, size], iconAnchor: [size/2, size/2]
   });
   const m = L.marker([place.lat, place.lng], { icon }).addTo(map);
+
   const status = getStatusLabel(place);
-  const tagsHtml = (place.tags || []).map(t => `<span class="popup-tag ${place.category==='activity'?'a':''}">${t}</span>`).join('');
+  const tagsHtml = (place.tags || []).map(t =>
+    `<span class="popup-tag ${place.category==='activity'?'a':''}">${t}</span>`
+  ).join('');
   const statusHtml = status.open === true
     ? `<div class="popup-status-open">${status.label}</div>`
     : status.open === false
@@ -535,9 +600,11 @@ function addMarker(place, isMatch, dist, travelMin) {
     : status.label !== 'no hours saved'
     ? `<div class="popup-status-closed">${status.label}</div>` : '';
   const mapsHref = place.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name)}`;
+  const catLabel = isEatery ? '🍴 eatery' : '⭐ activity';
 
   m.bindPopup(`
     <div class="popup-inner">
+      <div style="font-size:9px;color:${matchColor};font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:2px">${catLabel}</div>
       <div class="popup-name">${place.name}</div>
       <div class="popup-dist">${dist.toFixed(1)} km · ~${travelMin} min drive</div>
       ${place.note ? `<div style="font-size:10px;color:var(--ink2);margin-top:3px;font-style:italic">${place.note}</div>` : ''}
@@ -574,12 +641,18 @@ function renderStrip(all, matchedIds) {
   list.innerHTML = sorted.map(p => {
     const isMatch = matchedIds.includes(p.id);
     const status = getStatusLabel(p);
+    const isEatery = p.category === 'eatery';
+    const catIcon = isEatery ? '🍴' : '⭐';
+    const catColor = isEatery ? '#7C3AED' : '#0EA5E9';
     const tagsHtml = (p.tags || []).map(t => `<span class="pctag ${p.category==='activity'?'a':''}">${t}</span>`).join('');
     const statusHtml = status.open === true
       ? `<div class="pc-status-open">${status.label}</div>`
       : `<div class="pc-status-closed">${status.label}</div>`;
-    return `<div class="pcard ${isMatch ? 'match' : 'dim'}" onclick="focusPlace('${p.id}')">
-      <div class="pc-name">${p.name}</div>
+    return `<div class="pcard ${isMatch ? 'match' : 'dim'}" onclick="focusPlace('${p.id}')" style="${isMatch ? `border-color:${catColor}40;` : ''}">
+      <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">
+        <span style="font-size:14px">${catIcon}</span>
+        <div class="pc-name">${p.name}</div>
+      </div>
       <div class="pc-dist">${p.dist.toFixed(1)} km</div>
       <div class="pc-time">~${p.travelMin} min drive</div>
       <div class="pc-tags">${tagsHtml}</div>

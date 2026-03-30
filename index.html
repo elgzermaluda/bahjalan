@@ -264,10 +264,15 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
 .user-pin-pulse { animation: pulse 2s infinite; }
 @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(153,60,29,0.4)} 50%{box-shadow:0 0 0 10px rgba(153,60,29,0)} }
 
+/* activity tag blue variant */
+.popup-tag.a { background: #E0F2FE; color: #0369A1; border-color: #7DD3FC; }
+.pctag.a { background: #E0F2FE; color: #0369A1; border-color: #7DD3FC; }
+
 /* mobile adjustments */
 @media(max-width:600px){
   #filter-panel { width: calc(100vw - 24px); }
   #save-panel { width: 100%; }
+  #map-legend { display: none; }
 }
 </style>
 </head>
@@ -283,6 +288,37 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
 </div>
 
 <div id="map"></div>
+
+<!-- Map legend -->
+<div id="map-legend" style="
+  position:fixed;top:68px;right:12px;
+  background:rgba(247,243,237,0.95);border:1px solid #e0d8cc;
+  border-radius:10px;padding:8px 12px;z-index:500;
+  font-size:11px;color:#6b5c4e;line-height:1.8;
+  box-shadow:0 2px 10px rgba(42,31,20,0.08);
+">
+  <div style="font-size:9px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px">legend</div>
+  <div>🧍 <span style="color:#2a1f14">you (drag to move)</span></div>
+  <div>🍴 <span style="color:#7C3AED;font-weight:500">eatery</span></div>
+  <div>⭐ <span style="color:#0EA5E9;font-weight:500">activity</span></div>
+  <div style="display:flex;align-items:center;gap:5px;margin-top:2px">
+    <div style="width:18px;height:2px;background:#7C3AED;border-radius:1px"></div>
+    <span>within filter</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:5px">
+    <div style="width:18px;height:2px;background:#c8b8a0;border-radius:1px;opacity:0.5"></div>
+    <span>outside filter</span>
+  </div>
+</div>
+
+<!-- Drag hint -->
+<div id="drag-hint" style="
+  position:fixed;bottom:118px;right:12px;
+  background:rgba(42,31,20,0.75);color:#fff;
+  border-radius:20px;padding:6px 12px;font-size:11px;
+  z-index:500;pointer-events:none;
+  opacity:1;transition:opacity 1s;
+">drag 🧍 to change location</div>
 
 <!-- FILTER PANEL -->
 <div id="filter-panel">
@@ -373,15 +409,15 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
           maps link
           <span class="info-btn" tabindex="0">i
             <div class="info-tooltip">
-              how to get the link:<br>
+              <b>how to get the link:</b><br>
               <ol>
                 <li>open Google Maps</li>
                 <li>find the place</li>
-                <li>tap <b>Share</b></li>
-                <li>tap <b>Copy link</b></li>
+                <li>tap <b>Share</b> → <b>Copy link</b></li>
                 <li>paste here</li>
               </ol>
-              works on phone &amp; browser.
+              <b>short link not working?</b><br>
+              open the place in your browser instead — copy the full URL from the address bar (it starts with maps.google.com/...).
             </div>
           </span>
         </div>
@@ -511,5 +547,12 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="app.js"></script>
+<script>
+  // fade out drag hint after 4 seconds
+  setTimeout(() => {
+    const hint = document.getElementById('drag-hint');
+    if (hint) { hint.style.opacity = '0'; setTimeout(() => hint.remove(), 1000); }
+  }, 4000);
+</script>
 </body>
 </html>
