@@ -70,23 +70,81 @@ async function loadData() {
   } catch(e) { places = []; }
 }
 
-async function saveData() {
+// Show token modal — returns entered token or null if cancelled
+function askForToken() {
+  return new Promise(resolve => {
+    const overlay = document.getElementById('token-overlay');
+    const input = document.getElementById('token-input');
+    const err = document.getElementById('token-error');
+    input.value = '';
+    err.textContent = '';
+    overlay.style.display = 'flex';
+    setTimeout(() => input.focus(), 100);
+
+    document.getElementById('token-save-btn').onclick = () => {
+      const val = input.value.trim();
+      if (!val) { err.textContent = 'paste your token first'; return; }
+      if (!val.startsWith('ghp_') && !val.startsWith('github_pat_')) {
+        err.textContent = "doesn't look right — token starts with ghp_ or github_pat_";
+        return;
+      }
+      localStorage.setItem(GH_TOKEN_KEY, val);
+      overlay.style.display = 'none';
+      resolve(val);
+    };
+    document.getElementById('token-cancel-btn').onclick = () => {
+      overlay.style.display = 'none';
+      resolve(null);
+    };
+    input.onkeydown = e => { if (e.key === 'Enter') document.getElementById('token-save-btn').click(); };
+  });
+}
+
+async function saveData(retryOnFail = true) {
   let token = getToken();
   if (!token) {
-    token = prompt('Enter your GitHub Personal Access Token (ghp_...) to save:');
+    token = await askForToken();
     if (!token) return false;
-    localStorage.setItem(GH_TOKEN_KEY, token);
   }
   try {
     const apiUrl = `https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${GH_FILE}`;
-    const getRes = await fetch(apiUrl, { headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' } });
+    const getRes = await fetch(apiUrl, {
+      headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if (getRes.status === 401) {
+      localStorage.removeItem(GH_TOKEN_KEY);
+      if (retryOnFail) {
+        showToast('token rejected — please enter it again');
+        token = await askForToken();
+        if (!token) return false;
+        return saveData(false);
+      }
+      return false;
+    }
     let sha = null;
     if (getRes.ok) { const j = await getRes.json(); sha = j.sha; }
     const content = btoa(unescape(encodeURIComponent(JSON.stringify({ places }, null, 2))));
     const body = { message: 'Update places', content, ...(sha && { sha }) };
-    const putRes = await fetch(apiUrl, { method: 'PUT', headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-    return putRes.ok;
-  } catch(e) { return false; }
+    const putRes = await fetch(apiUrl, {
+      method: 'PUT',
+      headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!putRes.ok) {
+      const errData = await putRes.json().catch(() => ({}));
+      if (putRes.status === 403 || putRes.status === 404) {
+        localStorage.removeItem(GH_TOKEN_KEY);
+        showToast('permission error — make sure your token has "repo" scope');
+        return false;
+      }
+      showToast('save failed — ' + (errData.message || putRes.status));
+      return false;
+    }
+    return true;
+  } catch(e) {
+    showToast('network error — check your internet and try again');
+    return false;
+  }
 }
 
 // ── USER LOCATION ─────────────────────────────────────────
