@@ -1,6 +1,46 @@
 {
   "places": [
     {
+      "id": "1775132276203",
+      "name": "Petronas Twin Towers",
+      "lat": 3.1574849,
+      "lng": 101.613488,
+      "mapsUrl": "https://www.google.com/maps/place/Petronas+Twin+Towers/@3.1574849,101.613488,12z/data=!3m1!5s0x31cc3624d159584b:0xd7fdfb7d8ae99871!4m6!3m5!1s0x31cc37d12d669c1f:0x9e3afdd17c8a9056!8m2!3d3.1574693!4d101.7115639!16zL20vMHN5bHo?entry=tts&g_ep=EgoyMDI2MDMzMC4wIPu8ASoASAFQAw%3D%3D&skid=dab4a76b-f58b-44e0-8955-71650f8a5bdd",
+      "category": "activity",
+      "tags": [
+        "theme park"
+      ],
+      "note": "",
+      "hours": {
+        "0": null,
+        "1": {
+          "open": "08:00",
+          "close": "22:00"
+        },
+        "2": {
+          "open": "08:00",
+          "close": "22:00"
+        },
+        "3": {
+          "open": "08:00",
+          "close": "22:00"
+        },
+        "4": {
+          "open": "08:00",
+          "close": "22:00"
+        },
+        "5": {
+          "open": "08:00",
+          "close": "23:00"
+        },
+        "6": {
+          "open": "09:00",
+          "close": "23:00"
+        }
+      },
+      "savedAt": "2026-04-02T12:17:56.203Z"
+    },
+    {
       "id": "1775132173722",
       "name": "Kedai Kopi Malaya",
       "lat": 3.1261435,
