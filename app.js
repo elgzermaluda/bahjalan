@@ -1,12 +1,15 @@
 // ════════════════════════════════════════════════════════
 //  BAH, JALAN MANA? — app.js
-//  GitHub storage: update GH_USER and GH_REPO below
 // ════════════════════════════════════════════════════════
 
-const GH_USER = 'elgzermaluda';  // ← change this
-const GH_REPO = 'bahjalan';              // ← change this (your repo name)
+// These are read from localStorage — set on first launch via the setup modal
 const GH_FILE = 'data.json';
 const GH_TOKEN_KEY = 'bjm_gh_token';
+const GH_USER_KEY  = 'bjm_gh_user';
+const GH_REPO_KEY  = 'bjm_gh_repo';
+
+function getGHUser() { return localStorage.getItem(GH_USER_KEY) || ''; }
+function getGHRepo() { return localStorage.getItem(GH_REPO_KEY) || 'bahjalan'; }
 
 // ── STATE ────────────────────────────────────────────────
 let map, userMarker, radiusCircle;
@@ -31,6 +34,10 @@ let editingId = null;
 // ── INIT ─────────────────────────────────────────────────
 window.onload = async () => {
   initMap();
+  // Check if GitHub setup is complete — if not, show setup modal first
+  if (!getGHUser()) {
+    await showSetupModal();
+  }
   await loadData();
   renderFilterTags();
   renderPlaces();
@@ -62,7 +69,7 @@ function getToken() {
 
 async function loadData() {
   try {
-    const url = `https://raw.githubusercontent.com/${GH_USER}/${GH_REPO}/main/${GH_FILE}?t=${Date.now()}`;
+    const url = `https://raw.githubusercontent.com/${getGHUser()}/${getGHRepo()}/main/${GH_FILE}?t=${Date.now()}`;
     const res = await fetch(url);
     if (!res.ok) { places = []; return; }
     const d = await res.json();
@@ -70,33 +77,72 @@ async function loadData() {
   } catch(e) { places = []; }
 }
 
-// Show token modal — returns entered token or null if cancelled
+// First-time setup modal — collects username, repo name, token
+function showSetupModal() {
+  return new Promise(resolve => {
+    const overlay = document.getElementById('token-overlay');
+    overlay.style.display = 'flex';
+    // pre-fill repo if already stored
+    const repoInp = document.getElementById('setup-repo');
+    if (repoInp) repoInp.value = getGHRepo();
+    setTimeout(() => {
+      const u = document.getElementById('setup-user');
+      if (u) u.focus();
+    }, 100);
+
+    document.getElementById('token-save-btn').onclick = () => {
+      const user = (document.getElementById('setup-user').value || '').trim();
+      const repo = (document.getElementById('setup-repo').value || '').trim() || 'bahjalan';
+      const token = (document.getElementById('token-input').value || '').trim();
+      const err = document.getElementById('token-error');
+
+      if (!user) { err.textContent = 'enter your github username'; return; }
+      if (!token) { err.textContent = 'paste your github token'; return; }
+      if (!token.startsWith('ghp_') && !token.startsWith('github_pat_')) {
+        err.textContent = "token should start with ghp_ or github_pat_";
+        return;
+      }
+      localStorage.setItem(GH_USER_KEY, user);
+      localStorage.setItem(GH_REPO_KEY, repo);
+      localStorage.setItem(GH_TOKEN_KEY, token);
+      overlay.style.display = 'none';
+      resolve();
+    };
+    document.getElementById('token-cancel-btn').onclick = () => {
+      overlay.style.display = 'none';
+      resolve();
+    };
+    document.getElementById('token-input').onkeydown = e => {
+      if (e.key === 'Enter') document.getElementById('token-save-btn').click();
+    };
+  });
+}
+
+// Re-ask for token only (when 401 received)
 function askForToken() {
   return new Promise(resolve => {
     const overlay = document.getElementById('token-overlay');
-    const input = document.getElementById('token-input');
-    const err = document.getElementById('token-error');
-    input.value = '';
-    err.textContent = '';
     overlay.style.display = 'flex';
-    setTimeout(() => input.focus(), 100);
+    document.getElementById('token-input').value = '';
+    document.getElementById('token-error').textContent = 'your token was rejected — paste a new one';
+    setTimeout(() => document.getElementById('token-input').focus(), 100);
 
     document.getElementById('token-save-btn').onclick = () => {
-      const val = input.value.trim();
-      if (!val) { err.textContent = 'paste your token first'; return; }
-      if (!val.startsWith('ghp_') && !val.startsWith('github_pat_')) {
-        err.textContent = "doesn't look right — token starts with ghp_ or github_pat_";
+      const token = (document.getElementById('token-input').value || '').trim();
+      const err = document.getElementById('token-error');
+      if (!token) { err.textContent = 'paste your token first'; return; }
+      if (!token.startsWith('ghp_') && !token.startsWith('github_pat_')) {
+        err.textContent = "should start with ghp_ or github_pat_";
         return;
       }
-      localStorage.setItem(GH_TOKEN_KEY, val);
+      localStorage.setItem(GH_TOKEN_KEY, token);
       overlay.style.display = 'none';
-      resolve(val);
+      resolve(token);
     };
     document.getElementById('token-cancel-btn').onclick = () => {
       overlay.style.display = 'none';
       resolve(null);
     };
-    input.onkeydown = e => { if (e.key === 'Enter') document.getElementById('token-save-btn').click(); };
   });
 }
 
@@ -107,7 +153,7 @@ async function saveData(retryOnFail = true) {
     if (!token) return false;
   }
   try {
-    const apiUrl = `https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${GH_FILE}`;
+    const apiUrl = `https://api.github.com/repos/${getGHUser()}/${getGHRepo()}/contents/${GH_FILE}`;
     const getRes = await fetch(apiUrl, {
       headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
     });
@@ -172,8 +218,10 @@ function placeUserPin(lat, lng) {
   userMarker.on('dragend', () => {
     const p = userMarker.getLatLng();
     userLat = p.lat; userLng = p.lng;
+    // Clear route cache — new start point means all routes must be re-fetched
+    Object.keys(routeCache).forEach(k => delete routeCache[k]);
     renderPlaces();
-    showToast('location moved — recalculating...');
+    showToast('location moved — recalculating routes...');
   });
   userMarker.bindTooltip('drag to move your location', { permanent: false, direction: 'top', offset: [0, -20] });
   updateRadiusCircle();
@@ -492,18 +540,40 @@ function haversine(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-async function getTravelTime(lat, lng) {
+// Cache routes so we don't re-fetch on every re-render
+const routeCache = {};
+
+async function getRouteData(lat, lng) {
+  const key = `${userLat.toFixed(4)},${userLng.toFixed(4)}-${lat.toFixed(4)},${lng.toFixed(4)}`;
+  if (routeCache[key]) return routeCache[key];
   try {
-    const url = `https://router.project-osrm.org/route/v1/driving/${userLng},${userLat};${lng},${lat}?overview=false`;
+    // overview=full gives us the actual road geometry as encoded polyline
+    const url = `https://router.project-osrm.org/route/v1/driving/${userLng},${userLat};${lng},${lat}?overview=full&geometries=geojson`;
     const res = await fetch(url);
     const data = await res.json();
     if (data.routes && data.routes[0]) {
-      return Math.round(data.routes[0].duration / 60);
+      const route = data.routes[0];
+      const result = {
+        minutes: Math.round(route.duration / 60),
+        coords: route.geometry.coordinates.map(c => [c[1], c[0]]) // flip lng,lat → lat,lng for Leaflet
+      };
+      routeCache[key] = result;
+      return result;
     }
   } catch(e) {}
-  // fallback estimate: assume avg 40km/h
+  // Fallback: straight line estimate
   const km = haversine(userLat, userLng, lat, lng);
-  return Math.round((km / 40) * 60);
+  const result = {
+    minutes: Math.round((km / 40) * 60),
+    coords: null // null = draw straight dashed line as fallback
+  };
+  routeCache[key] = result;
+  return result;
+}
+
+async function getTravelTime(lat, lng) {
+  const r = await getRouteData(lat, lng);
+  return r.minutes;
 }
 
 // ── HOURS CHECK ───────────────────────────────────────────
@@ -605,15 +675,25 @@ async function renderPlaces() {
     if (isMatch) matchedPlaces.push({ ...p, isMatch });
   });
 
-  // Tentacle lines to matched places — purple, distinct from OSM roads
-  filtered.forEach(p => {
+  // Road routes to matched places — using actual OSRM geometry
+  for (const p of filtered) {
     const isEatery = p.category === 'eatery';
     const lineColor = isEatery ? '#7C3AED' : '#0EA5E9';
-    const line = L.polyline([[userLat, userLng], [p.lat, p.lng]], {
-      color: lineColor, weight: 2, opacity: 0.65
-    }).addTo(map);
-    tentacleLines.push(line);
-  });
+    const routeData = await getRouteData(p.lat, p.lng);
+    if (routeData.coords) {
+      // Actual road route
+      const line = L.polyline(routeData.coords, {
+        color: lineColor, weight: 3, opacity: 0.75
+      }).addTo(map);
+      tentacleLines.push(line);
+    } else {
+      // Fallback: dashed straight line
+      const line = L.polyline([[userLat, userLng], [p.lat, p.lng]], {
+        color: lineColor, weight: 2, opacity: 0.6, dashArray: '6 5'
+      }).addTo(map);
+      tentacleLines.push(line);
+    }
+  }
 
   renderStrip(allWithDist, filtered.map(f => f.id));
   renderFilterTags();
@@ -629,9 +709,9 @@ function addMarker(place, isMatch, dist, travelMin) {
 
   const color = isMatch ? matchColor : '#c8b8a0';
   const border = isMatch ? matchBorder : '#f0ebe3';
-  const size = isMatch ? 30 : 22;
+  const size = isMatch ? 32 : 26;
   const emoji = isMatch ? icon_emoji : (isEatery ? '🍴' : '⭐');
-  const opacity = isMatch ? '1' : '0.45';
+  const opacity = isMatch ? '1' : '0.72';
 
   const icon = L.divIcon({
     className: '',
@@ -706,7 +786,7 @@ function renderStrip(all, matchedIds) {
     const statusHtml = status.open === true
       ? `<div class="pc-status-open">${status.label}</div>`
       : `<div class="pc-status-closed">${status.label}</div>`;
-    return `<div class="pcard ${isMatch ? 'match' : 'dim'}" onclick="focusPlace('${p.id}')" style="${isMatch ? `border-color:${catColor}40;` : ''}">
+    return `<div class="pcard ${isMatch ? 'match' : 'faded'}" onclick="focusPlace('${p.id}')" style="${isMatch ? `border-color:${catColor}40;` : ''}">
       <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">
         <span style="font-size:14px">${catIcon}</span>
         <div class="pc-name">${p.name}</div>
@@ -803,6 +883,48 @@ function searchPlaces(q) {
     const match = p.name.toLowerCase().includes(lower) || (p.tags || []).some(t => t.toLowerCase().includes(lower));
     m.setOpacity(match ? 1 : 0.2);
   });
+}
+
+// ── SETTINGS RESET ───────────────────────────────────────
+function resetGitHubSettings() {
+  localStorage.removeItem(GH_TOKEN_KEY);
+  localStorage.removeItem(GH_USER_KEY);
+  localStorage.removeItem(GH_REPO_KEY);
+  showToast('settings cleared — reload to reconnect');
+}
+
+function openSettings() {
+  // pre-fill existing values
+  const u = document.getElementById('setup-user');
+  const r = document.getElementById('setup-repo');
+  const t = document.getElementById('token-input');
+  const e = document.getElementById('token-error');
+  if (u) u.value = getGHUser();
+  if (r) r.value = getGHRepo();
+  if (t) t.value = localStorage.getItem(GH_TOKEN_KEY) || '';
+  if (e) e.textContent = '';
+  document.getElementById('token-overlay').style.display = 'flex';
+
+  document.getElementById('token-save-btn').onclick = () => {
+    const user = (u.value || '').trim();
+    const repo = (r.value || '').trim() || 'bahjalan';
+    const token = (t.value || '').trim();
+    if (!user) { e.textContent = 'enter your github username'; return; }
+    if (!token) { e.textContent = 'paste your github token'; return; }
+    if (!token.startsWith('ghp_') && !token.startsWith('github_pat_')) {
+      e.textContent = "token should start with ghp_ or github_pat_";
+      return;
+    }
+    localStorage.setItem(GH_USER_KEY, user);
+    localStorage.setItem(GH_REPO_KEY, repo);
+    localStorage.setItem(GH_TOKEN_KEY, token);
+    document.getElementById('token-overlay').style.display = 'none';
+    showToast('settings saved ✓');
+    loadData().then(() => { renderPlaces(); renderFilterTags(); });
+  };
+  document.getElementById('token-cancel-btn').onclick = () => {
+    document.getElementById('token-overlay').style.display = 'none';
+  };
 }
 
 // ── TOAST ─────────────────────────────────────────────────

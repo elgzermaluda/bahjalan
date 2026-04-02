@@ -125,7 +125,7 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
 }
 .pcard:hover { border-color: var(--red-mid); }
 .pcard.match { border-color: var(--red-mid); background: var(--red-soft); }
-.pcard.dim { opacity: 0.32; }
+.pcard.faded { opacity: 0.62; filter: grayscale(30%); }
 .pc-name { font-size: 12px; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pc-dist { font-size: 10px; color: var(--red); margin-top: 2px; font-weight: 500; }
 .pc-time { font-size: 9px; color: var(--ink3); }
@@ -285,6 +285,12 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
     <input id="search-input" placeholder="search your saved places..." oninput="searchPlaces(this.value)"/>
   </div>
   <button id="btn-save" onclick="openSavePanel()">+ save place</button>
+  <button onclick="openSettings()" title="github settings" style="
+    background:transparent;border:1px solid #e0d8cc;border-radius:50%;
+    width:36px;height:36px;font-size:15px;cursor:pointer;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;color:#6b5c4e;
+    transition:border-color 0.2s;
+  " onmouseover="this.style.borderColor='#7C3AED'" onmouseout="this.style.borderColor='#e0d8cc'">⚙</button>
 </div>
 
 <div id="map"></div>
@@ -543,42 +549,57 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
   </div>
 </div>
 
-<!-- TOKEN MODAL -->
+<!-- SETUP / TOKEN MODAL -->
 <div id="token-overlay" style="
   display:none;position:fixed;inset:0;
-  background:rgba(42,31,20,0.55);z-index:2000;
+  background:rgba(42,31,20,0.6);z-index:2000;
   align-items:center;justify-content:center;padding:20px;
 ">
   <div style="
     background:#f7f3ed;border:1px solid #e0d8cc;border-radius:16px;
-    width:100%;max-width:380px;overflow:hidden;box-shadow:0 12px 40px rgba(42,31,20,0.2);
+    width:100%;max-width:400px;box-shadow:0 12px 40px rgba(42,31,20,0.25);
+    overflow:hidden;
   ">
-    <div style="padding:18px 20px;border-bottom:1px solid #e0d8cc;background:#fff">
-      <div style="font-size:15px;font-weight:500;color:#2a1f14;margin-bottom:2px">connect to github</div>
-      <div style="font-size:12px;color:#aaa">your places are stored in your own github repo</div>
+    <div style="padding:16px 20px;border-bottom:1px solid #e0d8cc;background:#fff">
+      <div style="font-size:15px;font-weight:500;color:#2a1f14">connect to github</div>
+      <div style="font-size:11px;color:#aaa;margin-top:2px">your places are saved in your own github repo — free, no server needed</div>
     </div>
-    <div style="padding:18px 20px;display:flex;flex-direction:column;gap:12px">
-      <div style="font-size:12px;color:#6b5c4e;line-height:1.7;background:#fff;border:1px solid #e0d8cc;border-radius:10px;padding:12px 14px">
-        <b style="color:#2a1f14">how to get your token:</b><br>
-        1. go to <b>github.com</b> → your profile photo → <b>Settings</b><br>
-        2. scroll down → <b>Developer settings</b><br>
+    <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px">
+
+      <div style="background:#fff;border:1px solid #e0d8cc;border-radius:10px;padding:12px 14px;font-size:11px;color:#6b5c4e;line-height:1.8">
+        <b style="color:#2a1f14">one-time setup:</b><br>
+        1. go to <b>github.com</b> → your profile → <b>Settings</b><br>
+        2. scroll to bottom → <b>Developer settings</b><br>
         3. <b>Personal access tokens</b> → <b>Tokens (classic)</b><br>
-        4. <b>Generate new token (classic)</b><br>
-        5. tick the <b>repo</b> checkbox → <b>Generate token</b><br>
-        6. copy it (shown once only!) and paste below
+        4. <b>Generate new token</b> → tick <b>repo</b> → generate<br>
+        5. copy the token (shown once!) and paste below
       </div>
+
       <div>
-        <div style="font-size:10px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:5px">your github token</div>
-        <input id="token-input" type="password"
-          placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
-          style="width:100%;border:1px solid #e0d8cc;border-radius:10px;padding:10px 12px;font-size:13px;color:#2a1f14;background:#fff;outline:none;font-family:inherit;transition:border-color 0.2s"
-          onfocus="this.style.borderColor='#7C3AED'"
-          onblur="this.style.borderColor='#e0d8cc'"
-        />
-        <div id="token-error" style="font-size:11px;color:#991B1B;margin-top:4px;min-height:16px"></div>
-        <div style="font-size:10px;color:#bbb;margin-top:2px;line-height:1.5">stored only in your browser — never sent anywhere except github</div>
+        <div style="font-size:10px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">your github username</div>
+        <input id="setup-user" type="text" placeholder="e.g. elgzermaluda"
+          style="width:100%;border:1px solid #e0d8cc;border-radius:8px;padding:9px 12px;font-size:13px;color:#2a1f14;background:#fff;outline:none;font-family:inherit"
+          onfocus="this.style.borderColor='#7C3AED'" onblur="this.style.borderColor='#e0d8cc'"/>
       </div>
-      <div style="display:flex;gap:8px">
+
+      <div>
+        <div style="font-size:10px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">repo name <span style="font-weight:400;text-transform:none;font-size:10px;color:#bbb">(leave as "bahjalan" if that's what you named it)</span></div>
+        <input id="setup-repo" type="text" placeholder="bahjalan" value="bahjalan"
+          style="width:100%;border:1px solid #e0d8cc;border-radius:8px;padding:9px 12px;font-size:13px;color:#2a1f14;background:#fff;outline:none;font-family:inherit"
+          onfocus="this.style.borderColor='#7C3AED'" onblur="this.style.borderColor='#e0d8cc'"/>
+      </div>
+
+      <div>
+        <div style="font-size:10px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">github token</div>
+        <input id="token-input" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+          style="width:100%;border:1px solid #e0d8cc;border-radius:8px;padding:9px 12px;font-size:13px;color:#2a1f14;background:#fff;outline:none;font-family:inherit"
+          onfocus="this.style.borderColor='#7C3AED'" onblur="this.style.borderColor='#e0d8cc'"/>
+        <div style="font-size:10px;color:#bbb;margin-top:3px">stored only in your browser, never shared</div>
+      </div>
+
+      <div id="token-error" style="font-size:11px;color:#991B1B;min-height:14px;margin-top:-6px"></div>
+
+      <div style="display:flex;gap:8px;margin-top:2px">
         <button id="token-cancel-btn" style="
           flex:1;padding:10px 0;border:1px solid #e0d8cc;border-radius:100px;
           font-size:12px;color:#aaa;cursor:pointer;background:#f0ebe3;font-family:inherit;
@@ -586,10 +607,12 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
         <button id="token-save-btn" style="
           flex:2;padding:10px 0;border:none;border-radius:100px;
           font-size:13px;font-weight:500;cursor:pointer;
-          background:#7C3AED;color:#fff;font-family:inherit;transition:background 0.2s;
-        " onmouseover="this.style.background='#6D28D9'" onmouseout="this.style.background='#7C3AED'">
-          save token &amp; continue
-        </button>
+          background:#7C3AED;color:#fff;font-family:inherit;
+        ">connect &amp; save</button>
+      </div>
+
+      <div style="text-align:center">
+        <span onclick="resetGitHubSettings()" style="font-size:10px;color:#bbb;cursor:pointer;text-decoration:underline">reset saved settings</span>
       </div>
     </div>
   </div>
