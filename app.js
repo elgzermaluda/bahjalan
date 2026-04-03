@@ -704,18 +704,20 @@ async function renderPlaces() {
     const mins = routeData.minutes;
     const labelHtml = `
       <div style="
-        background:${lineColor};color:#fff;
-        font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;
-        padding:3px 8px;border-radius:20px;
+        background:#ffffff;
+        color:${lineColor};
+        font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;
+        padding:4px 9px;border-radius:20px;
         white-space:nowrap;
-        box-shadow:0 1px 6px rgba(0,0,0,0.25);
-        border:2px solid #fff;
+        box-shadow:0 2px 8px rgba(0,0,0,0.30);
+        border:2px solid ${lineColor};
         pointer-events:none;
+        letter-spacing:0.01em;
       ">${km} km · ${mins} min</div>`;
     const labelIcon = L.divIcon({
       className: '',
       html: labelHtml,
-      iconAnchor: [40, 12]
+      iconAnchor: [44, 14]
     });
     const labelMarker = L.marker(mid, { icon: labelIcon, interactive: false }).addTo(map);
     tentacleLines.push(labelMarker);
