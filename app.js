@@ -640,8 +640,8 @@ async function renderPlaces() {
 
   for (const p of places) {
     const dist = haversine(userLat, userLng, p.lat, p.lng);
-    const travelMin = await getTravelTime(p.lat, p.lng);
-    allWithDist.push({ ...p, dist, travelMin });
+    const routeData = await getRouteData(p.lat, p.lng);
+    allWithDist.push({ ...p, dist, travelMin: routeData.minutes, routeData });
   }
 
   // filter
@@ -678,21 +678,47 @@ async function renderPlaces() {
   // Road routes to matched places — using actual OSRM geometry
   for (const p of filtered) {
     const isEatery = p.category === 'eatery';
-    const lineColor = isEatery ? '#7C3AED' : '#0EA5E9';
-    const routeData = await getRouteData(p.lat, p.lng);
-    if (routeData.coords) {
-      // Actual road route
-      const line = L.polyline(routeData.coords, {
-        color: lineColor, weight: 3, opacity: 0.75
-      }).addTo(map);
-      tentacleLines.push(line);
-    } else {
-      // Fallback: dashed straight line
-      const line = L.polyline([[userLat, userLng], [p.lat, p.lng]], {
-        color: lineColor, weight: 2, opacity: 0.6, dashArray: '6 5'
-      }).addTo(map);
-      tentacleLines.push(line);
-    }
+    // White outline first, then coloured line on top — makes it pop against any map colour
+    const lineColor = isEatery ? '#6D28D9' : '#0284C7';
+    const routeData = p.routeData || await getRouteData(p.lat, p.lng);
+    const coords = routeData.coords || [[userLat, userLng], [p.lat, p.lng]];
+    const isDashed = !routeData.coords;
+
+    // White casing — makes line readable against red OSM roads
+    const casing = L.polyline(coords, {
+      color: '#ffffff', weight: 7, opacity: 0.85,
+      ...(isDashed ? { dashArray: '8 6' } : {})
+    }).addTo(map);
+    tentacleLines.push(casing);
+
+    // Coloured line on top
+    const line = L.polyline(coords, {
+      color: lineColor, weight: 4, opacity: 0.92,
+      ...(isDashed ? { dashArray: '8 6' } : {})
+    }).addTo(map);
+    tentacleLines.push(line);
+
+    // ── Route label: distance + time, floating at midpoint of the route ──
+    const mid = coords[Math.floor(coords.length / 2)];
+    const km = p.dist.toFixed(1);
+    const mins = routeData.minutes;
+    const labelHtml = `
+      <div style="
+        background:${lineColor};color:#fff;
+        font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;
+        padding:3px 8px;border-radius:20px;
+        white-space:nowrap;
+        box-shadow:0 1px 6px rgba(0,0,0,0.25);
+        border:2px solid #fff;
+        pointer-events:none;
+      ">${km} km · ${mins} min</div>`;
+    const labelIcon = L.divIcon({
+      className: '',
+      html: labelHtml,
+      iconAnchor: [40, 12]
+    });
+    const labelMarker = L.marker(mid, { icon: labelIcon, interactive: false }).addTo(map);
+    tentacleLines.push(labelMarker);
   }
 
   renderStrip(allWithDist, filtered.map(f => f.id));
