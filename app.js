@@ -46,8 +46,9 @@ window.onload = async () => {
 
 function initMap() {
   map = L.map('map', { zoomControl: false }).setView([userLat, userLng], 13);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors',
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    attribution: '© OpenStreetMap contributors © CARTO',
+    subdomains: 'abcd',
     maxZoom: 19
   }).addTo(map);
   L.control.zoom({ position: 'bottomright' }).addTo(map);
@@ -703,21 +704,42 @@ async function renderPlaces() {
     const km = p.dist.toFixed(1);
     const mins = routeData.minutes;
     const labelHtml = `
-      <div style="
-        background:#ffffff;
-        color:${lineColor};
-        font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;
-        padding:4px 9px;border-radius:20px;
-        white-space:nowrap;
-        box-shadow:0 2px 8px rgba(0,0,0,0.30);
-        border:2px solid ${lineColor};
-        pointer-events:none;
-        letter-spacing:0.01em;
-      ">${km} km · ${mins} min</div>`;
+      <div style="position:relative;display:inline-block;pointer-events:none;">
+        <div style="
+          background:#fff;
+          border:2px solid ${lineColor};
+          border-radius:6px;
+          padding:5px 10px;
+          font-family:'DM Sans',sans-serif;
+          font-size:12px;font-weight:700;
+          color:#1a1a1a;
+          white-space:nowrap;
+          box-shadow:0 2px 10px rgba(0,0,0,0.22);
+          text-align:center;
+          line-height:1.25;
+        ">
+          <div style="font-size:13px;font-weight:700;color:${lineColor}">${mins} min</div>
+          <div style="font-size:10px;font-weight:500;color:#666;margin-top:1px">${km} km</div>
+        </div>
+        <div style="
+          position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);
+          width:0;height:0;
+          border-left:7px solid transparent;
+          border-right:7px solid transparent;
+          border-top:8px solid ${lineColor};
+        "></div>
+        <div style="
+          position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);
+          width:0;height:0;
+          border-left:5px solid transparent;
+          border-right:5px solid transparent;
+          border-top:6px solid #fff;
+        "></div>
+      </div>`;
     const labelIcon = L.divIcon({
       className: '',
       html: labelHtml,
-      iconAnchor: [44, 14]
+      iconAnchor: [38, 50]
     });
     const labelMarker = L.marker(mid, { icon: labelIcon, interactive: false }).addTo(map);
     tentacleLines.push(labelMarker);
