@@ -40,10 +40,6 @@ window.onload = async () => {
     await showSetupModal();
   }
   await loadData();
-  // If still no places after load, show a helpful hint
-  if (places.length === 0 && getGHUser()) {
-    showToast('loaded — no places saved yet, or check your username in ⚙');
-  }
   renderFilterTags();
   renderPlaces();
   initWhenDay();
@@ -76,14 +72,27 @@ function getToken() {
 async function loadData() {
   const user = getGHUser();
   const repo = getGHRepo();
-  if (!user) { places = []; return; }
+  if (!user) {
+    showToast('no username set — tap ⚙ to set up');
+    places = [];
+    return;
+  }
+  const url = `https://raw.githubusercontent.com/${user}/${repo}/main/${GH_FILE}?t=${Date.now()}`;
+  showToast('loading from github...');
   try {
-    const url = `https://raw.githubusercontent.com/${user}/${repo}/main/${GH_FILE}?t=${Date.now()}`;
     const res = await fetch(url);
-    if (!res.ok) { places = []; return; }
+    if (!res.ok) {
+      showToast(`load failed ${res.status} — check ⚙ username/repo`);
+      places = [];
+      return;
+    }
     const d = await res.json();
     places = d.places || [];
-  } catch(e) { places = []; }
+    showToast(`loaded ${places.length} place${places.length !== 1 ? 's' : ''} ✓`);
+  } catch(e) {
+    showToast('network error loading data — check connection');
+    places = [];
+  }
 }
 
 // First-time setup modal — collects username, repo name, token
