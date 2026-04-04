@@ -268,11 +268,71 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
 .popup-tag.a { background: #E0F2FE; color: #0369A1; border-color: #7DD3FC; }
 .pctag.a { background: #E0F2FE; color: #0369A1; border-color: #7DD3FC; }
 
-/* mobile adjustments */
-@media(max-width:600px){
-  #filter-panel { width: calc(100vw - 24px); }
-  #save-panel { width: 100%; }
+/* ── MOBILE ── */
+@media(max-width:640px){
+
+  /* topbar: hide search bar text, shrink */
+  #topbar { padding: 0 10px; gap: 7px; height: 52px; }
+  .logo { font-size: 14px; }
+  #search-bar { min-width: 0; }
+  #search-bar input { font-size: 12px; }
+  #btn-save { padding: 0 12px; font-size: 12px; height: 34px; }
+  #map { top: 52px; }
+
+  /* filter panel: hidden by default, slides up from bottom as sheet */
+  #filter-panel {
+    top: auto;
+    bottom: 0; left: 0; right: 0;
+    width: 100%;
+    border-radius: 16px 16px 0 0;
+    border-bottom: none;
+    max-height: 75vh;
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    z-index: 600;
+  }
+  #filter-panel.mobile-open {
+    transform: translateY(0);
+  }
+
+  /* filter toggle button — floating above places strip */
+  #filter-toggle-btn {
+    display: flex !important;
+  }
+
+  /* places strip: shorter, cards smaller */
+  #places-strip {
+    padding: 8px 10px 10px;
+    bottom: 0;
+  }
+  .ps-head { margin-bottom: 6px; }
+  .pcard { width: 130px; padding: 7px 9px; }
+  .pc-name { font-size: 11px; }
+
+  /* save panel: full screen */
+  #save-panel {
+    width: 100%;
+    top: 0;
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
+  #save-panel.open { transform: translateX(0); }
+
+  /* map legend hidden */
   #map-legend { display: none; }
+
+  /* drag hint hidden on mobile — too obvious already */
+  #drag-hint { display: none; }
+
+  /* filter overlay backdrop */
+  #filter-backdrop {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(42,31,20,0.4);
+    z-index: 595;
+  }
+  #filter-backdrop.show { display: block; }
 }
 </style>
 </head>
@@ -294,6 +354,25 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
 </div>
 
 <div id="map"></div>
+
+<!-- Mobile filter backdrop -->
+<div id="filter-backdrop" onclick="closeMobileFilter()"></div>
+
+<!-- Mobile filter toggle button — only visible on mobile -->
+<button id="filter-toggle-btn" onclick="toggleMobileFilter()" style="
+  display:none;
+  position:fixed;bottom:130px;right:14px;
+  background:var(--red);color:var(--red-soft);
+  border:none;border-radius:var(--radius-pill);
+  padding:10px 16px;font-size:13px;font-weight:500;
+  font-family:'DM Sans',sans-serif;
+  box-shadow:0 4px 14px rgba(153,60,29,0.4);
+  z-index:550;cursor:pointer;
+  align-items:center;gap:6px;
+">
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 3h12M3 7h8M5 11h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+  filter
+</button>
 
 <!-- Map legend -->
 <div id="map-legend" style="
@@ -561,8 +640,8 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
     overflow:hidden;
   ">
     <div style="padding:16px 20px;border-bottom:1px solid #e0d8cc;background:#fff">
-      <div style="font-size:15px;font-weight:500;color:#2a1f14">connect to github</div>
-      <div style="font-size:11px;color:#aaa;margin-top:2px">your places are saved in your own github repo — free, no server needed</div>
+      <div style="font-size:15px;font-weight:500;color:#2a1f14">connect to your map</div>
+      <div style="font-size:11px;color:#aaa;margin-top:2px">enter your github username to load your saved places on this device</div>
     </div>
     <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px">
 
@@ -590,11 +669,14 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
       </div>
 
       <div>
-        <div style="font-size:10px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">github token</div>
-        <input id="token-input" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+        <div style="font-size:10px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">
+          github token
+          <span style="text-transform:none;font-weight:400;font-size:10px;color:#bbb;letter-spacing:0"> — only needed to add/remove places</span>
+        </div>
+        <input id="token-input" type="password" placeholder="ghp_... (leave blank to view only)"
           style="width:100%;border:1px solid #e0d8cc;border-radius:8px;padding:9px 12px;font-size:13px;color:#2a1f14;background:#fff;outline:none;font-family:inherit"
           onfocus="this.style.borderColor='#7C3AED'" onblur="this.style.borderColor='#e0d8cc'"/>
-        <div style="font-size:10px;color:#bbb;margin-top:3px">stored only in your browser, never shared</div>
+        <div style="font-size:10px;color:#bbb;margin-top:3px">stored only in your browser — leave blank if you just want to browse</div>
       </div>
 
       <div id="token-error" style="font-size:11px;color:#991B1B;min-height:14px;margin-top:-6px"></div>

@@ -34,11 +34,16 @@ let editingId = null;
 // ── INIT ─────────────────────────────────────────────────
 window.onload = async () => {
   initMap();
-  // Check if GitHub setup is complete — if not, show setup modal first
+  // If no username stored on this device/browser, show setup modal
+  // This fires on every new device — phone, laptop, friend's browser etc
   if (!getGHUser()) {
     await showSetupModal();
   }
   await loadData();
+  // If still no places after load, show a helpful hint
+  if (places.length === 0 && getGHUser()) {
+    showToast('loaded — no places saved yet, or check your username in ⚙');
+  }
   renderFilterTags();
   renderPlaces();
   initWhenDay();
@@ -69,8 +74,11 @@ function getToken() {
 }
 
 async function loadData() {
+  const user = getGHUser();
+  const repo = getGHRepo();
+  if (!user) { places = []; return; }
   try {
-    const url = `https://raw.githubusercontent.com/${getGHUser()}/${getGHRepo()}/main/${GH_FILE}?t=${Date.now()}`;
+    const url = `https://raw.githubusercontent.com/${user}/${repo}/main/${GH_FILE}?t=${Date.now()}`;
     const res = await fetch(url);
     if (!res.ok) { places = []; return; }
     const d = await res.json();
@@ -98,14 +106,14 @@ function showSetupModal() {
       const err = document.getElementById('token-error');
 
       if (!user) { err.textContent = 'enter your github username'; return; }
-      if (!token) { err.textContent = 'paste your github token'; return; }
-      if (!token.startsWith('ghp_') && !token.startsWith('github_pat_')) {
+      // Token is optional — only needed for saving/deleting
+      if (token && !token.startsWith('ghp_') && !token.startsWith('github_pat_')) {
         err.textContent = "token should start with ghp_ or github_pat_";
         return;
       }
       localStorage.setItem(GH_USER_KEY, user);
       localStorage.setItem(GH_REPO_KEY, repo);
-      localStorage.setItem(GH_TOKEN_KEY, token);
+      if (token) localStorage.setItem(GH_TOKEN_KEY, token);
       overlay.style.display = 'none';
       resolve();
     };
@@ -975,6 +983,32 @@ function openSettings() {
   document.getElementById('token-cancel-btn').onclick = () => {
     document.getElementById('token-overlay').style.display = 'none';
   };
+}
+
+// ── MOBILE FILTER SHEET ──────────────────────────────────
+function toggleMobileFilter() {
+  const panel = document.getElementById('filter-panel');
+  const backdrop = document.getElementById('filter-backdrop');
+  const isOpen = panel.classList.contains('mobile-open');
+  if (isOpen) {
+    panel.classList.remove('mobile-open');
+    backdrop.classList.remove('show');
+  } else {
+    panel.classList.add('mobile-open');
+    backdrop.classList.add('show');
+  }
+}
+
+function closeMobileFilter() {
+  document.getElementById('filter-panel').classList.remove('mobile-open');
+  document.getElementById('filter-backdrop').classList.remove('show');
+}
+
+// Close filter sheet when any filter change happens on mobile
+function onFilterChange() {
+  if (window.innerWidth <= 640) {
+    setTimeout(closeMobileFilter, 300);
+  }
 }
 
 // ── TOAST ─────────────────────────────────────────────────
