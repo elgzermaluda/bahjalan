@@ -1,6 +1,49 @@
 {
   "places": [
     {
+      "id": "1775457238895",
+      "name": "Saloma Link",
+      "lat": 3.1609739,
+      "lng": 101.7081703,
+      "mapsUrl": "https://www.google.com/maps/place/Saloma+Link/@3.1609739,101.7081703,3a,75y,90t/data=!3m8!1e2!3m6!1sCIABIhBpdIWOIQfTiX-cbwAGwIbS!2e10!3e12!6shttps:%2F%2Flh3.googleusercontent.com%2Fgps-cs-s%2FAHVAweropfOEAg2pSobs8qlgNrWMDH56pRLe3bghR2HoP7eFSPrx45pk6VIDG4WPoLbYf9PxyUAOHc2Xd2Xu-Bi_cHCZRwZyxl0uxYJOyLS5NMsJi3PUksoqih_Tlr2GUHXX2B-l_7BCEA8iXSw%3Dw109-h86-k-no!7i1374!8i1080!4m7!3m6!1s0x31cc375f66d6c8d5:0x239fcd8025b03e50!8m2!3d3.1607526!4d101.708301!10e5!16s%2Fg%2F11hdqvp5ph?entry=ttu&g_ep=EgoyMDI2MDQwMS4wIKXMDSoASAFQAw%3D%3D",
+      "category": "activity",
+      "tags": [
+        "outdoor"
+      ],
+      "note": "",
+      "hours": {
+        "0": {
+          "open": "05:00",
+          "close": "23:59"
+        },
+        "1": {
+          "open": "05:00",
+          "close": "23:59"
+        },
+        "2": {
+          "open": "05:00",
+          "close": "23:59"
+        },
+        "3": {
+          "open": "05:00",
+          "close": "23:59"
+        },
+        "4": {
+          "open": "05:00",
+          "close": "23:59"
+        },
+        "5": {
+          "open": "05:00",
+          "close": "23:59"
+        },
+        "6": {
+          "open": "05:00",
+          "close": "23:59"
+        }
+      },
+      "savedAt": "2026-04-06T06:33:58.895Z"
+    },
+    {
       "id": "1775457137626",
       "name": "Ilham Gallery",
       "lat": 3.159106,
