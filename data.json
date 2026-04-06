@@ -1,6 +1,49 @@
 {
   "places": [
     {
+      "id": "1775457006189",
+      "name": "National Art Gallery",
+      "lat": 3.1733177,
+      "lng": 101.7053544,
+      "mapsUrl": "https://www.google.com/maps/place/National+Art+Gallery/@3.1733177,101.7053544,3a,75y,90t/data=!3m8!1e2!3m6!1sCIABIhAGbyfQ8wRH42f9AyEADeuX!2e10!3e12!6shttps:%2F%2Flh3.googleusercontent.com%2Fgps-cs-s%2FAHVAwepa_rR-ajpcMk4KtB35DL6gHEtN3N67vfG7Uks6VvvvN1s4zS-jsrzyd9RVAjE4vx-6Dx49nE6KAvc2CUlKoKdozY6HR31LYnmDmUAOpM7gcyKNVTr2Ce4HYyHvgumnfTZ79r08SaeOJ8jr%3Dw152-h86-k-no!7i1280!8i720!4m7!3m6!1s0x31cc486cea2db79f:0x33e4d7a469aff301!8m2!3d3.1736636!4d101.7052282!10e5!16s%2Fm%2F03gsj1l?entry=ttu&g_ep=EgoyMDI2MDQwMS4wIKXMDSoASAFQAw%3D%3D",
+      "category": "activity",
+      "tags": [
+        "museum"
+      ],
+      "note": "",
+      "hours": {
+        "0": {
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "1": {
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "2": {
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "3": {
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "4": {
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "5": {
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "6": {
+          "open": "09:00",
+          "close": "17:00"
+        }
+      },
+      "savedAt": "2026-04-06T06:30:06.189Z"
+    },
+    {
       "id": "1775456939775",
       "name": "SKYTREX Adventure Sg Congkak",
       "lat": 3.2182556,
