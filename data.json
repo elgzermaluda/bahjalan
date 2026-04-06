@@ -1,6 +1,46 @@
 {
   "places": [
     {
+      "id": "1775463129380",
+      "name": "unnamed place",
+      "lat": 3.1800974,
+      "lng": 101.747957,
+      "mapsUrl": "https://www.google.com/maps/search/Dina+Burger+Crispy+Setiawangsa,+Jalan+Setiawangsa+1,+Setiawangsa,+54200+Kuala+Lumpur,+Federal+Territory+of+Kuala+Lumpur,+Malaysia/@3.1800974,101.747957,16.96z?entry=ttu&g_ep=EgoyMDI2MDQwMS4wIKXMDSoASAFQAw%3D%3D",
+      "category": "eatery",
+      "tags": [
+        "hawker"
+      ],
+      "note": "",
+      "hours": {
+        "0": {
+          "open": "16:30",
+          "close": "2:00"
+        },
+        "1": {
+          "open": "16:30",
+          "close": "2:00"
+        },
+        "2": {
+          "open": "16:30",
+          "close": "2:00"
+        },
+        "3": {
+          "open": "16:30",
+          "close": "2:00"
+        },
+        "4": {
+          "open": "16:30",
+          "close": "2:00"
+        },
+        "5": {
+          "open": "16:30",
+          "close": "2:00"
+        },
+        "6": null
+      },
+      "savedAt": "2026-04-06T08:12:09.380Z"
+    },
+    {
       "id": "1775458581402",
       "name": "FARM FRESH",
       "lat": 2.9896883,
