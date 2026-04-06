@@ -1,6 +1,49 @@
 {
   "places": [
     {
+      "id": "1775456939775",
+      "name": "SKYTREX Adventure Sg Congkak",
+      "lat": 3.2182556,
+      "lng": 101.8345423,
+      "mapsUrl": "https://www.google.com/maps/place/SKYTREX+Adventure+Sg+Congkak/@3.2182556,101.8345423,12.21z/data=!4m6!3m5!1s0x31cc3bd227352e1b:0x68fc775e5a5fd7c2!8m2!3d3.2089852!4d101.8422029!16s%2Fg%2F11h18d119n?entry=ttu&g_ep=EgoyMDI2MDQwMS4wIKXMDSoASAFQAw%3D%3D",
+      "category": "activity",
+      "tags": [
+        "outdoor"
+      ],
+      "note": "",
+      "hours": {
+        "0": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "1": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "2": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "3": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "4": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "5": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "6": {
+          "open": "09:00",
+          "close": "18:00"
+        }
+      },
+      "savedAt": "2026-04-06T06:28:59.775Z"
+    },
+    {
       "id": "1775455664654",
       "name": "A JEO SSI Kimchi Ramen",
       "lat": 3.1418249,
