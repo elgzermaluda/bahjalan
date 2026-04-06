@@ -1,6 +1,49 @@
 {
   "places": [
     {
+      "id": "1775458338614",
+      "name": "LUCK BROS KOPI",
+      "lat": 3.1413775,
+      "lng": 101.6948112,
+      "mapsUrl": "https://www.google.com/maps/place/LUCK+BROS+KOPI+@+Petaling+Street/@3.1413775,101.6948112,17z/data=!3m2!4b1!5s0x31cc49da9cf6a61b:0x157768606a0f7178!4m6!3m5!1s0x31cc490ec9319fc7:0xd0088dacc4e9e13!8m2!3d3.1413775!4d101.6973861!16s%2Fg%2F11h_1hf6f9?entry=ttu&g_ep=EgoyMDI2MDQwMS4wIKXMDSoASAFQAw%3D%3D",
+      "category": "eatery",
+      "tags": [
+        "restaurant"
+      ],
+      "note": "",
+      "hours": {
+        "0": {
+          "open": "08:00",
+          "close": "02:00"
+        },
+        "1": {
+          "open": "08:00",
+          "close": "02:00"
+        },
+        "2": {
+          "open": "08:00",
+          "close": "02:00"
+        },
+        "3": {
+          "open": "08:00",
+          "close": "02:00"
+        },
+        "4": {
+          "open": "08:00",
+          "close": "02:00"
+        },
+        "5": {
+          "open": "08:00",
+          "close": "02:00"
+        },
+        "6": {
+          "open": "08:00",
+          "close": "02:00"
+        }
+      },
+      "savedAt": "2026-04-06T06:52:18.614Z"
+    },
+    {
       "id": "1775458195750",
       "name": "Warong Che Senah",
       "lat": 3.1605012,
