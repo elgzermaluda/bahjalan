@@ -1,6 +1,43 @@
 {
   "places": [
     {
+      "id": "1775457137626",
+      "name": "Ilham Gallery",
+      "lat": 3.159106,
+      "lng": 101.7187716,
+      "mapsUrl": "https://www.google.com/maps/place/Ilham+Gallery/@3.159106,101.7187716,17z/data=!4m6!3m5!1s0x31cc37cfd0d81ea7:0xbb65ef8331445c49!8m2!3d3.1590704!4d101.7187176!16s%2Fg%2F11c57ydqmr?entry=ttu&g_ep=EgoyMDI2MDQwMS4wIKXMDSoASAFQAw%3D%3D",
+      "category": "activity",
+      "tags": [
+        "museum"
+      ],
+      "note": "",
+      "hours": {
+        "0": "unknown",
+        "1": null,
+        "2": {
+          "open": "11:00",
+          "close": "19:00"
+        },
+        "3": {
+          "open": "11:00",
+          "close": "19:00"
+        },
+        "4": {
+          "open": "11:00",
+          "close": "19:00"
+        },
+        "5": {
+          "open": "11:00",
+          "close": "19:00"
+        },
+        "6": {
+          "open": "11:00",
+          "close": "17:00"
+        }
+      },
+      "savedAt": "2026-04-06T06:32:17.626Z"
+    },
+    {
       "id": "1775457055898",
       "name": "Perdana Botanical Gardens",
       "lat": 3.143678,
