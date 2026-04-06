@@ -17,6 +17,7 @@ let userLat = 3.1390, userLng = 101.6869; // default: KL
 let places = [];
 let markers = {};
 let tentacleLines = [];
+let eventsOnMap = true; // toggle show/hide event pins on map
 let filterState = {
   cat: 'all',
   tags: [],
@@ -393,6 +394,12 @@ function openSavePanel() {
   document.getElementById('extracted-coords').textContent = '— extracted from link';
   document.getElementById('extracted-coords').className = 'row-val auto';
   document.getElementById('place-note').value = '';
+  // reset event fields
+  const evOnce = document.querySelector('input[name="evtype"][value="once"]');
+  if (evOnce) evOnce.checked = true;
+  ['ev-date','ev-start','ev-end'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  const evDay = document.getElementById('ev-day'); if(evDay) evDay.value='6';
+  toggleEventType();
   resetTags();
   resetHours();
   setCategory('eatery');
@@ -450,8 +457,20 @@ function editPlace(id) {
   });
   document.getElementById('place-note').value = place.note || '';
 
-  // Pre-fill step 3
-  loadHoursIntoForm(place.hours);
+  // Pre-fill step 3 (only for non-events)
+  if (place.category !== 'event') {
+    loadHoursIntoForm(place.hours);
+  } else {
+    // pre-fill event fields
+    const evType = place.eventType || 'once';
+    const radioEl = document.querySelector(`input[name="evtype"][value="${evType}"]`);
+    if (radioEl) radioEl.checked = true;
+    toggleEventType();
+    if (place.eventDate) document.getElementById('ev-date').value = place.eventDate;
+    if (place.eventDay != null) document.getElementById('ev-day').value = place.eventDay;
+    if (place.eventStart) document.getElementById('ev-start').value = place.eventStart;
+    if (place.eventEnd) document.getElementById('ev-end').value = place.eventEnd;
+  }
 
   // Update panel title
   document.querySelector('.sp-title').textContent = 'edit place';
@@ -474,8 +493,33 @@ function setCategory(cat) {
   currentCategory = cat;
   document.getElementById('cat-eatery').classList.toggle('on', cat === 'eatery');
   document.getElementById('cat-activity').classList.toggle('on', cat === 'activity');
-  document.getElementById('eat-tag-block').style.display = cat === 'eatery' ? '' : 'none';
-  document.getElementById('act-tag-block').style.display = cat === 'activity' ? '' : 'none';
+  document.getElementById('cat-event').classList.toggle('on', cat === 'event');
+  document.getElementById('eat-tag-block').style.display   = cat === 'eatery'   ? '' : 'none';
+  document.getElementById('act-tag-block').style.display   = cat === 'activity' ? '' : 'none';
+  document.getElementById('event-tag-block').style.display = cat === 'event'    ? '' : 'none';
+  document.getElementById('event-fields').style.display    = cat === 'event'    ? '' : 'none';
+  // hide hours step tab for events — events use date/time fields instead
+  document.getElementById('step-tab-3').style.display = cat === 'event' ? 'none' : '';
+  // update next button on step 2
+  const nextBtn = document.getElementById('step2-next-btn');
+  if (nextBtn) {
+    nextBtn.textContent = cat === 'event' ? 'save to my map ✓' : 'next: hours →';
+    nextBtn.onclick = cat === 'event' ? () => savePlace() : () => goStep(3);
+  }
+}
+
+function toggleEventType() {
+  const isRecurring = document.querySelector('input[name="evtype"]:checked')?.value === 'recurring';
+  document.getElementById('ev-once-row').style.display  = isRecurring ? 'none' : '';
+  document.getElementById('ev-recur-row').style.display = isRecurring ? '' : 'none';
+  // update step 2 next button — events skip hours step
+  const nextBtn = document.getElementById('step2-next-btn');
+  if (nextBtn) {
+    nextBtn.textContent = currentCategory === 'event' ? 'save to my map ✓' : 'next: hours →';
+    nextBtn.onclick = currentCategory === 'event'
+      ? () => savePlace()
+      : () => goStep(3);
+  }
 }
 
 function addCustomTag(presetId, inputId) {
@@ -633,11 +677,21 @@ async function savePlace() {
     showToast('go back to step 1 and extract a link first');
     return;
   }
-  const presetId = currentCategory === 'eatery' ? 'eat-presets' : 'act-presets';
+  const presetId = currentCategory === 'eatery' ? 'eat-presets' : currentCategory === 'event' ? 'evt-presets' : 'act-presets';
   const tags = getSelectedTags(presetId);
   const note = document.getElementById('place-note').value.trim();
   const hours = getHours();
   const name = extractedName || 'unnamed place';
+
+  // Event-specific fields
+  let eventType = null, eventDay = null, eventDate = null, eventStart = null, eventEnd = null;
+  if (currentCategory === 'event') {
+    eventType  = document.querySelector('input[name="evtype"]:checked')?.value || 'once';
+    eventDay   = eventType === 'recurring' ? document.getElementById('ev-day').value : null;
+    eventDate  = eventType === 'once' ? document.getElementById('ev-date').value : null;
+    eventStart = document.getElementById('ev-start').value || null;
+    eventEnd   = document.getElementById('ev-end').value || null;
+  }
 
   const place = {
     id: editingId || Date.now().toString(),
@@ -648,7 +702,8 @@ async function savePlace() {
     category: currentCategory,
     tags,
     note,
-    hours,
+    hours: currentCategory === 'event' ? null : hours,
+    ...(currentCategory === 'event' && { eventType, eventDay, eventDate, eventStart, eventEnd }),
     savedAt: new Date().toISOString()
   };
 
@@ -789,15 +844,17 @@ async function renderPlaces() {
   const allWithDist = [];
 
   for (const p of places) {
-    const dist = haversine(userLat, userLng, p.lat, p.lng);
+    const dist = p._dist !== undefined ? p._dist : haversine(userLat, userLng, p.lat, p.lng);
     const routeData = await getRouteData(p.lat, p.lng);
     allWithDist.push({ ...p, dist, travelMin: routeData.minutes, routeData });
   }
 
   // filter
   const filtered = allWithDist.filter(p => {
-    // category
-    if (filterState.cat !== 'all' && p.category !== filterState.cat) return false;
+    // category — events show in 'all' and 'event', not in eatery/activity tabs
+    if (filterState.cat === 'eatery' && p.category !== 'eatery') return false;
+    if (filterState.cat === 'activity' && p.category !== 'activity') return false;
+    if (filterState.cat === 'event' && p.category !== 'event') return false;
     // tags
     if (filterState.tags.length > 0) {
       const has = filterState.tags.some(t => p.tags && p.tags.includes(t));
@@ -818,8 +875,9 @@ async function renderPlaces() {
     return true;
   });
 
-  // Render all pins
+  // Render all pins — skip event pins if toggled off
   allWithDist.forEach(p => {
+    if (p.category === 'event' && !eventsOnMap) return;
     const isMatch = filtered.some(f => f.id === p.id);
     addMarker(p, isMatch, p.dist, p.travelMin);
     if (isMatch) matchedPlaces.push({ ...p, isMatch });
@@ -827,9 +885,11 @@ async function renderPlaces() {
 
   // Road routes to matched places — using actual OSRM geometry
   for (const p of filtered) {
+    if (p.category === 'event' && !eventsOnMap) continue;
     const isEatery = p.category === 'eatery';
     // White outline first, then coloured line on top — makes it pop against any map colour
-    const lineColor = isEatery ? '#6D28D9' : '#0284C7';
+    const isEvent2 = p.category === 'event';
+    const lineColor = isEatery ? '#6D28D9' : isEvent2 ? '#D97706' : '#0284C7';
     const routeData = p.routeData || await getRouteData(p.lat, p.lng);
     const coords = routeData.coords || [[userLat, userLng], [p.lat, p.lng]];
     const isDashed = !routeData.coords;
@@ -896,20 +956,24 @@ async function renderPlaces() {
 
   renderStrip(allWithDist, filtered.map(f => f.id));
   renderFilterTags();
+  // refresh events panel if it's open
+  const ep = document.getElementById('events-panel');
+  if (ep && ep.classList.contains('open')) renderEventsPanel();
 }
 
 function addMarker(place, isMatch, dist, travelMin) {
-  const isEatery = place.category === 'eatery';
-  // Colours: purple for eateries, teal/blue for activities — both distinct from OSM red roads
-  const matchColor = isEatery ? '#7C3AED' : '#0EA5E9';
-  const matchBorder = isEatery ? '#EDE9FE' : '#E0F2FE';
-  const dimColor = isEatery ? '#C4B5FD' : '#7DD3FC';
-  const icon_emoji = isEatery ? '🍴' : '⭐';
+  const cat = place.category;
+  const isEatery  = cat === 'eatery';
+  const isEvent   = cat === 'event';
+  // 🍴 purple=eatery  ⭐ blue=activity  📅 amber=event
+  const matchColor  = isEatery ? '#7C3AED' : isEvent ? '#D97706' : '#0EA5E9';
+  const matchBorder = isEatery ? '#EDE9FE' : isEvent ? '#FEF3C7' : '#E0F2FE';
+  const icon_emoji  = isEatery ? '🍴'      : isEvent ? '📅'      : '⭐';
 
-  const color = isMatch ? matchColor : '#c8b8a0';
+  const color  = isMatch ? matchColor  : '#c8b8a0';
   const border = isMatch ? matchBorder : '#f0ebe3';
-  const size = isMatch ? 32 : 26;
-  const emoji = isMatch ? icon_emoji : (isEatery ? '🍴' : '⭐');
+  const size   = isMatch ? 32 : 26;
+  const emoji  = icon_emoji;
   const opacity = isMatch ? '1' : '0.72';
 
   const icon = L.divIcon({
@@ -927,8 +991,9 @@ function addMarker(place, isMatch, dist, travelMin) {
   const m = L.marker([place.lat, place.lng], { icon }).addTo(map);
 
   const status = getStatusLabel(place);
+  const tagClass = place.category==='activity' ? 'a' : place.category==='event' ? 'e' : '';
   const tagsHtml = (place.tags || []).map(t =>
-    `<span class="popup-tag ${place.category==='activity'?'a':''}">${t}</span>`
+    `<span class="popup-tag ${tagClass}">${t}</span>`
   ).join('');
   const statusHtml = status.open === true
     ? `<div class="popup-status-open">${status.label}</div>`
@@ -937,7 +1002,7 @@ function addMarker(place, isMatch, dist, travelMin) {
     : status.label !== 'no hours saved'
     ? `<div class="popup-status-closed">${status.label}</div>` : '';
   const mapsHref = place.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name)}`;
-  const catLabel = isEatery ? '🍴 eatery' : '⭐ activity';
+  const catLabel = isEatery ? '🍴 eatery' : isEvent ? '📅 event' : '⭐ activity';
 
   m.bindPopup(`
     <div class="popup-inner">
@@ -982,7 +1047,8 @@ function renderStrip(all, matchedIds) {
     const isEatery = p.category === 'eatery';
     const catIcon = isEatery ? '🍴' : '⭐';
     const catColor = isEatery ? '#7C3AED' : '#0EA5E9';
-    const tagsHtml = (p.tags || []).map(t => `<span class="pctag ${p.category==='activity'?'a':''}">${t}</span>`).join('');
+    const tcls = p.category==='activity'?'a':p.category==='event'?'e':'';
+    const tagsHtml = (p.tags || []).map(t => `<span class="pctag ${tcls}">${t}</span>`).join('');
     const statusHtml = status.open === true
       ? `<div class="pc-status-open">${status.label}</div>`
       : `<div class="pc-status-closed">${status.label}</div>`;
@@ -1038,6 +1104,150 @@ function setCat(cat, el) {
   el.classList.add('on');
   filterState.cat = cat;
   renderPlaces();
+}
+
+// ── EVENTS ────────────────────────────────────────────────
+const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function getNextOccurrence(event) {
+  const now = new Date();
+  if (event.eventType === 'once') {
+    if (!event.eventDate) return null;
+    const d = new Date(event.eventDate + 'T' + (event.eventStart || '00:00'));
+    return d < now ? null : d; // past = null
+  }
+  if (event.eventType === 'recurring' && event.eventDay != null) {
+    // find next occurrence of this weekday
+    const target = parseInt(event.eventDay);
+    const d = new Date(now);
+    d.setHours(0,0,0,0);
+    const diff = (target - d.getDay() + 7) % 7;
+    d.setDate(d.getDate() + (diff === 0 ? 0 : diff));
+    if (event.eventStart) {
+      const [h,m] = event.eventStart.split(':').map(Number);
+      d.setHours(h, m, 0, 0);
+      // if today but time already passed, next week
+      if (d < now) d.setDate(d.getDate() + 7);
+    }
+    return d;
+  }
+  return null;
+}
+
+function formatEventDate(d) {
+  if (!d) return '';
+  const now = new Date();
+  const today = new Date(now); today.setHours(0,0,0,0);
+  const tomorrow = new Date(today); tomorrow.setDate(today.getDate()+1);
+  const dDay = new Date(d); dDay.setHours(0,0,0,0);
+  const timeStr = d.getHours() || d.getMinutes()
+    ? ` · ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`
+    : '';
+  if (dDay.getTime() === today.getTime()) return `today${timeStr}`;
+  if (dDay.getTime() === tomorrow.getTime()) return `tomorrow${timeStr}`;
+  // within 7 days
+  const diff = Math.round((dDay - today) / 86400000);
+  if (diff < 7) return `${DAYS[d.getDay()]}${timeStr}`;
+  return `${d.getDate()} ${MONTHS[d.getMonth()]}${timeStr}`;
+}
+
+function renderEventsPanel() {
+  const panel = document.getElementById('events-panel');
+  const eventPlaces = places.filter(p => p.category === 'event');
+
+  // Attach next occurrence, distance, filter out past + apply distance filter, sort
+  const upcoming = eventPlaces
+    .map(p => ({ ...p, _next: getNextOccurrence(p), _dist: haversine(userLat, userLng, p.lat, p.lng) }))
+    .filter(p => {
+      if (p._next === null) return false;
+      // respect distance filter
+      if (filterState.mode === 'r' || filterState.mode === 'b') {
+        if (p._dist > filterState.km) return false;
+      }
+      return true;
+    })
+    .sort((a,b) => a._next - b._next);
+
+  const showAll = panel.dataset.showAll === 'true';
+  const visible = showAll ? upcoming : upcoming.slice(0, 7);
+  const list = document.getElementById('events-list');
+  const seeMoreBtn = document.getElementById('events-seemore');
+
+  if (upcoming.length === 0) {
+    list.innerHTML = `<div style="font-size:12px;color:var(--ink3);text-align:center;padding:20px 0">no upcoming events — save an event to see it here</div>`;
+    seeMoreBtn.style.display = 'none';
+    return;
+  }
+
+  let html = '';
+  let lastGroup = '';
+  visible.forEach(p => {
+    const dist = p._dist !== undefined ? p._dist : haversine(userLat, userLng, p.lat, p.lng);
+    const dateStr = formatEventDate(p._next);
+    // group header
+    const now = new Date(); const today = new Date(now); today.setHours(0,0,0,0);
+    const dDay = new Date(p._next); dDay.setHours(0,0,0,0);
+    const diff = Math.round((dDay - today) / 86400000);
+    const group = diff === 0 ? 'today' : diff <= 6 ? 'this week' : 'coming up';
+    if (group !== lastGroup) {
+      html += `<div style="font-size:9px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:0.1em;padding:8px 0 4px">${group}</div>`;
+      lastGroup = group;
+    }
+    const tagsHtml = (p.tags||[]).slice(0,2).map(t=>`<span style="font-size:9px;padding:1px 6px;border-radius:8px;background:#FEF3C7;color:#92400E;border:1px solid #FDE68A">${t}</span>`).join('');
+    const endStr = p.eventEnd ? ` – ${p.eventEnd}` : '';
+    const recurStr = p.eventType==='recurring' ? `every ${DAYS[p.eventDay]}` : '';
+    html += `
+      <div onclick="focusPlace('${p.id}')" style="
+        display:flex;align-items:flex-start;gap:10px;
+        padding:9px 10px;background:var(--white);
+        border:1px solid var(--border);border-radius:var(--radius-sm);
+        cursor:pointer;margin-bottom:5px;transition:border-color 0.15s;
+      " onmouseover="this.style.borderColor='#D97706'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="font-size:20px;flex-shrink:0;margin-top:1px">📅</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name}</div>
+          <div style="font-size:11px;color:#D97706;font-weight:500;margin-top:1px">${dateStr}${p.eventStart ? (recurStr ? '' : '') : ''}${endStr}</div>
+          ${recurStr ? `<div style="font-size:10px;color:var(--ink3)">${recurStr}</div>` : ''}
+          <div style="display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap">
+            <span style="font-size:10px;color:var(--ink3)">${dist.toFixed(1)} km away</span>
+            ${tagsHtml}
+          </div>
+        </div>
+        <div style="font-size:10px;color:var(--ink3);white-space:nowrap;flex-shrink:0">${p.eventStart||''}${endStr}</div>
+      </div>`;
+  });
+  list.innerHTML = html;
+  if (upcoming.length > 7 && !showAll) {
+    seeMoreBtn.style.display = 'block';
+    seeMoreBtn.textContent = `see all ${upcoming.length} events`;
+  } else {
+    seeMoreBtn.style.display = 'none';
+  }
+}
+
+function toggleEventsOnMap() {
+  eventsOnMap = !eventsOnMap;
+  const btn = document.getElementById('events-map-toggle');
+  if (btn) {
+    btn.textContent = eventsOnMap ? '📍 on map' : '📍 hidden';
+    btn.style.background = eventsOnMap ? '#FEF3C7' : 'var(--cream2)';
+    btn.style.borderColor = eventsOnMap ? '#FDE68A' : 'var(--border)';
+    btn.style.color = eventsOnMap ? '#92400E' : 'var(--ink3)';
+  }
+  renderPlaces();
+}
+
+function toggleEventsPanel() {
+  const panel = document.getElementById('events-panel');
+  const isOpen = panel.classList.contains('open');
+  if (isOpen) {
+    panel.classList.remove('open');
+  } else {
+    panel.dataset.showAll = 'false';
+    renderEventsPanel();
+    panel.classList.add('open');
+  }
 }
 
 function setMode(m) {

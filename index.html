@@ -268,7 +268,10 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
 
 /* activity tag blue variant */
 .popup-tag.a { background: #E0F2FE; color: #0369A1; border-color: #7DD3FC; }
+.popup-tag.e { background: #FEF3C7; color: #92400E; border-color: #FDE68A; }
 .pctag.a { background: #E0F2FE; color: #0369A1; border-color: #7DD3FC; }
+.pctag.e { background: #FEF3C7; color: #92400E; border-color: #FDE68A; }
+#events-panel.open { transform: translateY(0) !important; }
 
 /* ── MOBILE ── */
 @media(max-width:640px){
@@ -414,6 +417,7 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
       <button class="seg-btn on" onclick="setCat('all',this)">all</button>
       <button class="seg-btn" onclick="setCat('eatery',this)">eateries</button>
       <button class="seg-btn" onclick="setCat('activity',this)">activities</button>
+      <button class="seg-btn" onclick="setCat('event',this)">events</button>
     </div>
   </div>
 
@@ -475,6 +479,55 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
     <div class="pcard no-places">no places saved yet — tap + save place to start</div>
   </div>
 </div>
+
+<!-- EVENTS PANEL -->
+<div id="events-panel" style="
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--cream);border-top:2px solid #D97706;
+  border-radius:16px 16px 0 0;
+  z-index:700;
+  transform:translateY(100%);transition:transform 0.3s ease;
+  max-height:80vh;display:flex;flex-direction:column;
+  box-shadow:0 -4px 24px rgba(42,31,20,0.15);
+">
+  <div style="padding:12px 14px;border-bottom:1px solid var(--border);background:var(--white);border-radius:16px 16px 0 0;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="font-size:18px">📅</span>
+      <div>
+        <div style="font-size:14px;font-weight:500;color:var(--ink)">upcoming events</div>
+        <div style="font-size:10px;color:var(--ink3)">sorted by earliest first</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <button id="events-map-toggle" onclick="toggleEventsOnMap()" style="
+        background:#FEF3C7;border:1px solid #FDE68A;border-radius:20px;
+        padding:5px 10px;font-size:11px;color:#92400E;cursor:pointer;
+        font-family:inherit;font-weight:500;white-space:nowrap;
+      ">📍 on map</button>
+      <button onclick="toggleEventsPanel()" style="background:var(--cream2);border:1px solid var(--border);border-radius:50%;width:28px;height:28px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink2)">✕</button>
+    </div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:10px 14px" id="events-list"></div>
+  <div style="padding:0 14px 14px;flex-shrink:0">
+    <button id="events-seemore" onclick="document.getElementById('events-panel').dataset.showAll='true';renderEventsPanel()" style="
+      display:none;width:100%;padding:10px 0;background:transparent;
+      border:1px solid var(--border);border-radius:var(--radius-pill);
+      font-size:12px;color:var(--ink2);cursor:pointer;font-family:inherit;
+    "></button>
+  </div>
+</div>
+
+<!-- Events toggle button — always visible in topbar area -->
+<button id="events-toggle-btn" onclick="toggleEventsPanel()" style="
+  position:fixed;bottom:130px;left:14px;
+  background:#D97706;color:#FEF3C7;
+  border:none;border-radius:var(--radius-pill);
+  padding:10px 14px;font-size:12px;font-weight:500;
+  font-family:'DM Sans',sans-serif;
+  box-shadow:0 4px 14px rgba(217,119,6,0.4);
+  z-index:550;cursor:pointer;
+  display:flex;align-items:center;gap:5px;
+">📅 events</button>
 
 <!-- SAVE PANEL -->
 <div id="save-panel">
@@ -538,6 +591,7 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
         <div class="cat-toggle">
           <button class="cat-btn on" id="cat-eatery" onclick="setCategory('eatery')">eatery</button>
           <button class="cat-btn" id="cat-activity" onclick="setCategory('activity')">activity</button>
+          <button class="cat-btn" id="cat-event" onclick="setCategory('event')">📅 event</button>
         </div>
       </div>
     </div>
@@ -590,6 +644,76 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
       </div>
     </div>
 
+    <!-- EVENT tag block -->
+    <div class="form-block" id="event-tag-block" style="display:none">
+      <div class="form-row" style="flex-direction:column;padding:0">
+        <div style="padding:9px 10px 0;font-size:10px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:0.06em">tags <span style="text-transform:none;font-weight:400;font-size:10px;color:var(--ink3);letter-spacing:0">optional</span></div>
+        <div class="tag-picker">
+          <div class="tp-presets" id="evt-presets">
+            <div class="tp-tag on" onclick="this.classList.toggle('on')">market</div>
+            <div class="tp-tag" onclick="this.classList.toggle('on')">food</div>
+            <div class="tp-tag" onclick="this.classList.toggle('on')">music</div>
+            <div class="tp-tag" onclick="this.classList.toggle('on')">art</div>
+            <div class="tp-tag" onclick="this.classList.toggle('on')">festival</div>
+            <div class="tp-tag" onclick="this.classList.toggle('on')">popup</div>
+            <div class="tp-tag" onclick="this.classList.toggle('on')">sports</div>
+            <div class="tp-tag" onclick="this.classList.toggle('on')">night market</div>
+            <div class="tp-tag" onclick="this.classList.toggle('on')">exhibition</div>
+          </div>
+          <div class="tp-add-row">
+            <input class="tp-inp" id="evt-custom" placeholder="type your own tag..." onkeydown="if(event.key==='Enter')addCustomTag('evt-presets','evt-custom')"/>
+            <button class="tp-add-btn" onclick="addCustomTag('evt-presets','evt-custom')">+ add</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EVENT date/time fields -->
+    <div class="form-block" id="event-fields" style="display:none">
+      <div class="form-row" style="flex-direction:column;padding:10px 12px;gap:10px">
+        <div style="font-size:10px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:0.06em">when is it?</div>
+        <!-- one-time vs recurring -->
+        <div style="display:flex;gap:8px">
+          <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer">
+            <input type="radio" name="evtype" value="once" checked onchange="toggleEventType()" style="accent-color:var(--red)"> one-time
+          </label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer">
+            <input type="radio" name="evtype" value="recurring" onchange="toggleEventType()" style="accent-color:var(--red)"> recurring (weekly)
+          </label>
+        </div>
+        <!-- one-time date -->
+        <div id="ev-once-row">
+          <div style="font-size:10px;color:var(--ink3);margin-bottom:4px">date</div>
+          <input type="date" id="ev-date" class="t-inp" style="width:100%;padding:7px 10px;font-size:13px;border-radius:var(--radius-sm)">
+        </div>
+        <!-- recurring day -->
+        <div id="ev-recur-row" style="display:none">
+          <div style="font-size:10px;color:var(--ink3);margin-bottom:4px">every</div>
+          <select id="ev-day" class="wsel" style="width:100%;padding:7px 10px;font-size:13px">
+            <option value="0">Sunday</option>
+            <option value="1">Monday</option>
+            <option value="2">Tuesday</option>
+            <option value="3">Wednesday</option>
+            <option value="4">Thursday</option>
+            <option value="5">Friday</option>
+            <option value="6">Saturday</option>
+          </select>
+        </div>
+        <!-- time -->
+        <div style="display:flex;gap:8px;align-items:center">
+          <div style="flex:1">
+            <div style="font-size:10px;color:var(--ink3);margin-bottom:4px">start time</div>
+            <input type="time" id="ev-start" class="t-inp" style="width:100%;padding:7px 8px;font-size:13px">
+          </div>
+          <div style="font-size:13px;color:var(--ink3);margin-top:18px">–</div>
+          <div style="flex:1">
+            <div style="font-size:10px;color:var(--ink3);margin-bottom:4px">end time <span style="color:var(--ink3);font-weight:400">(optional)</span></div>
+            <input type="time" id="ev-end" class="t-inp" style="width:100%;padding:7px 8px;font-size:13px">
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="form-block">
       <div class="form-row">
         <div class="row-label">note <span class="badge-opt">optional</span></div>
@@ -599,7 +723,7 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
 
     <div style="display:flex;gap:8px">
       <button class="btn-secondary" onclick="goStep(1)">← back</button>
-      <button class="btn-primary" onclick="goStep(3)">next: hours →</button>
+      <button class="btn-primary" id="step2-next-btn" onclick="goStep(3)">next: hours →</button>
     </div>
   </div>
 
