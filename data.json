@@ -1,6 +1,92 @@
 {
   "places": [
     {
+      "id": "1775455037618",
+      "name": "Museum Of Illusions Kuala Lumpur",
+      "lat": 3.1472239,
+      "lng": 101.7122313,
+      "mapsUrl": "https://www.google.com/maps/place/Museum+Of+Illusions+Kuala+Lumpur/@3.1472239,101.7122313,3a,75y,90t/data=!3m8!1e2!3m6!1sCIHM0ogKEICAgIDs2fOmnAE!2e10!3e12!6shttps:%2F%2Flh3.googleusercontent.com%2Fgps-cs-s%2FAHVAweoZccVr4STVF6hugOXMqPkf_ud2Svtg-078UnNkpS6epBVYwwivQGnd6tbRSMXnjYdNby5ms2g8fY-JcUwXhJ0l5i6Nnxs3uVHLbbWH2LvvLkEMpQ0u7Wuv8qpny4hF9BMnc46mOg%3Dw203-h270-k-no!7i3000!8i4000!4m11!1m2!2m1!1sMuseum+of+Illusions!3m7!1s0x31cc362bfa300001:0xff54175d035086f8!8m2!3d3.1471339!4d101.7121372!10e5!15sChNNdXNldW0gb2YgSWxsdXNpb25zWhUiE211c2V1bSBvZiBpbGx1c2lvbnOSAQZtdXNldW2aASNDaFpEU1VoTk1HOW5TMFZKUTBGblNVUmxOVGQ1WTBWbkVBReABAPoBBAhwEEo!16s%2Fg%2F11hdb80cl4?entry=ttu&g_ep=EgoyMDI2MDQwMS4wIKXMDSoASAFQAw%3D%3D",
+      "category": "activity",
+      "tags": [
+        "museum"
+      ],
+      "note": "",
+      "hours": {
+        "0": {
+          "open": "10",
+          "close": "22:00"
+        },
+        "1": {
+          "open": "10",
+          "close": "22:00"
+        },
+        "2": {
+          "open": "10",
+          "close": "22:00"
+        },
+        "3": {
+          "open": "10",
+          "close": "22:00"
+        },
+        "4": {
+          "open": "10",
+          "close": "22:00"
+        },
+        "5": {
+          "open": "10",
+          "close": "22:00"
+        },
+        "6": {
+          "open": "10",
+          "close": "22:00"
+        }
+      },
+      "savedAt": "2026-04-06T05:57:17.618Z"
+    },
+    {
+      "id": "1775455024823",
+      "name": "Museum Of Illusions Kuala Lumpur",
+      "lat": 3.1472239,
+      "lng": 101.7122313,
+      "mapsUrl": "https://www.google.com/maps/place/Museum+Of+Illusions+Kuala+Lumpur/@3.1472239,101.7122313,3a,75y,90t/data=!3m8!1e2!3m6!1sCIHM0ogKEICAgIDs2fOmnAE!2e10!3e12!6shttps:%2F%2Flh3.googleusercontent.com%2Fgps-cs-s%2FAHVAweoZccVr4STVF6hugOXMqPkf_ud2Svtg-078UnNkpS6epBVYwwivQGnd6tbRSMXnjYdNby5ms2g8fY-JcUwXhJ0l5i6Nnxs3uVHLbbWH2LvvLkEMpQ0u7Wuv8qpny4hF9BMnc46mOg%3Dw203-h270-k-no!7i3000!8i4000!4m11!1m2!2m1!1sMuseum+of+Illusions!3m7!1s0x31cc362bfa300001:0xff54175d035086f8!8m2!3d3.1471339!4d101.7121372!10e5!15sChNNdXNldW0gb2YgSWxsdXNpb25zWhUiE211c2V1bSBvZiBpbGx1c2lvbnOSAQZtdXNldW2aASNDaFpEU1VoTk1HOW5TMFZKUTBGblNVUmxOVGQ1WTBWbkVBReABAPoBBAhwEEo!16s%2Fg%2F11hdb80cl4?entry=ttu&g_ep=EgoyMDI2MDQwMS4wIKXMDSoASAFQAw%3D%3D",
+      "category": "activity",
+      "tags": [
+        "museum"
+      ],
+      "note": "",
+      "hours": {
+        "0": {
+          "open": "10",
+          "close": "22:00"
+        },
+        "1": {
+          "open": "10",
+          "close": "22:00"
+        },
+        "2": {
+          "open": "10",
+          "close": "22:00"
+        },
+        "3": {
+          "open": "10",
+          "close": "22:00"
+        },
+        "4": {
+          "open": "10",
+          "close": "22:00"
+        },
+        "5": {
+          "open": "10",
+          "close": "22:00"
+        },
+        "6": {
+          "open": "10",
+          "close": "22:00"
+        }
+      },
+      "savedAt": "2026-04-06T05:57:04.823Z"
+    },
+    {
       "id": "1775446279849",
       "name": "The Messengers by JWC",
       "lat": 3.1261403,
