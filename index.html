@@ -212,7 +212,7 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
 /* hours grid */
 .hours-wrap { padding: 10px 12px; }
 .hours-hint { font-size: 10px; color: var(--ink3); margin-bottom: 8px; line-height: 1.5; }
-.hours-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.hours-grid { display: flex; flex-direction: column; gap: 4px; }
 .day-row { display: flex; align-items: center; gap: 4px; }
 .day-check { width: 14px; height: 14px; accent-color: var(--red); cursor: pointer; flex-shrink: 0; }
 .day-lbl { font-size: 11px; color: var(--ink); min-width: 26px; flex-shrink: 0; }
@@ -220,6 +220,8 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
 .t-inp:focus { border-color: var(--red-mid); }
 .t-sep { font-size: 9px; color: var(--ink3); flex-shrink: 0; }
 .day-closed { font-size: 10px; color: var(--ink3); font-style: italic; flex: 1; text-align: center; }
+.day-closed-btn { padding: 4px 10px; border-radius: 20px; font-size: 11px; border: 1px solid var(--border); color: var(--ink2); cursor: pointer; background: var(--cream); transition: all 0.15s; }
+.day-closed-btn.closed { background: #FCEBEB; border-color: #F7C1C1; color: #791F1F; text-decoration: line-through; }
 
 /* sp footer */
 .sp-footer { padding: 12px 14px; border-top: 1px solid var(--border); background: var(--white); display: flex; gap: 8px; }
@@ -608,15 +610,40 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
     </div>
     <div class="form-block">
       <div class="hours-wrap">
-        <div class="hours-hint">uncheck a day = closed. leave times blank = unknown.</div>
-        <div class="hours-grid" id="hours-grid">
-          <div class="day-row"><input type="checkbox" class="day-check" data-day="1" checked onchange="toggleDay(this)"><span class="day-lbl">Mon</span><input class="t-inp" id="h1s" value="08:00"><span class="t-sep">–</span><input class="t-inp" id="h1e" value="22:00"></div>
-          <div class="day-row"><input type="checkbox" class="day-check" data-day="2" checked onchange="toggleDay(this)"><span class="day-lbl">Tue</span><input class="t-inp" id="h2s" value="08:00"><span class="t-sep">–</span><input class="t-inp" id="h2e" value="22:00"></div>
-          <div class="day-row"><input type="checkbox" class="day-check" data-day="3" checked onchange="toggleDay(this)"><span class="day-lbl">Wed</span><input class="t-inp" id="h3s" value="08:00"><span class="t-sep">–</span><input class="t-inp" id="h3e" value="22:00"></div>
-          <div class="day-row"><input type="checkbox" class="day-check" data-day="4" checked onchange="toggleDay(this)"><span class="day-lbl">Thu</span><input class="t-inp" id="h4s" value="08:00"><span class="t-sep">–</span><input class="t-inp" id="h4e" value="22:00"></div>
-          <div class="day-row"><input type="checkbox" class="day-check" data-day="5" checked onchange="toggleDay(this)"><span class="day-lbl">Fri</span><input class="t-inp" id="h5s" value="08:00"><span class="t-sep">–</span><input class="t-inp" id="h5e" value="23:00"></div>
-          <div class="day-row"><input type="checkbox" class="day-check" data-day="6" checked onchange="toggleDay(this)"><span class="day-lbl">Sat</span><input class="t-inp" id="h6s" value="09:00"><span class="t-sep">–</span><input class="t-inp" id="h6e" value="23:00"></div>
-          <div class="day-row"><input type="checkbox" class="day-check" data-day="0" onchange="toggleDay(this)"><span class="day-lbl">Sun</span><input class="t-inp" id="h0s" placeholder="--:--" disabled><span class="t-sep">–</span><input class="t-inp" id="h0e" placeholder="--:--" disabled></div>
+        <div class="hours-hint" style="margin-bottom:10px">set opening hours. use "every day" for same hours, or "custom" for different hours per day.</div>
+        <div style="display:flex;gap:5px;margin-bottom:10px">
+          <button class="mchip on" id="hmode-every" onclick="setHoursMode('every')">every day</button>
+          <button class="mchip" id="hmode-custom" onclick="setHoursMode('custom')">custom per day</button>
+        </div>
+        <div id="hours-everyday">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <span style="font-size:11px;color:var(--ink2);min-width:60px">open</span>
+            <input class="t-inp" id="hevery-s" value="08:00" style="width:75px">
+            <span class="t-sep">–</span>
+            <input class="t-inp" id="hevery-e" value="22:00" style="width:75px">
+          </div>
+          <div style="font-size:10px;color:var(--ink3);margin-bottom:5px">tap to mark closed:</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px">
+            <div class="day-closed-btn" id="dc-1" onclick="toggleClosedDay(1)">Mon</div>
+            <div class="day-closed-btn" id="dc-2" onclick="toggleClosedDay(2)">Tue</div>
+            <div class="day-closed-btn" id="dc-3" onclick="toggleClosedDay(3)">Wed</div>
+            <div class="day-closed-btn" id="dc-4" onclick="toggleClosedDay(4)">Thu</div>
+            <div class="day-closed-btn" id="dc-5" onclick="toggleClosedDay(5)">Fri</div>
+            <div class="day-closed-btn" id="dc-6" onclick="toggleClosedDay(6)">Sat</div>
+            <div class="day-closed-btn" id="dc-0" onclick="toggleClosedDay(0)">Sun</div>
+          </div>
+        </div>
+        <div id="hours-custom" style="display:none">
+          <div class="hours-grid" id="hours-grid">
+            <div class="day-row"><input type="checkbox" class="day-check" data-day="1" checked onchange="toggleDay(this)"><span class="day-lbl">Mon</span><input class="t-inp" id="h1s" value="08:00"><span class="t-sep">–</span><input class="t-inp" id="h1e" value="22:00"></div>
+            <div class="day-row"><input type="checkbox" class="day-check" data-day="2" checked onchange="toggleDay(this)"><span class="day-lbl">Tue</span><input class="t-inp" id="h2s" value="08:00"><span class="t-sep">–</span><input class="t-inp" id="h2e" value="22:00"></div>
+            <div class="day-row"><input type="checkbox" class="day-check" data-day="3" checked onchange="toggleDay(this)"><span class="day-lbl">Wed</span><input class="t-inp" id="h3s" value="08:00"><span class="t-sep">–</span><input class="t-inp" id="h3e" value="22:00"></div>
+            <div class="day-row"><input type="checkbox" class="day-check" data-day="4" checked onchange="toggleDay(this)"><span class="day-lbl">Thu</span><input class="t-inp" id="h4s" value="08:00"><span class="t-sep">–</span><input class="t-inp" id="h4e" value="22:00"></div>
+            <div class="day-row"><input type="checkbox" class="day-check" data-day="5" checked onchange="toggleDay(this)"><span class="day-lbl">Fri</span><input class="t-inp" id="h5s" value="08:00"><span class="t-sep">–</span><input class="t-inp" id="h5e" value="23:00"></div>
+            <div class="day-row"><input type="checkbox" class="day-check" data-day="6" checked onchange="toggleDay(this)"><span class="day-lbl">Sat</span><input class="t-inp" id="h6s" value="09:00"><span class="t-sep">–</span><input class="t-inp" id="h6e" value="23:00"></div>
+            <div class="day-row"><input type="checkbox" class="day-check" data-day="0" onchange="toggleDay(this)"><span class="day-lbl">Sun</span><input class="t-inp" id="h0s" placeholder="closed" disabled><span class="t-sep">–</span><input class="t-inp" id="h0e" placeholder="closed" disabled></div>
+          </div>
+          <div class="hours-hint" style="margin-top:6px">uncheck = closed that day</div>
         </div>
       </div>
     </div>

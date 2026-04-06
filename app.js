@@ -402,6 +402,61 @@ function openSavePanel() {
 
 function closeSavePanel() {
   document.getElementById('save-panel').classList.remove('open');
+  document.querySelector('.sp-title').textContent = 'save a place';
+  editingId = null;
+}
+
+function editPlace(id) {
+  const place = places.find(p => p.id === id);
+  if (!place) return;
+  map.closePopup();
+
+  // Pre-fill step 1
+  editingId = id;
+  extractedLat = place.lat;
+  extractedLng = place.lng;
+  extractedName = place.name;
+  extractedMapsUrl = place.mapsUrl;
+
+  document.getElementById('url-input').value = place.mapsUrl || '';
+  const nameEl = document.getElementById('extracted-name');
+  const coordEl = document.getElementById('extracted-coords');
+  nameEl.textContent = place.name;
+  nameEl.className = 'row-val extracted';
+  coordEl.textContent = `${place.lat.toFixed(5)}° N, ${place.lng.toFixed(5)}° E`;
+  coordEl.className = 'row-val extracted';
+
+  // Pre-fill step 2
+  setCategory(place.category || 'eatery');
+  resetTags();
+  const presetId = place.category === 'activity' ? 'act-presets' : 'eat-presets';
+  // First deselect all
+  document.querySelectorAll(`#${presetId} .tp-tag`).forEach(t => t.classList.remove('on'));
+  // Select saved tags
+  (place.tags || []).forEach(tag => {
+    let found = false;
+    document.querySelectorAll(`#${presetId} .tp-tag`).forEach(t => {
+      if (t.textContent.trim() === tag) { t.classList.add('on'); found = true; }
+    });
+    // If not a preset tag, add as custom
+    if (!found) {
+      const customInpId = place.category === 'activity' ? 'act-custom' : 'eat-custom';
+      const fakeInp = document.getElementById(customInpId);
+      const saved = fakeInp.value;
+      fakeInp.value = tag;
+      addCustomTag(presetId, customInpId);
+      fakeInp.value = saved;
+    }
+  });
+  document.getElementById('place-note').value = place.note || '';
+
+  // Pre-fill step 3
+  loadHoursIntoForm(place.hours);
+
+  // Update panel title
+  document.querySelector('.sp-title').textContent = 'edit place';
+  goStep(1);
+  document.getElementById('save-panel').classList.add('open');
 }
 
 function goStep(n) {
@@ -457,6 +512,28 @@ function getSelectedTags(presetId) {
 }
 
 // ── HOURS ─────────────────────────────────────────────────
+let hoursMode = 'every';
+let closedDays = new Set();
+
+function setHoursMode(mode) {
+  hoursMode = mode;
+  document.getElementById('hmode-every').classList.toggle('on', mode === 'every');
+  document.getElementById('hmode-custom').classList.toggle('on', mode === 'custom');
+  document.getElementById('hours-everyday').style.display = mode === 'every' ? '' : 'none';
+  document.getElementById('hours-custom').style.display = mode === 'custom' ? '' : 'none';
+}
+
+function toggleClosedDay(day) {
+  const btn = document.getElementById(`dc-${day}`);
+  if (closedDays.has(day)) {
+    closedDays.delete(day);
+    btn.classList.remove('closed');
+  } else {
+    closedDays.add(day);
+    btn.classList.add('closed');
+  }
+}
+
 function toggleDay(cb) {
   const day = cb.dataset.day;
   const disabled = !cb.checked;
@@ -469,30 +546,85 @@ function toggleDay(cb) {
 }
 
 function resetHours() {
-  const defaults = { 1:'08:00', 2:'08:00', 3:'08:00', 4:'08:00', 5:'08:00', 6:'09:00' };
-  const defaultsE = { 1:'22:00', 2:'22:00', 3:'22:00', 4:'22:00', 5:'23:00', 6:'23:00' };
+  hoursMode = 'every';
+  closedDays = new Set();
+  setHoursMode('every');
+  document.getElementById('hevery-s').value = '08:00';
+  document.getElementById('hevery-e').value = '22:00';
   [0,1,2,3,4,5,6].forEach(d => {
+    const btn = document.getElementById(`dc-${d}`);
+    if (btn) btn.classList.remove('closed');
     const cb = document.querySelector(`.day-check[data-day="${d}"]`);
+    if (!cb) return;
     const open = d !== 0;
     cb.checked = open;
     const si = document.getElementById(`h${d}s`);
     const ei = document.getElementById(`h${d}e`);
     si.disabled = !open; ei.disabled = !open;
-    si.value = open ? (defaults[d] || '') : '';
-    ei.value = open ? (defaultsE[d] || '') : '';
+    si.value = open ? (d===6?'09:00':'08:00') : '';
+    ei.value = open ? (d>=5?'23:00':'22:00') : '';
   });
 }
 
 function getHours() {
   const hours = {};
-  [0,1,2,3,4,5,6].forEach(d => {
-    const cb = document.querySelector(`.day-check[data-day="${d}"]`);
-    if (!cb.checked) { hours[d] = null; return; }
-    const s = document.getElementById(`h${d}s`).value;
-    const e = document.getElementById(`h${d}e`).value;
-    hours[d] = (s && e) ? { open: s, close: e } : 'unknown';
-  });
+  if (hoursMode === 'every') {
+    const s = document.getElementById('hevery-s').value;
+    const e = document.getElementById('hevery-e').value;
+    [0,1,2,3,4,5,6].forEach(d => {
+      hours[d] = closedDays.has(d) ? null : (s && e ? { open: s, close: e } : 'unknown');
+    });
+  } else {
+    [0,1,2,3,4,5,6].forEach(d => {
+      const cb = document.querySelector(`.day-check[data-day="${d}"]`);
+      if (!cb || !cb.checked) { hours[d] = null; return; }
+      const s = document.getElementById(`h${d}s`).value;
+      const e = document.getElementById(`h${d}e`).value;
+      hours[d] = (s && e) ? { open: s, close: e } : 'unknown';
+    });
+  }
   return hours;
+}
+
+function loadHoursIntoForm(hours) {
+  if (!hours) { resetHours(); return; }
+  // Detect if it looks like "every day" mode — all open days have same hours
+  const openDays = Object.entries(hours).filter(([d,v]) => v && v !== null && v !== 'unknown');
+  const times = openDays.map(([d,v]) => `${v.open}-${v.close}`);
+  const allSame = times.length > 0 && times.every(t => t === times[0]);
+  if (allSame && openDays.length >= 4) {
+    setHoursMode('every');
+    closedDays = new Set();
+    const [os, oe] = times[0].split('-');
+    document.getElementById('hevery-s').value = os;
+    document.getElementById('hevery-e').value = oe;
+    [0,1,2,3,4,5,6].forEach(d => {
+      const val = hours[d];
+      const btn = document.getElementById(`dc-${d}`);
+      if (!val || val === null) { closedDays.add(Number(d)); if (btn) btn.classList.add('closed'); }
+      else if (btn) btn.classList.remove('closed');
+    });
+  } else {
+    setHoursMode('custom');
+    [0,1,2,3,4,5,6].forEach(d => {
+      const cb = document.querySelector(`.day-check[data-day="${d}"]`);
+      if (!cb) return;
+      const val = hours[d];
+      if (!val || val === null) {
+        cb.checked = false;
+        document.getElementById(`h${d}s`).disabled = true;
+        document.getElementById(`h${d}e`).disabled = true;
+        document.getElementById(`h${d}s`).value = '';
+        document.getElementById(`h${d}e`).value = '';
+      } else {
+        cb.checked = true;
+        document.getElementById(`h${d}s`).disabled = false;
+        document.getElementById(`h${d}e`).disabled = false;
+        document.getElementById(`h${d}s`).value = val === 'unknown' ? '' : val.open;
+        document.getElementById(`h${d}e`).value = val === 'unknown' ? '' : val.close;
+      }
+    });
+  }
 }
 
 // ── SAVE PLACE ────────────────────────────────────────────
@@ -817,6 +949,7 @@ function addMarker(place, isMatch, dist, travelMin) {
       ${statusHtml}
       <div class="popup-btns">
         <a class="popup-btn primary" href="${mapsHref}" target="_blank">open in maps</a>
+        <div class="popup-btn" onclick="editPlace('${place.id}')">edit</div>
         <div class="popup-btn del" onclick="deletePlace('${place.id}')">remove</div>
       </div>
     </div>
@@ -853,15 +986,18 @@ function renderStrip(all, matchedIds) {
     const statusHtml = status.open === true
       ? `<div class="pc-status-open">${status.label}</div>`
       : `<div class="pc-status-closed">${status.label}</div>`;
-    return `<div class="pcard ${isMatch ? 'match' : 'faded'}" onclick="focusPlace('${p.id}')" style="${isMatch ? `border-color:${catColor}40;` : ''}">
-      <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">
+    return `<div class="pcard ${isMatch ? 'match' : 'faded'}" style="${isMatch ? `border-color:${catColor}40;` : ''}">
+      <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px" onclick="focusPlace('${p.id}')">
         <span style="font-size:14px">${catIcon}</span>
         <div class="pc-name">${p.name}</div>
       </div>
-      <div class="pc-dist">${p.dist.toFixed(1)} km</div>
-      <div class="pc-time">~${p.travelMin} min drive</div>
-      <div class="pc-tags">${tagsHtml}</div>
+      <div class="pc-dist" onclick="focusPlace('${p.id}')">${p.dist.toFixed(1)} km · ~${p.travelMin} min</div>
+      <div class="pc-tags" onclick="focusPlace('${p.id}')">${tagsHtml}</div>
       ${filterState.when !== 'any' ? statusHtml : ''}
+      <div style="display:flex;gap:4px;margin-top:6px">
+        <div onclick="editPlace('${p.id}')" style="flex:1;text-align:center;font-size:10px;padding:3px 0;border:1px solid var(--border);border-radius:20px;color:var(--ink2);cursor:pointer;background:var(--cream)">edit</div>
+        <div onclick="focusPlace('${p.id}')" style="flex:1;text-align:center;font-size:10px;padding:3px 0;border:1px solid var(--border);border-radius:20px;color:var(--ink2);cursor:pointer;background:var(--cream)">view</div>
+      </div>
     </div>`;
   }).join('');
 }
