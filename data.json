@@ -1,6 +1,50 @@
 {
   "places": [
     {
+      "id": "1775457983024",
+      "name": "WhiteBurger",
+      "lat": 3.1665175,
+      "lng": 101.7079414,
+      "mapsUrl": "https://www.google.com/maps/place/WhiteBurger/@3.1665175,101.7079414,3a,75y,90t/data=!3m8!1e2!3m6!1sCIHM0ogKEICAgIDB4KqD3wE!2e10!3e12!6shttps:%2F%2Flh3.googleusercontent.com%2Fgps-cs-s%2FAHVAwepNUQ9H77esDbbKpIXMCvxDsNNDCXoo1xi48SXrksBJnHcTstInrFDZ4LKr_986YMMolna7fUac-y1DSdAsvcQDHcwwDsnyB3sNwVX-KlrgXRx4XEwKA7NxjBFv_o71UgjF-DUNvw%3Dw114-h86-k-no!7i4032!8i3024!4m7!3m6!1s0x31cc37b7e8ea23b5:0x6da0598964a02827!8m2!3d3.166366!4d101.7077722!10e5!16s%2Fg%2F11s4tm53c9?entry=ttu&g_ep=EgoyMDI2MDQwMS4wIKXMDSoASAFQAw%3D%3D",
+      "category": "eatery",
+      "tags": [
+        "restaurant",
+        "rooftop"
+      ],
+      "note": "",
+      "hours": {
+        "0": {
+          "open": "11:00",
+          "close": "4:00"
+        },
+        "1": {
+          "open": "11:00",
+          "close": "4:00"
+        },
+        "2": {
+          "open": "11:00",
+          "close": "4:00"
+        },
+        "3": {
+          "open": "11:00",
+          "close": "4:00"
+        },
+        "4": {
+          "open": "11:00",
+          "close": "4:00"
+        },
+        "5": {
+          "open": "11:00",
+          "close": "4:00"
+        },
+        "6": {
+          "open": "11:00",
+          "close": "4:00"
+        }
+      },
+      "savedAt": "2026-04-06T06:46:23.024Z"
+    },
+    {
       "id": "1775457855770",
       "name": "Supamala Hotpot",
       "lat": 3.1575581,
