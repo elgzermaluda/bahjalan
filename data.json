@@ -1,6 +1,51 @@
 {
   "places": [
     {
+      "id": "1775458195750",
+      "name": "Warong Che Senah",
+      "lat": 3.1605012,
+      "lng": 101.6998444,
+      "mapsUrl": "https://www.google.com/maps/place/Warong+Che+Senah/@3.1605012,101.6998444,17z/data=!3m1!4b1!4m6!3m5!1s0x31cc4828bcc4f8e5:0xb742ba74d807fc23!8m2!3d3.1605012!4d101.7024193!16s%2Fg%2F11cncrxw1p?entry=ttu&g_ep=EgoyMDI2MDQwMS4wIKXMDSoASAFQAw%3D%3D",
+      "category": "eatery",
+      "tags": [
+        "restaurant",
+        "rooftop",
+        "food court"
+      ],
+      "note": "",
+      "hours": {
+        "0": {
+          "open": "16:30",
+          "close": "02:00"
+        },
+        "1": {
+          "open": "16:30",
+          "close": "02:00"
+        },
+        "2": {
+          "open": "16:30",
+          "close": "02:00"
+        },
+        "3": {
+          "open": "16:30",
+          "close": "02:00"
+        },
+        "4": {
+          "open": "16:30",
+          "close": "02:00"
+        },
+        "5": {
+          "open": "16:30",
+          "close": "02:00"
+        },
+        "6": {
+          "open": "16:30",
+          "close": "02:00"
+        }
+      },
+      "savedAt": "2026-04-06T06:49:55.750Z"
+    },
+    {
       "id": "1775457983024",
       "name": "WhiteBurger",
       "lat": 3.1665175,
