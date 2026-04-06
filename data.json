@@ -1,6 +1,43 @@
 {
   "places": [
     {
+      "id": "1775458464663",
+      "name": "Warunk Koffie by Wood & Steel",
+      "lat": 3.1991386,
+      "lng": 101.5186327,
+      "mapsUrl": "https://www.google.com/maps/place/Warunk+Koffie+by+Wood+%26+Steel/@3.1991386,101.5186327,17z/data=!4m6!3m5!1s0x31cc4fca92f7ae7f:0xba5902309e0f172!8m2!3d3.1990612!4d101.5186353!16s%2Fg%2F11g9wdhztw?entry=ttu&g_ep=EgoyMDI2MDQwMS4wIKXMDSoASAFQAw%3D%3D",
+      "category": "eatery",
+      "tags": [
+        "restaurant"
+      ],
+      "note": "",
+      "hours": {
+        "0": null,
+        "1": null,
+        "2": {
+          "open": "11:00",
+          "close": "20:00"
+        },
+        "3": {
+          "open": "11:00",
+          "close": "20:00"
+        },
+        "4": {
+          "open": "11:00",
+          "close": "22:30"
+        },
+        "5": {
+          "open": "15:30",
+          "close": "22:00"
+        },
+        "6": {
+          "open": "11:00",
+          "close": "22:00"
+        }
+      },
+      "savedAt": "2026-04-06T06:54:24.663Z"
+    },
+    {
       "id": "1775458338614",
       "name": "LUCK BROS KOPI",
       "lat": 3.1413775,
