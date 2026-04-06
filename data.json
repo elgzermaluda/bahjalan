@@ -1,6 +1,50 @@
 {
   "places": [
     {
+      "id": "1775457055898",
+      "name": "Perdana Botanical Gardens",
+      "lat": 3.143678,
+      "lng": 101.686073,
+      "mapsUrl": "https://www.google.com/maps/place/Perdana+Botanical+Gardens,+Kuala+Lumpur,+Federal+Territory+of+Kuala+Lumpur,+Malaysia/@3.143678,101.686073,15z/data=!4m6!3m5!1s0x31cc49c84fc1a605:0x803fd2fe37eb3542!8m2!3d3.143678!4d101.686073!16s%2Fg%2F1td7wl3w?entry=ttu&g_ep=EgoyMDI2MDQwMS4wIKXMDSoASAFQAw%3D%3D",
+      "category": "activity",
+      "tags": [
+        "theme park",
+        "outdoor"
+      ],
+      "note": "",
+      "hours": {
+        "0": {
+          "open": "08:00",
+          "close": "22:00"
+        },
+        "1": {
+          "open": "08:00",
+          "close": "22:00"
+        },
+        "2": {
+          "open": "08:00",
+          "close": "22:00"
+        },
+        "3": {
+          "open": "08:00",
+          "close": "22:00"
+        },
+        "4": {
+          "open": "08:00",
+          "close": "22:00"
+        },
+        "5": {
+          "open": "08:00",
+          "close": "22:00"
+        },
+        "6": {
+          "open": "08:00",
+          "close": "22:00"
+        }
+      },
+      "savedAt": "2026-04-06T06:30:55.898Z"
+    },
+    {
       "id": "1775457006189",
       "name": "National Art Gallery",
       "lat": 3.1733177,
