@@ -560,6 +560,7 @@
       "category": "eatery",
       "tags": [
         "cafe",
+        "restaurant",
         "korean"
       ],
       "note": "",
@@ -593,7 +594,7 @@
           "close": "23:59"
         }
       },
-      "savedAt": "2026-04-06T06:07:44.654Z"
+      "savedAt": "2026-04-07T02:10:17.250Z"
     },
     {
       "id": "1775455037618",
