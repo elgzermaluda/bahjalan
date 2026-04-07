@@ -531,16 +531,16 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
   </div>
 </div>
 
-<!-- Events toggle button — always visible in topbar area -->
+<!-- Events toggle button -->
 <button id="events-toggle-btn" onclick="toggleEventsPanel()" style="
-  position:fixed;bottom:130px;left:14px;
+  position:fixed;bottom:130px;left:12px;
   background:#D97706;color:#FEF3C7;
   border:none;border-radius:var(--radius-pill);
-  padding:10px 14px;font-size:12px;font-weight:500;
+  padding:8px 13px;font-size:12px;font-weight:500;
   font-family:'DM Sans',sans-serif;
-  box-shadow:0 4px 14px rgba(217,119,6,0.4);
+  box-shadow:0 3px 10px rgba(217,119,6,0.35);
   z-index:550;cursor:pointer;
-  display:flex;align-items:center;gap:5px;
+  display:flex;align-items:center;gap:4px;
 ">📅 events</button>
 
 <!-- SAVE PANEL -->
@@ -974,6 +974,19 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
 <div id="toast"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// Set floating button positions based on places strip height after load
+function initButtonPositions() {
+  const strip = document.getElementById('places-strip');
+  const evBtn = document.getElementById('events-toggle-btn');
+  const fBtn = document.getElementById('filter-toggle-btn');
+  if (!strip) return;
+  const h = strip.offsetHeight + 10;
+  if (evBtn) evBtn.style.bottom = h + 'px';
+  if (fBtn) fBtn.style.bottom = h + 'px';
+}
+window.addEventListener('load', () => setTimeout(initButtonPositions, 500));
+</script>
 <script src="app.js"></script>
 <script>
   // fade out drag hint after 4 seconds

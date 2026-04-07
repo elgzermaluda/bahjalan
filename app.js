@@ -262,7 +262,7 @@ function useMyLocation() {
     renderPlaces();
     showToast('location updated ✓');
   }, err => {
-    showToast('GPS failed — enter location manually');
+    showToast("GPS failed — enter location manually");
     setTimeout(openManualLocation, 600);
   }, { timeout: 8000 });
 }
@@ -277,7 +277,7 @@ function openManualLocation() {
 async function searchManualLocation() {
   const q = document.getElementById('manual-loc-input').value.trim();
   const err = document.getElementById('manual-loc-error');
-  if (!q) { err.textContent = 'enter a place name or area'; return; }
+  if (!q) { err.textContent = "enter a place name or area"; return; }
   const btn = document.getElementById('manual-loc-btn');
   btn.textContent = 'searching...';
   try {
@@ -285,7 +285,7 @@ async function searchManualLocation() {
       headers: { 'Accept-Language': 'en', 'User-Agent': 'BahJalanMana/1.0' }
     });
     const data = await res.json();
-    if (!data.length) { err.textContent = 'place not found — try a different name'; btn.textContent = 'search'; return; }
+    if (!data.length) { err.textContent = "place not found — try a different name"; btn.textContent = 'search'; return; }
     // Show results
     const resultsEl = document.getElementById('manual-loc-results');
     resultsEl.innerHTML = data.map((r,i) => `
@@ -298,7 +298,7 @@ async function searchManualLocation() {
       </div>`).join('');
     resultsEl.style.display = 'block';
   } catch(e) {
-    err.textContent = 'search failed — check connection';
+    err.textContent = "search failed — check connection";
   }
   btn.textContent = 'search';
 }
@@ -1163,9 +1163,9 @@ function setCat(cat, el) {
   document.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('on'));
   el.classList.add('on');
   filterState.cat = cat;
-  filterState.tags = []; // clear tag filter on category change
-  renderPlaces();
-  renderFilterTags();
+  filterState.tags = [];
+  renderFilterTags(); // rebuild tag chips first (correct category)
+  renderPlaces();     // then filter places with cleared tags
 }
 
 // ── EVENTS ────────────────────────────────────────────────
@@ -1395,18 +1395,14 @@ ${'─'.repeat(40)}
   const lines = filtered.map((p,i) => {
     const cat = p.category === 'eatery' ? '🍴' : p.category === 'activity' ? '⭐' : '📅';
     const tags = (p.tags||[]).join(', ');
-    const maps = p.mapsUrl ? `
-   → ${p.mapsUrl}` : '';
-    const note = p.note ? `
-   "${p.note}"` : '';
-    return `${i+1}. ${cat} ${p.name}
-   ${p.dist.toFixed(1)} km · ~${p.travelMin} min drive${tags ? ` · ${tags}` : ''}${note}${maps}`;
-  }).join('
+    const maps = p.mapsUrl ? ('\n   → ' + p.mapsUrl) : '';
+    const note = p.note ? ('\n   "' + p.note + '"') : '';
+    const line1 = (i+1) + '. ' + cat + ' ' + p.name;
+    const line2 = '   ' + p.dist.toFixed(1) + ' km · ~' + p.travelMin + ' min drive' + (tags ? ' · ' + tags : '') + note + maps;
+    return line1 + '\n' + line2;
+  }).join('\n\n');
 
-');
-
-  const text = header + '
-' + lines;
+  const text = header + '\n' + lines;
   // Copy to clipboard
   try {
     await navigator.clipboard.writeText(text);
@@ -1471,9 +1467,16 @@ function togglePlacesStrip() {
   const list = document.getElementById('ps-list');
   const chevron = document.getElementById('ps-chevron');
   const strip = document.getElementById('places-strip');
-  list.style.display = placesStripOpen ? 'flex' : 'none';
+  if (list) list.style.display = placesStripOpen ? 'flex' : 'none';
   if (chevron) chevron.style.transform = placesStripOpen ? '' : 'rotate(180deg)';
-  strip.style.paddingBottom = placesStripOpen ? '' : '10px';
+  if (strip) strip.style.paddingBottom = placesStripOpen ? '' : '8px';
+  // Move floating buttons up/down with the strip
+  const stripH = strip ? strip.offsetHeight : 120;
+  const base = stripH + 10;
+  const evBtn = document.getElementById('events-toggle-btn');
+  const fBtn = document.getElementById('filter-toggle-btn');
+  if (evBtn) evBtn.style.bottom = base + 'px';
+  if (fBtn) fBtn.style.bottom = base + 'px';
 }
 
 // ── MOBILE FILTER SHEET ──────────────────────────────────
@@ -1572,7 +1575,7 @@ function parseImportFile(file) {
         .filter(p => p.lat && p.lng && !isNaN(p.lat) && !isNaN(p.lng));
 
       if (importedPlaces.length === 0) {
-        showToast('no places found — make sure it's the Saved Places.json file');
+        showToast("no places found — make sure it's the Saved Places.json file");
         return;
       }
 
@@ -1588,7 +1591,7 @@ function parseImportFile(file) {
       updateImportSelectedCount();
       showToast(`${importedPlaces.length} places loaded ✓`);
     } catch(err) {
-      showToast('could not read file — make sure it's the correct JSON file');
+      showToast("could not read file — make sure it's the correct JSON file");
     }
   };
   reader.readAsText(file);
@@ -1691,7 +1694,7 @@ function removeImportTag(id, tag) {
 
 async function saveImportedPlaces() {
   const toSave = importedPlaces.filter(p => importState[p._id].selected);
-  if (!toSave.length) { showToast('select at least one place'); return; }
+  if (!toSave.length) { showToast("select at least one place"); return; }
 
   showToast(`saving ${toSave.length} places...`);
 
