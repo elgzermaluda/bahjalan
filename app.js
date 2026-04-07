@@ -17,7 +17,8 @@ let userLat = 3.1390, userLng = 101.6869; // default: KL
 let places = [];
 let markers = {};
 let tentacleLines = [];
-let eventsOnMap = true; // toggle show/hide event pins on map
+let eventsOnMap = true;      // toggle show/hide event pins on map
+let routeLabelsVisible = true; // toggle show/hide km/min labels on routes
 let filterState = {
   cat: 'all',
   tags: [],
@@ -247,18 +248,70 @@ function placeUserPin(lat, lng) {
 }
 
 function useMyLocation() {
-  if (!navigator.geolocation) { showToast('geolocation not supported on this device'); return; }
+  if (!navigator.geolocation) {
+    openManualLocation();
+    return;
+  }
   showToast('getting your location...');
   navigator.geolocation.getCurrentPosition(pos => {
     userLat = pos.coords.latitude;
     userLng = pos.coords.longitude;
     map.setView([userLat, userLng], 14);
     placeUserPin(userLat, userLng);
+    Object.keys(routeCache).forEach(k => delete routeCache[k]);
     renderPlaces();
     showToast('location updated ✓');
   }, err => {
-    showToast('could not get location — drag the 🧍 icon instead');
+    showToast('GPS failed — enter location manually');
+    setTimeout(openManualLocation, 600);
   }, { timeout: 8000 });
+}
+
+function openManualLocation() {
+  document.getElementById('manual-loc-overlay').style.display = 'flex';
+  document.getElementById('manual-loc-input').value = '';
+  document.getElementById('manual-loc-error').textContent = '';
+  setTimeout(() => document.getElementById('manual-loc-input').focus(), 100);
+}
+
+async function searchManualLocation() {
+  const q = document.getElementById('manual-loc-input').value.trim();
+  const err = document.getElementById('manual-loc-error');
+  if (!q) { err.textContent = 'enter a place name or area'; return; }
+  const btn = document.getElementById('manual-loc-btn');
+  btn.textContent = 'searching...';
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=5&countrycodes=my`, {
+      headers: { 'Accept-Language': 'en', 'User-Agent': 'BahJalanMana/1.0' }
+    });
+    const data = await res.json();
+    if (!data.length) { err.textContent = 'place not found — try a different name'; btn.textContent = 'search'; return; }
+    // Show results
+    const resultsEl = document.getElementById('manual-loc-results');
+    resultsEl.innerHTML = data.map((r,i) => `
+      <div onclick="setManualLocation(${r.lat},${r.lon},'${r.display_name.split(',')[0].replace(/'/g,"")}')" style="
+        padding:8px 10px;border-bottom:1px solid var(--border);cursor:pointer;font-size:12px;
+        color:var(--ink);transition:background 0.1s;
+      " onmouseover="this.style.background='var(--cream2)'" onmouseout="this.style.background=''">
+        <div style="font-weight:500">${r.display_name.split(',')[0]}</div>
+        <div style="font-size:10px;color:var(--ink3)">${r.display_name.split(',').slice(1,3).join(',')}</div>
+      </div>`).join('');
+    resultsEl.style.display = 'block';
+  } catch(e) {
+    err.textContent = 'search failed — check connection';
+  }
+  btn.textContent = 'search';
+}
+
+function setManualLocation(lat, lng, name) {
+  userLat = parseFloat(lat);
+  userLng = parseFloat(lng);
+  document.getElementById('manual-loc-overlay').style.display = 'none';
+  map.setView([userLat, userLng], 14);
+  placeUserPin(userLat, userLng);
+  Object.keys(routeCache).forEach(k => delete routeCache[k]);
+  renderPlaces();
+  showToast(`location set to ${name} ✓`);
 }
 
 function updateRadiusCircle() {
@@ -950,8 +1003,10 @@ async function renderPlaces() {
       html: labelHtml,
       iconAnchor: [38, 50]
     });
-    const labelMarker = L.marker(mid, { icon: labelIcon, interactive: false }).addTo(map);
-    tentacleLines.push(labelMarker);
+    if (routeLabelsVisible) {
+      const labelMarker = L.marker(mid, { icon: labelIcon, interactive: false }).addTo(map);
+      tentacleLines.push(labelMarker);
+    }
   }
 
   renderStrip(allWithDist, filtered.map(f => f.id));
@@ -1075,13 +1130,18 @@ function focusPlace(id) {
 
 // ── FILTER TAG CHIPS ──────────────────────────────────────
 function renderFilterTags() {
+  // Only show tags that belong to the current category filter
   const allTags = new Set();
-  places.forEach(p => (p.tags || []).forEach(t => allTags.add(t)));
+  places.forEach(p => {
+    if (filterState.cat === 'all' || p.category === filterState.cat) {
+      (p.tags || []).forEach(t => allTags.add(t));
+    }
+  });
   const wrap = document.getElementById('filter-tags');
   const activeTags = new Set(filterState.tags);
   wrap.innerHTML = '';
   if (allTags.size === 0) {
-    wrap.innerHTML = '<span style="font-size:11px;color:var(--ink3)">tags appear here once you save places</span>';
+    wrap.innerHTML = '<span style="font-size:11px;color:var(--ink3)">no tags yet</span>';
     return;
   }
   allTags.forEach(tag => {
@@ -1103,7 +1163,9 @@ function setCat(cat, el) {
   document.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('on'));
   el.classList.add('on');
   filterState.cat = cat;
+  filterState.tags = []; // clear tag filter on category change
   renderPlaces();
+  renderFilterTags();
 }
 
 // ── EVENTS ────────────────────────────────────────────────
@@ -1226,6 +1288,16 @@ function renderEventsPanel() {
   }
 }
 
+function toggleRouteLabels() {
+  routeLabelsVisible = !routeLabelsVisible;
+  const btn = document.getElementById('route-labels-toggle');
+  if (btn) {
+    btn.textContent = routeLabelsVisible ? 'labels on' : 'labels off';
+    btn.style.opacity = routeLabelsVisible ? '1' : '0.5';
+  }
+  renderPlaces();
+}
+
 function toggleEventsOnMap() {
   eventsOnMap = !eventsOnMap;
   const btn = document.getElementById('events-map-toggle');
@@ -1298,6 +1370,58 @@ function searchPlaces(q) {
   });
 }
 
+// ── EXPORT LIST ──────────────────────────────────────────
+async function exportPlacesList() {
+  // Get current filtered+sorted places with distances
+  const allWithDist = [];
+  for (const p of places) {
+    const dist = haversine(userLat, userLng, p.lat, p.lng);
+    const routeData = await getRouteData(p.lat, p.lng);
+    allWithDist.push({ ...p, dist, travelMin: routeData.minutes });
+  }
+  const filtered = allWithDist.filter(p => {
+    if (filterState.cat !== 'all' && p.category !== filterState.cat) return false;
+    if (filterState.tags.length > 0 && !filterState.tags.some(t => (p.tags||[]).includes(t))) return false;
+    if (filterState.mode === 'r' || filterState.mode === 'b') { if (p.dist > filterState.km) return false; }
+    if (filterState.mode === 't' || filterState.mode === 'b') { if (p.travelMin > filterState.min) return false; }
+    return true;
+  }).sort((a,b) => a.dist - b.dist);
+
+  const isFiltered = filterState.cat !== 'all' || filterState.tags.length > 0 || filterState.mode !== 'r';
+  const header = `bah, jalan mana? — ${isFiltered ? 'filtered' : 'all'} places (${filtered.length})
+sorted nearest to furthest from current location
+${'─'.repeat(40)}
+`;
+  const lines = filtered.map((p,i) => {
+    const cat = p.category === 'eatery' ? '🍴' : p.category === 'activity' ? '⭐' : '📅';
+    const tags = (p.tags||[]).join(', ');
+    const maps = p.mapsUrl ? `
+   → ${p.mapsUrl}` : '';
+    const note = p.note ? `
+   "${p.note}"` : '';
+    return `${i+1}. ${cat} ${p.name}
+   ${p.dist.toFixed(1)} km · ~${p.travelMin} min drive${tags ? ` · ${tags}` : ''}${note}${maps}`;
+  }).join('
+
+');
+
+  const text = header + '
+' + lines;
+  // Copy to clipboard
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast('list copied to clipboard ✓');
+  } catch(e) {
+    // Fallback: create download
+    const blob = new Blob([text], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'bahjalan-places.txt';
+    a.click();
+    showToast('list downloaded ✓');
+  }
+}
+
 // ── SETTINGS RESET ───────────────────────────────────────
 function resetGitHubSettings() {
   localStorage.removeItem(GH_TOKEN_KEY);
@@ -1340,6 +1464,18 @@ function openSettings() {
   };
 }
 
+// ── PLACES STRIP TOGGLE ──────────────────────────────────
+let placesStripOpen = true;
+function togglePlacesStrip() {
+  placesStripOpen = !placesStripOpen;
+  const list = document.getElementById('ps-list');
+  const chevron = document.getElementById('ps-chevron');
+  const strip = document.getElementById('places-strip');
+  list.style.display = placesStripOpen ? 'flex' : 'none';
+  if (chevron) chevron.style.transform = placesStripOpen ? '' : 'rotate(180deg)';
+  strip.style.paddingBottom = placesStripOpen ? '' : '10px';
+}
+
 // ── MOBILE FILTER SHEET ──────────────────────────────────
 function toggleMobileFilter() {
   const panel = document.getElementById('filter-panel');
@@ -1363,6 +1499,235 @@ function closeMobileFilter() {
 function onFilterChange() {
   if (window.innerWidth <= 640) {
     setTimeout(closeMobileFilter, 300);
+  }
+}
+
+
+// ── GOOGLE TAKEOUT IMPORT ─────────────────────────────────
+let importedPlaces = []; // raw parsed places from JSON
+let importState = {};    // id -> { selected, category, tags }
+
+function openImportPanel() {
+  importedPlaces = [];
+  importState = {};
+  showImportStep(1);
+  document.getElementById('import-panel').style.display = 'flex';
+}
+
+function closeImportPanel() {
+  document.getElementById('import-panel').style.display = 'none';
+}
+
+function showImportStep(n) {
+  document.getElementById('import-step1').style.display = n === 1 ? 'flex' : 'none';
+  document.getElementById('import-step2').style.display = n === 2 ? 'flex' : 'none';
+  document.getElementById('import-save-wrap').style.display = n === 2 ? 'block' : 'none';
+  document.getElementById('istep-1').style.color = n === 1 ? 'var(--red)' : 'var(--green)';
+  document.getElementById('istep-1').style.borderBottomColor = n === 1 ? 'var(--red)' : 'var(--green)';
+  document.getElementById('istep-2').style.color = n === 2 ? 'var(--red)' : 'var(--ink3)';
+  document.getElementById('istep-2').style.borderBottomColor = n === 2 ? 'var(--red)' : 'transparent';
+}
+
+function handleImportDrop(e) {
+  e.preventDefault();
+  document.getElementById('import-dropzone').style.borderColor = 'var(--border)';
+  document.getElementById('import-dropzone').style.background = 'var(--white)';
+  const file = e.dataTransfer.files[0];
+  if (file) parseImportFile(file);
+}
+
+function handleImportFile(inp) {
+  const file = inp.files[0];
+  if (file) parseImportFile(file);
+}
+
+function parseImportFile(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const raw = JSON.parse(e.target.result);
+      // Google Takeout format: { features: [ { geometry, properties } ] }
+      // or { type: "FeatureCollection", features: [...] }
+      let features = [];
+      if (raw.features) features = raw.features;
+      else if (Array.isArray(raw)) features = raw;
+
+      importedPlaces = features
+        .filter(f => f.geometry && f.geometry.coordinates)
+        .map((f, i) => {
+          const props = f.properties || {};
+          const coords = f.geometry.coordinates; // [lng, lat]
+          const name = props['Title'] || props['name'] || props['Location'] && props['Location']['Address'] || 'Unnamed place';
+          const url = props['Google Maps URL'] || props['url'] || '';
+          const address = props['Location'] && props['Location']['Address'] || props['address'] || '';
+          return {
+            _id: 'import_' + i,
+            name: name.trim(),
+            lat: parseFloat(coords[1]),
+            lng: parseFloat(coords[0]),
+            mapsUrl: url,
+            address
+          };
+        })
+        .filter(p => p.lat && p.lng && !isNaN(p.lat) && !isNaN(p.lng));
+
+      if (importedPlaces.length === 0) {
+        showToast('no places found — make sure it's the Saved Places.json file');
+        return;
+      }
+
+      // Init state for each place
+      importedPlaces.forEach(p => {
+        importState[p._id] = { selected: true, category: 'eatery', tags: [] };
+      });
+
+      renderImportList();
+      showImportStep(2);
+      document.getElementById('import-total-count').textContent = `${importedPlaces.length} places found`;
+      document.getElementById('import-select-all').checked = true;
+      updateImportSelectedCount();
+      showToast(`${importedPlaces.length} places loaded ✓`);
+    } catch(err) {
+      showToast('could not read file — make sure it's the correct JSON file');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function renderImportList() {
+  const list = document.getElementById('import-place-list');
+  // Get all unique tags from existing saved places for suggestions
+  const existingTags = new Set();
+  places.forEach(p => (p.tags||[]).forEach(t => existingTags.add(t)));
+
+  list.innerHTML = importedPlaces.map(p => {
+    const state = importState[p._id];
+    const dist = haversine(userLat, userLng, p.lat, p.lng);
+    const catIcon = state.category === 'eatery' ? '🍴' : state.category === 'activity' ? '⭐' : '📅';
+    const catColor = state.category === 'eatery' ? '#7C3AED' : state.category === 'activity' ? '#0EA5E9' : '#D97706';
+    const tagsHtml = state.tags.map(t =>
+      `<span onclick="removeImportTag('${p._id}','${t}')" style="font-size:10px;padding:2px 7px;border-radius:10px;background:var(--red-soft);color:#712B13;border:1px solid var(--red-border);cursor:pointer">${t} ×</span>`
+    ).join('');
+
+    return `<div id="irow-${p._id}" style="
+      background:var(--white);border:1px solid ${state.selected ? 'var(--border)' : '#f0ebe3'};
+      border-radius:var(--radius-sm);padding:10px 12px;
+      opacity:${state.selected ? '1' : '0.45'};transition:all 0.15s;
+    ">
+      <div style="display:flex;align-items:flex-start;gap:8px">
+        <input type="checkbox" ${state.selected ? 'checked' : ''} onchange="toggleImportSelect('${p._id}',this.checked)"
+          style="width:15px;height:15px;accent-color:var(--red);cursor:pointer;flex-shrink:0;margin-top:2px">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap">
+            <div style="font-size:13px;font-weight:500;color:var(--ink);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</div>
+            <div style="font-size:10px;color:var(--ink3);flex-shrink:0">${dist.toFixed(1)} km</div>
+          </div>
+          ${p.address ? `<div style="font-size:10px;color:var(--ink3);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.address}</div>` : ''}
+          <!-- Category chips -->
+          <div style="display:flex;gap:4px;margin-bottom:7px">
+            <div onclick="setImportCategory('${p._id}','eatery')" style="padding:3px 9px;border-radius:20px;font-size:11px;cursor:pointer;border:1px solid ${state.category==='eatery'?'#7C3AED':'var(--border)'};background:${state.category==='eatery'?'#EDE9FE':'var(--cream)'};color:${state.category==='eatery'?'#4C1D95':'var(--ink3)'}">🍴</div>
+            <div onclick="setImportCategory('${p._id}','activity')" style="padding:3px 9px;border-radius:20px;font-size:11px;cursor:pointer;border:1px solid ${state.category==='activity'?'#0EA5E9':'var(--border)'};background:${state.category==='activity'?'#E0F2FE':'var(--cream)'};color:${state.category==='activity'?'#0369A1':'var(--ink3)'}">⭐</div>
+            <div onclick="setImportCategory('${p._id}','event')" style="padding:3px 9px;border-radius:20px;font-size:11px;cursor:pointer;border:1px solid ${state.category==='event'?'#D97706':'var(--border)'};background:${state.category==='event'?'#FEF3C7':'var(--cream)'};color:${state.category==='event'?'#92400E':'var(--ink3)'}">📅</div>
+          </div>
+          <!-- Tags -->
+          <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center">
+            ${tagsHtml}
+            <div style="position:relative;display:inline-block">
+              <input placeholder="+ tag" onkeydown="if(event.key==='Enter'||event.key===','){addImportTag('${p._id}',this.value);this.value='';event.preventDefault()}" onblur="if(this.value.trim()){addImportTag('${p._id}',this.value);this.value=''}"
+                style="border:1px dashed var(--border);border-radius:20px;padding:2px 8px;font-size:11px;width:60px;outline:none;background:transparent;font-family:inherit;color:var(--ink)"/>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleImportSelect(id, checked) {
+  importState[id].selected = checked;
+  updateImportSelectedCount();
+  // update row opacity
+  const row = document.getElementById('irow-' + id);
+  if (row) row.style.opacity = checked ? '1' : '0.45';
+}
+
+function toggleSelectAll(checked) {
+  Object.keys(importState).forEach(id => { importState[id].selected = checked; });
+  renderImportList();
+  updateImportSelectedCount();
+}
+
+function updateImportSelectedCount() {
+  const count = Object.values(importState).filter(s => s.selected).length;
+  document.getElementById('import-selected-count').textContent = `${count} selected`;
+}
+
+function setImportCategory(id, cat) {
+  importState[id].category = cat;
+  // re-render just that row
+  renderImportList();
+}
+
+function batchSetCategory(cat) {
+  Object.keys(importState).forEach(id => {
+    if (importState[id].selected) importState[id].category = cat;
+  });
+  renderImportList();
+}
+
+function addImportTag(id, val) {
+  const tag = val.trim().replace(',','');
+  if (!tag) return;
+  if (!importState[id].tags.includes(tag)) {
+    importState[id].tags.push(tag);
+    renderImportList();
+  }
+}
+
+function removeImportTag(id, tag) {
+  importState[id].tags = importState[id].tags.filter(t => t !== tag);
+  renderImportList();
+}
+
+async function saveImportedPlaces() {
+  const toSave = importedPlaces.filter(p => importState[p._id].selected);
+  if (!toSave.length) { showToast('select at least one place'); return; }
+
+  showToast(`saving ${toSave.length} places...`);
+
+  const newPlaces = toSave.map(p => ({
+    id: Date.now().toString() + '_' + Math.random().toString(36).slice(2,6),
+    name: p.name,
+    lat: p.lat,
+    lng: p.lng,
+    mapsUrl: p.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.name)}`,
+    category: importState[p._id].category,
+    tags: importState[p._id].tags,
+    note: '',
+    hours: null,
+    savedAt: new Date().toISOString()
+  }));
+
+  // Add to existing places, avoid duplicates by name+coords
+  const existingKeys = new Set(places.map(p => `${p.name}|${p.lat.toFixed(4)}|${p.lng.toFixed(4)}`));
+  const deduplicated = newPlaces.filter(p => {
+    const key = `${p.name}|${p.lat.toFixed(4)}|${p.lng.toFixed(4)}`;
+    return !existingKeys.has(key);
+  });
+
+  if (deduplicated.length < newPlaces.length) {
+    showToast(`${newPlaces.length - deduplicated.length} duplicates skipped`);
+  }
+
+  places = [...deduplicated, ...places];
+  const ok = await saveData();
+  if (ok) {
+    showToast(`${deduplicated.length} places saved ✓`);
+    closeImportPanel();
+    renderPlaces();
+    renderFilterTags();
+  } else {
+    showToast('save failed — check ⚙ settings');
   }
 }
 
