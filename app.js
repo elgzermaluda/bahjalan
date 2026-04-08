@@ -24,10 +24,7 @@ let filterState = {
   tags: [],
   mode: 'r',
   km: 12,
-  min: 20,
-  when: 'any',
-  whenDay: null,
-  whenTime: null
+  min: 20
 };
 let currentStep = 1;
 let currentCategory = 'eatery';
@@ -44,7 +41,7 @@ window.onload = async () => {
   await loadData();
   renderFilterTags();
   renderPlaces();
-  initWhenDay();
+
 };
 
 function initMap() {
@@ -54,17 +51,11 @@ function initMap() {
     subdomains: 'abcd',
     maxZoom: 19
   }).addTo(map);
-  L.control.zoom({ position: 'bottomright' }).addTo(map);
+  L.control.zoom({ position: 'topright' }).addTo(map);
   placeUserPin(userLat, userLng);
 }
 
-function initWhenDay() {
-  const d = new Date();
-  document.getElementById('when-day').value = d.getDay();
-  const h = String(d.getHours()).padStart(2,'0');
-  const m = String(d.getMinutes()).padStart(2,'0');
-  document.getElementById('when-time').value = `${h}:${m}`;
-}
+
 
 // ── GITHUB STORAGE ───────────────────────────────────────
 function getToken() {
@@ -884,7 +875,13 @@ function getStatusLabel(place) {
 }
 
 // ── FILTERING ─────────────────────────────────────────────
-async function renderPlaces() {
+let renderDebounceTimer = null;
+function renderPlaces() {
+  clearTimeout(renderDebounceTimer);
+  renderDebounceTimer = setTimeout(_doRenderPlaces, 80);
+}
+
+async function _doRenderPlaces() {
   // Clear existing markers and tentacles
   Object.values(markers).forEach(m => map.removeLayer(m));
   markers = {};
@@ -896,10 +893,13 @@ async function renderPlaces() {
   const matchedPlaces = [];
   const allWithDist = [];
 
+  // Use haversine for ALL places (instant, no network) for filtering + display
   for (const p of places) {
-    const dist = p._dist !== undefined ? p._dist : haversine(userLat, userLng, p.lat, p.lng);
-    const routeData = await getRouteData(p.lat, p.lng);
-    allWithDist.push({ ...p, dist, travelMin: routeData.minutes, routeData });
+    const dist = haversine(userLat, userLng, p.lat, p.lng);
+    // Use cached travel time if available, else estimate from haversine (40km/h avg)
+    const cached = routeCache[`${userLat.toFixed(4)},${userLng.toFixed(4)}-${p.lat.toFixed(4)},${p.lng.toFixed(4)}`];
+    const travelMin = cached ? cached.minutes : Math.round((dist / 40) * 60);
+    allWithDist.push({ ...p, dist, travelMin });
   }
 
   // filter
@@ -920,11 +920,7 @@ async function renderPlaces() {
     if (filterState.mode === 't' || filterState.mode === 'b') {
       if (p.travelMin > filterState.min) return false;
     }
-    // hours
-    if (filterState.when !== 'any') {
-      const s = getOpenStatus(p);
-      if (s === false) return false;
-    }
+
     return true;
   });
 
@@ -936,14 +932,13 @@ async function renderPlaces() {
     if (isMatch) matchedPlaces.push({ ...p, isMatch });
   });
 
-  // Road routes to matched places — using actual OSRM geometry
+  // Road routes to matched places — fetch OSRM only for filtered matches
   for (const p of filtered) {
     if (p.category === 'event' && !eventsOnMap) continue;
     const isEatery = p.category === 'eatery';
-    // White outline first, then coloured line on top — makes it pop against any map colour
     const isEvent2 = p.category === 'event';
     const lineColor = isEatery ? '#6D28D9' : isEvent2 ? '#D97706' : '#0284C7';
-    const routeData = p.routeData || await getRouteData(p.lat, p.lng);
+    const routeData = await getRouteData(p.lat, p.lng);
     const coords = routeData.coords || [[userLat, userLng], [p.lat, p.lng]];
     const isDashed = !routeData.coords;
 
@@ -1114,7 +1109,7 @@ function renderStrip(all, matchedIds) {
       </div>
       <div class="pc-dist" onclick="focusPlace('${p.id}')">${p.dist.toFixed(1)} km · ~${p.travelMin} min</div>
       <div class="pc-tags" onclick="focusPlace('${p.id}')">${tagsHtml}</div>
-      ${filterState.when !== 'any' ? statusHtml : ''}
+
       <div style="display:flex;gap:4px;margin-top:6px">
         <div onclick="editPlace('${p.id}')" style="flex:1;text-align:center;font-size:10px;padding:3px 0;border:1px solid var(--border);border-radius:20px;color:var(--ink2);cursor:pointer;background:var(--cream)">edit</div>
         <div onclick="focusPlace('${p.id}')" style="flex:1;text-align:center;font-size:10px;padding:3px 0;border:1px solid var(--border);border-radius:20px;color:var(--ink2);cursor:pointer;background:var(--cream)">view</div>
@@ -1129,8 +1124,8 @@ function focusPlace(id) {
 }
 
 // ── FILTER TAG CHIPS ──────────────────────────────────────
+let tagsExpanded = false;
 function renderFilterTags() {
-  // Only show tags that belong to the current category filter
   const allTags = new Set();
   places.forEach(p => {
     if (filterState.cat === 'all' || p.category === filterState.cat) {
@@ -1144,7 +1139,10 @@ function renderFilterTags() {
     wrap.innerHTML = '<span style="font-size:11px;color:var(--ink3)">no tags yet</span>';
     return;
   }
-  allTags.forEach(tag => {
+  const tagArr = [...allTags];
+  const MAX = 5;
+  const visible = tagsExpanded ? tagArr : tagArr.slice(0, MAX);
+  visible.forEach(tag => {
     const el = document.createElement('div');
     el.className = 'ftag' + (activeTags.has(tag) ? ' on' : '');
     el.textContent = tag;
@@ -1156,6 +1154,14 @@ function renderFilterTags() {
     };
     wrap.appendChild(el);
   });
+  if (tagArr.length > MAX) {
+    const more = document.createElement('div');
+    more.className = 'ftag';
+    more.style.cssText = 'background:var(--cream2);color:var(--ink3);border-style:dashed';
+    more.textContent = tagsExpanded ? 'show less' : '+' + (tagArr.length - MAX) + ' more';
+    more.onclick = () => { tagsExpanded = !tagsExpanded; renderFilterTags(); };
+    wrap.appendChild(more);
+  }
 }
 
 // ── FILTER CONTROLS ───────────────────────────────────────
@@ -1343,20 +1349,7 @@ function updateSlider(type, val) {
   renderPlaces();
 }
 
-function setWhen(w) {
-  ['any','now','pick'].forEach(x => document.getElementById(`wc-${x}`).classList.remove('on'));
-  document.getElementById(`wc-${w}`).classList.add('on');
-  filterState.when = w;
-  const cc = document.getElementById('when-custom');
-  const hint = document.getElementById('when-hint');
-  if (w === 'any') { cc.classList.remove('show'); hint.textContent = 'showing all places regardless of hours'; }
-  else if (w === 'now') { cc.classList.remove('show'); hint.textContent = 'only places open right now (still open in 1hr)'; }
-  else { cc.classList.add('show'); hint.textContent = 'only places open at this day & time'; }
-  renderPlaces();
-}
 
-document.getElementById('when-day').addEventListener('change', renderPlaces);
-document.getElementById('when-time').addEventListener('change', renderPlaces);
 
 // ── SEARCH ────────────────────────────────────────────────
 function searchPlaces(q) {
@@ -1376,8 +1369,9 @@ async function exportPlacesList() {
   const allWithDist = [];
   for (const p of places) {
     const dist = haversine(userLat, userLng, p.lat, p.lng);
-    const routeData = await getRouteData(p.lat, p.lng);
-    allWithDist.push({ ...p, dist, travelMin: routeData.minutes });
+    const cached = routeCache[`${userLat.toFixed(4)},${userLng.toFixed(4)}-${p.lat.toFixed(4)},${p.lng.toFixed(4)}`];
+    const travelMin = cached ? cached.minutes : Math.round((dist / 40) * 60);
+    allWithDist.push({ ...p, dist, travelMin });
   }
   const filtered = allWithDist.filter(p => {
     if (filterState.cat !== 'all' && p.category !== filterState.cat) return false;
@@ -1476,7 +1470,7 @@ function togglePlacesStrip() {
   const evBtn = document.getElementById('events-toggle-btn');
   const fBtn = document.getElementById('filter-toggle-btn');
   if (evBtn) evBtn.style.bottom = base + 'px';
-  if (fBtn) fBtn.style.bottom = base + 'px';
+  if (fBtn) fBtn.style.bottom = base + 'px'; // mobile only
 }
 
 // ── MOBILE FILTER SHEET ──────────────────────────────────

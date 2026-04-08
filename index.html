@@ -456,27 +456,14 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
   </div>
 
   <div class="fp-section">
-    <div class="fp-label">when are you going?</div>
-    <div class="when-row">
-      <button class="wchip on" id="wc-any" onclick="setWhen('any')">any time</button>
-      <button class="wchip" id="wc-now" onclick="setWhen('now')">right now</button>
-      <button class="wchip" id="wc-pick" onclick="setWhen('pick')">pick time</button>
+    <div style="display:flex;flex-direction:column;gap:5px">
+      <button class="loc-btn" onclick="useMyLocation()">
+        <div class="loc-dot"></div>use my location (GPS)
+      </button>
+      <button class="loc-btn" onclick="openManualLocation()" style="border-color:var(--border2)">
+        <div class="loc-dot" style="background:var(--ink3)"></div>set location manually
+      </button>
     </div>
-    <div class="when-custom" id="when-custom">
-      <select class="wsel" id="when-day">
-        <option value="0">sunday</option><option value="1">monday</option><option value="2">tuesday</option>
-        <option value="3">wednesday</option><option value="4">thursday</option><option value="5">friday</option>
-        <option value="6">saturday</option>
-      </select>
-      <input type="time" class="wsel" id="when-time" value="12:00">
-    </div>
-    <div class="when-hint" id="when-hint">showing all places regardless of hours</div>
-  </div>
-
-  <div class="fp-section">
-    <button class="loc-btn" onclick="useMyLocation()">
-      <div class="loc-dot"></div>use my location
-    </button>
   </div>
 </div>
 
@@ -531,9 +518,9 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
   </div>
 </div>
 
-<!-- Events toggle button -->
+<!-- Events toggle button — bottom right -->
 <button id="events-toggle-btn" onclick="toggleEventsPanel()" style="
-  position:fixed;bottom:130px;left:12px;
+  position:fixed;bottom:130px;right:12px;
   background:#D97706;color:#FEF3C7;
   border:none;border-radius:var(--radius-pill);
   padding:8px 13px;font-size:12px;font-weight:500;
