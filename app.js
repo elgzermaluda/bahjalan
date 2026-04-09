@@ -1034,17 +1034,10 @@ function addMarker(place, isMatch, dist, travelMin) {
   });
   const m = L.marker([place.lat, place.lng], { icon }).addTo(map);
 
-  const status = getStatusLabel(place);
   const tagClass = place.category==='activity' ? 'a' : place.category==='event' ? 'e' : '';
   const tagsHtml = (place.tags || []).map(t =>
     `<span class="popup-tag ${tagClass}">${t}</span>`
   ).join('');
-  const statusHtml = status.open === true
-    ? `<div class="popup-status-open">${status.label}</div>`
-    : status.open === false
-    ? `<div class="popup-status-closed">${status.label}</div>`
-    : status.label !== 'no hours saved'
-    ? `<div class="popup-status-closed">${status.label}</div>` : '';
   const mapsHref = place.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name)}`;
   const catLabel = isEatery ? '🍴 eatery' : isEvent ? '📅 event' : '⭐ activity';
 
@@ -1055,7 +1048,6 @@ function addMarker(place, isMatch, dist, travelMin) {
       <div class="popup-dist">${dist.toFixed(1)} km · ~${travelMin} min drive</div>
       ${place.note ? `<div style="font-size:10px;color:var(--ink2);margin-top:3px;font-style:italic">${place.note}</div>` : ''}
       <div class="popup-tags">${tagsHtml}</div>
-      ${statusHtml}
       <div class="popup-btns">
         <a class="popup-btn primary" href="${mapsHref}" target="_blank">open in maps</a>
         <div class="popup-btn" onclick="editPlace('${place.id}')">edit</div>
@@ -1087,7 +1079,6 @@ function renderStrip(all, matchedIds) {
 
   list.innerHTML = sorted.map(p => {
     const isMatch = matchedIds.includes(p.id);
-    const status = getStatusLabel(p);
     const isEatery = p.category === 'eatery';
     const catIcon = isEatery ? '🍴' : '⭐';
     const catColor = isEatery ? '#7C3AED' : '#0EA5E9';
