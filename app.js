@@ -875,13 +875,7 @@ function getStatusLabel(place) {
 }
 
 // ── FILTERING ─────────────────────────────────────────────
-let renderDebounceTimer = null;
-function renderPlaces() {
-  clearTimeout(renderDebounceTimer);
-  renderDebounceTimer = setTimeout(_doRenderPlaces, 80);
-}
-
-async function _doRenderPlaces() {
+async function renderPlaces() {
   // Clear existing markers and tentacles
   Object.values(markers).forEach(m => map.removeLayer(m));
   markers = {};
