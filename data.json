@@ -1,6 +1,26 @@
 {
   "places": [
     {
+      "id": "1775959272156",
+      "name": "Sunway Resort Hotel",
+      "lat": 3.0711234,
+      "lng": 101.6061772,
+      "mapsUrl": "https://www.google.com/maps/place/Sunway+Resort+Hotel/@3.0711234,101.6061772,17z/data=!4m9!3m8!1s0x31cc4c812c0a18cb:0x96bc62906ec10444!5m2!4m1!1i2!8m2!3d3.071118!4d101.6087575!16s%2Fg%2F11hbr87gq9?entry=ttu&g_ep=EgoyMDI2MDQwOC4wIKXMDSoASAFQAw%3D%3D",
+      "category": "event",
+      "tags": [
+        "festival",
+        "stalls"
+      ],
+      "note": "",
+      "hours": null,
+      "eventType": "once",
+      "eventDay": null,
+      "eventDate": "2026-07-11",
+      "eventStart": null,
+      "eventEnd": null,
+      "savedAt": "2026-04-12T02:01:12.156Z"
+    },
+    {
       "id": "1775874944267",
       "name": "Terra | Eat. Explore. Escape",
       "lat": 3.0879617,
