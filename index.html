@@ -8,145 +8,139 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --cream: #f7f3ed;
-  --cream2: #f0ebe3;
-  --ink: #2a1f14;
-  --ink2: #6b5c4e;
-  --ink3: #aaa098;
-  --red: #993C1D;
-  --red-soft: #FAECE7;
-  --red-mid: #D85A30;
-  --red-border: #F5C4B3;
-  --green: #1D9E75;
-  --green-soft: #E1F5EE;
-  --green-border: #9FE1CB;
-  --border: #e0d8cc;
-  --border2: #d0c8bc;
-  --white: #ffffff;
-  --radius: 12px;
-  --radius-sm: 8px;
-  --radius-pill: 100px;
-  --shadow: 0 2px 16px rgba(42,31,20,0.10);
-  --shadow-lg: 0 8px 32px rgba(42,31,20,0.14);
+  --cream: #f7f3ed; --cream2: #f0ebe3;
+  --ink: #2a1f14; --ink2: #6b5c4e; --ink3: #aaa098;
+  --red: #993C1D; --red-soft: #FAECE7; --red-mid: #D85A30; --red-border: #F5C4B3;
+  --green: #1D9E75; --green-soft: #E1F5EE; --green-border: #9FE1CB;
+  --border: #e0d8cc; --border2: #d0c8bc; --white: #ffffff;
+  --radius: 12px; --radius-sm: 8px; --radius-pill: 100px;
+  --shadow: 0 2px 16px rgba(42,31,20,0.10); --shadow-lg: 0 8px 32px rgba(42,31,20,0.14);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; overflow: hidden; font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); }
 
 /* ── TOP BAR ── */
 #topbar {
-  position: fixed; top: 0; left: 0; right: 0; height: 56px;
+  position: fixed; top: 0; left: 0; right: 0; height: 52px;
   background: var(--cream); border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 10px; padding: 0 14px; z-index: 1000;
+  display: flex; align-items: center; gap: 7px; padding: 0 12px; z-index: 1000;
 }
-.logo { font-family: 'Playfair Display', serif; font-size: 16px; color: var(--ink); white-space: nowrap; }
+.logo { font-family: 'Playfair Display', serif; font-size: 14px; color: var(--ink); white-space: nowrap; flex-shrink: 0; }
 .logo span { color: var(--red); }
-#search-bar {
-  flex: 1; display: flex; align-items: center; gap: 8px;
+#profile-switcher {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px;
   background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-pill);
-  padding: 0 14px; height: 36px; transition: border-color 0.2s;
+  padding: 0 12px; height: 34px; cursor: pointer; transition: border-color 0.2s;
 }
-#search-bar:focus-within { border-color: var(--red-mid); }
-#search-bar input { border: none; outline: none; background: transparent; font-size: 13px; color: var(--ink); width: 100%; font-family: 'DM Sans', sans-serif; }
-#search-bar input::placeholder { color: var(--ink3); }
-.search-ico { width: 13px; height: 13px; border: 1.5px solid var(--ink3); border-radius: 50%; position: relative; flex-shrink: 0; }
-.search-ico::after { content: ''; position: absolute; width: 5px; height: 1.5px; background: var(--ink3); bottom: -4px; right: -4px; transform: rotate(45deg); }
-#btn-save {
-  background: var(--red); color: var(--red-soft); border: none; border-radius: var(--radius-pill);
-  padding: 0 16px; height: 36px; font-size: 13px; font-weight: 500; cursor: pointer;
-  white-space: nowrap; font-family: 'DM Sans', sans-serif; transition: background 0.2s;
-  flex-shrink: 0;
-}
+#profile-switcher:hover { border-color: var(--red-mid); }
+#profile-name-display { font-size: 12px; font-weight: 500; color: var(--ink); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#profile-name-display.placeholder { color: var(--ink3); font-style: italic; font-weight: 400; }
+.profile-caret { font-size: 9px; color: var(--ink3); flex-shrink: 0; transition: transform 0.2s; }
+.profile-caret.open { transform: rotate(180deg); }
+#btn-save { background: var(--red); color: var(--red-soft); border: none; border-radius: var(--radius-pill); padding: 0 14px; height: 34px; font-size: 12px; font-weight: 500; cursor: pointer; white-space: nowrap; font-family: 'DM Sans', sans-serif; transition: background 0.2s; flex-shrink: 0; }
 #btn-save:hover { background: #7a2e14; }
+.topbar-btn { background: transparent; border: 1px solid var(--border); border-radius: 50%; width: 34px; height: 34px; font-size: 14px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--ink2); transition: border-color 0.2s; font-family: 'DM Sans', sans-serif; }
+.topbar-btn:hover { border-color: var(--red-mid); }
+.topbar-btn.pill { border-radius: var(--radius-pill); width: auto; padding: 0 10px; font-size: 11px; font-weight: 500; }
 
 /* ── MAP ── */
-#map { position: fixed; top: 56px; left: 0; right: 0; bottom: 0; z-index: 1; }
+#map { position: fixed; top: 52px; left: 0; right: 0; bottom: 0; z-index: 1; }
 
-/* ── FLOAT FILTER PANEL ── */
-#filter-panel {
-  position: fixed; top: 68px; left: 12px; width: 220px;
-  background: rgba(247,243,237,0.96); border: 1px solid var(--border);
-  border-radius: var(--radius); z-index: 500; overflow: hidden;
-  box-shadow: var(--shadow);
+/* ── PROFILE DROPDOWN ── */
+#profile-dropdown {
+  position: fixed; top: 60px; left: 12px;
+  width: 280px; background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius); z-index: 900; box-shadow: var(--shadow-lg);
+  overflow: hidden; display: none;
 }
-.fp-section { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+#profile-dropdown.open { display: block; }
+.pd-header { padding: 9px 12px; border-bottom: 1px solid var(--border); font-size: 9px; font-weight: 600; color: var(--ink3); text-transform: uppercase; letter-spacing: 0.1em; }
+.pd-list { max-height: 220px; overflow-y: auto; }
+.pd-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+.pd-item:last-child { border-bottom: none; }
+.pd-item:hover { background: var(--cream); }
+.pd-item.active { background: var(--red-soft); }
+.pd-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--red); flex-shrink: 0; }
+.pd-dot.dim { background: var(--border2); }
+.pd-item-info { flex: 1; min-width: 0; }
+.pd-item-name { font-size: 13px; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pd-item-file { font-size: 10px; color: var(--ink3); }
+.pd-item-count { font-size: 10px; color: var(--ink3); flex-shrink: 0; }
+.pd-empty { padding: 16px 12px; font-size: 12px; color: var(--ink3); text-align: center; }
+.pd-actions { padding: 8px 12px; border-top: 1px solid var(--border); display: flex; gap: 6px; }
+.pd-btn { flex: 1; padding: 7px 0; text-align: center; font-size: 11px; font-weight: 500; border-radius: var(--radius-pill); border: 1px solid var(--border); color: var(--ink2); cursor: pointer; background: var(--cream); font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+.pd-btn:hover { border-color: var(--red-mid); color: var(--red); }
+.pd-btn.danger { color: #991B1B; border-color: #FCA5A5; background: #FEF2F2; }
+.pd-btn.danger:hover { background: #FCA5A5; }
+
+/* ── FILTER PANEL ── */
+#filter-panel {
+  position: fixed; top: 64px; left: 12px; width: 208px;
+  background: rgba(247,243,237,0.97); border: 1px solid var(--border);
+  border-radius: var(--radius); z-index: 500; overflow: hidden; box-shadow: var(--shadow);
+}
+.fp-section { border-bottom: 1px solid var(--border); }
 .fp-section:last-child { border-bottom: none; }
-.fp-label { font-size: 9px; font-weight: 600; color: var(--ink3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 7px; }
-
-/* seg controls */
+.fp-toggle { display: flex; align-items: center; justify-content: space-between; padding: 9px 11px; cursor: pointer; user-select: none; transition: background 0.1s; }
+.fp-toggle:hover { background: var(--cream2); }
+.fp-toggle-label { font-size: 10px; font-weight: 600; color: var(--ink2); text-transform: uppercase; letter-spacing: 0.07em; }
+.fp-toggle-meta { display: flex; align-items: center; gap: 5px; }
+.fp-val { font-size: 10px; color: var(--red); font-weight: 500; }
+.fp-caret { font-size: 9px; color: var(--ink3); transition: transform 0.2s; }
+.fp-caret.open { transform: rotate(180deg); }
+.fp-body { padding: 8px 11px 10px; display: none; }
+.fp-body.open { display: block; }
 .seg { display: flex; background: var(--cream2); border-radius: var(--radius-pill); padding: 2px; gap: 2px; }
-.seg-btn { flex: 1; text-align: center; font-size: 11px; padding: 5px 0; border-radius: var(--radius-pill); cursor: pointer; color: var(--ink2); transition: all 0.15s; font-family: 'DM Sans', sans-serif; border: none; background: transparent; }
+.seg-btn { flex: 1; text-align: center; font-size: 10px; padding: 5px 0; border-radius: var(--radius-pill); cursor: pointer; color: var(--ink2); transition: all 0.15s; font-family: 'DM Sans', sans-serif; border: none; background: transparent; }
 .seg-btn.on { background: var(--red); color: var(--red-soft); font-weight: 500; }
-
-/* tags */
 .tags-wrap { display: flex; flex-wrap: wrap; gap: 4px; }
-.ftag { padding: 4px 10px; border-radius: var(--radius-pill); font-size: 11px; border: 1px solid var(--border); color: var(--ink2); cursor: pointer; background: var(--cream); transition: all 0.15s; }
+.ftag { padding: 4px 9px; border-radius: var(--radius-pill); font-size: 11px; border: 1px solid var(--border); color: var(--ink2); cursor: pointer; background: var(--cream); transition: all 0.15s; }
 .ftag.on { background: rgba(153,60,29,0.1); border-color: rgba(216,90,48,0.5); color: #712B13; }
-
-/* distance */
 .mode-row { display: flex; gap: 3px; margin-bottom: 8px; }
-.mchip { flex: 1; padding: 5px 0; text-align: center; font-size: 10px; border-radius: var(--radius-pill); border: 1px solid var(--border); color: var(--ink3); cursor: pointer; background: var(--cream); transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
+.mchip { flex: 1; padding: 4px 0; text-align: center; font-size: 10px; border-radius: var(--radius-pill); border: 1px solid var(--border); color: var(--ink3); cursor: pointer; background: var(--cream); transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
 .mchip.on { background: var(--red); color: var(--red-soft); border-color: var(--red); font-weight: 500; }
 .sl-row { margin-bottom: 6px; transition: opacity 0.2s; }
 .sl-row.off { opacity: 0.25; pointer-events: none; }
-.sl-top { display: flex; justify-content: space-between; font-size: 10px; color: var(--ink3); margin-bottom: 4px; }
+.sl-top { display: flex; justify-content: space-between; font-size: 10px; color: var(--ink3); margin-bottom: 3px; }
 .sl-top b { color: var(--red); font-weight: 600; }
 input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
-.both-note { font-size: 10px; color: #712B13; background: rgba(153,60,29,0.07); border-radius: var(--radius-sm); padding: 5px 8px; line-height: 1.4; margin-top: 4px; display: none; }
+.both-note { font-size: 10px; color: #712B13; background: rgba(153,60,29,0.07); border-radius: var(--radius-sm); padding: 4px 8px; line-height: 1.4; margin-top: 4px; display: none; }
 .both-note.show { display: block; }
-
-/* when */
-.when-row { display: flex; gap: 3px; margin-bottom: 6px; }
-.wchip { flex: 1; padding: 5px 0; text-align: center; font-size: 10px; border-radius: var(--radius-pill); border: 1px solid var(--border); color: var(--ink3); cursor: pointer; background: var(--cream); transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
-.wchip.on { background: rgba(29,158,117,0.12); border-color: rgba(29,158,117,0.5); color: #085041; font-weight: 500; }
-.when-custom { display: none; gap: 4px; }
-.when-custom.show { display: flex; }
-.wsel { flex: 1; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 5px 6px; font-size: 10px; color: var(--ink); background: var(--white); outline: none; font-family: 'DM Sans', sans-serif; min-width: 0; }
-.when-hint { font-size: 10px; color: var(--ink3); line-height: 1.4; margin-top: 4px; }
-
-/* loc btn */
-.loc-btn { display: flex; align-items: center; gap: 6px; width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: var(--radius-pill); background: var(--cream); font-size: 11px; color: var(--ink2); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: border-color 0.2s; }
+.loc-btn { display: flex; align-items: center; gap: 6px; width: 100%; padding: 6px 9px; border: 1px solid var(--border); border-radius: var(--radius-pill); background: var(--cream); font-size: 11px; color: var(--ink2); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: border-color 0.2s; margin-bottom: 4px; }
+.loc-btn:last-child { margin-bottom: 0; }
 .loc-btn:hover { border-color: var(--red-mid); }
-.loc-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); flex-shrink: 0; }
+.loc-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--red); flex-shrink: 0; }
 
 /* ── PLACES STRIP ── */
-#places-strip {
-  position: fixed; bottom: 0; left: 0; right: 0;
-  background: rgba(247,243,237,0.97); border-top: 1px solid var(--border);
-  padding: 10px 14px 12px; z-index: 500; box-shadow: 0 -4px 20px rgba(42,31,20,0.08);
-}
-.ps-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+#places-strip { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(247,243,237,0.97); border-top: 1px solid var(--border); z-index: 500; box-shadow: 0 -4px 20px rgba(42,31,20,0.08); }
+.ps-head { display: flex; align-items: center; justify-content: space-between; padding: 9px 14px; cursor: pointer; user-select: none; transition: background 0.1s; }
+.ps-head:hover { background: var(--cream2); }
 .ps-title { font-size: 10px; font-weight: 600; color: var(--ink3); text-transform: uppercase; letter-spacing: 0.1em; }
+.ps-right { display: flex; align-items: center; gap: 8px; }
 .ps-count { font-size: 11px; color: var(--red); font-weight: 500; }
+.ps-chevron { font-size: 10px; color: var(--ink3); transition: transform 0.2s; }
+.ps-chevron.open { transform: rotate(180deg); }
+#ps-body { display: none; padding: 0 14px 10px; }
+#ps-body.open { display: block; }
 .ps-list { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; }
 .ps-list::-webkit-scrollbar { display: none; }
-.pcard {
-  flex-shrink: 0; width: 148px; background: var(--white); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); padding: 9px 11px; cursor: pointer; transition: all 0.15s;
-}
+.pcard { flex-shrink: 0; width: 148px; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 11px; cursor: pointer; transition: all 0.15s; }
 .pcard:hover { border-color: var(--red-mid); }
 .pcard.match { border-color: var(--red-mid); background: var(--red-soft); }
-.pcard.faded { opacity: 0.62; filter: grayscale(30%); }
+.pcard.faded { opacity: 0.5; }
 .pc-name { font-size: 12px; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pc-dist { font-size: 10px; color: var(--red); margin-top: 2px; font-weight: 500; }
-.pc-time { font-size: 9px; color: var(--ink3); }
 .pc-tags { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 5px; }
 .pctag { font-size: 9px; padding: 2px 6px; border-radius: 8px; background: var(--red-soft); color: #712B13; border: 1px solid var(--red-border); }
-.pctag.a { background: #E6F1FB; color: #042C53; border-color: #85B7EB; }
-.pc-status-open { font-size: 9px; color: var(--green); margin-top: 3px; font-weight: 500; }
-.pc-status-closed { font-size: 9px; color: var(--ink3); margin-top: 3px; }
-.pcard.no-places { align-items: center; justify-content: center; border-style: dashed; color: var(--ink3); font-size: 12px; min-width: 200px; text-align: center; padding: 16px; }
+.pctag.a { background: #E0F2FE; color: #0369A1; border-color: #7DD3FC; }
+.pctag.e { background: #FEF3C7; color: #92400E; border-color: #FDE68A; }
+.pcard.no-places { border-style: dashed; color: var(--ink3); font-size: 12px; min-width: 200px; text-align: center; padding: 14px; }
 
-/* ── SAVE PANEL (slide-in) ── */
-#save-panel {
-  position: fixed; top: 56px; right: 0; bottom: 0; width: 360px;
-  background: var(--cream); border-left: 1px solid var(--border);
-  z-index: 600; display: flex; flex-direction: column;
-  transform: translateX(100%); transition: transform 0.3s ease;
-  box-shadow: var(--shadow-lg);
-}
+/* ── SAVE PANEL ── */
+#save-panel { position: fixed; top: 52px; right: 0; bottom: 0; width: 360px; background: var(--cream); border-left: 1px solid var(--border); z-index: 600; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.3s ease; box-shadow: var(--shadow-lg); }
 #save-panel.open { transform: translateX(0); }
-.sp-head { padding: 12px 14px; border-bottom: 1px solid var(--border); background: var(--white); display: flex; align-items: center; gap: 10px; }
-.sp-back { font-size: 12px; color: var(--red); cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: var(--radius-pill); border: 1px solid var(--red-border); background: var(--red-soft); font-family: 'DM Sans', sans-serif; transition: background 0.15s; }
+.sp-head { padding: 11px 14px; border-bottom: 1px solid var(--border); background: var(--white); display: flex; align-items: center; gap: 10px; }
+.sp-back { font-size: 12px; color: var(--red); cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: var(--radius-pill); border: 1px solid var(--red-border); background: var(--red-soft); font-family: 'DM Sans', sans-serif; transition: background 0.15s; }
 .sp-back:hover { background: var(--red-border); }
 .sp-title { font-size: 14px; font-weight: 500; color: var(--ink); }
 .sp-steps { display: flex; border-bottom: 1px solid var(--border); background: var(--white); }
@@ -156,49 +150,33 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
 .sp-body { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
 .sp-body::-webkit-scrollbar { width: 4px; }
 .sp-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-/* form blocks */
 .form-block { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
 .form-row { display: flex; align-items: stretch; border-bottom: 1px solid var(--border); }
 .form-row:last-child { border-bottom: none; }
-.row-label { font-size: 10px; font-weight: 600; color: var(--ink3); padding: 10px 10px; min-width: 82px; flex-shrink: 0; border-right: 1px solid var(--border); display: flex; align-items: flex-start; padding-top: 11px; text-transform: uppercase; letter-spacing: 0.06em; line-height: 1.3; }
+.row-label { font-size: 10px; font-weight: 600; color: var(--ink3); padding: 10px; min-width: 76px; flex-shrink: 0; border-right: 1px solid var(--border); display: flex; align-items: flex-start; padding-top: 11px; text-transform: uppercase; letter-spacing: 0.06em; line-height: 1.3; }
 .row-val { flex: 1; padding: 9px 10px; font-size: 13px; color: var(--ink); line-height: 1.4; }
 .row-val input, .row-val textarea { border: none; outline: none; background: transparent; font-size: 13px; color: var(--ink); width: 100%; font-family: 'DM Sans', sans-serif; resize: none; }
 .row-val input::placeholder, .row-val textarea::placeholder { color: var(--ink3); }
 .row-val.auto { color: var(--ink3); font-style: italic; font-size: 12px; }
 .row-val.extracted { color: var(--ink); font-style: normal; }
-.badge-auto { display: inline-block; font-size: 9px; background: var(--green-soft); color: #085041; padding: 1px 6px; border-radius: 8px; font-weight: 600; margin-left: 4px; vertical-align: middle; }
-.badge-opt { display: inline-block; font-size: 9px; background: var(--cream2); color: var(--ink3); padding: 1px 6px; border-radius: 8px; margin-left: 4px; vertical-align: middle; }
-
-/* url row with button */
+.badge-auto { display: inline-block; font-size: 9px; background: var(--green-soft); color: #085041; padding: 1px 6px; border-radius: 8px; font-weight: 600; margin-left: 3px; vertical-align: middle; }
+.badge-opt { display: inline-block; font-size: 9px; background: var(--cream2); color: var(--ink3); padding: 1px 5px; border-radius: 8px; margin-left: 3px; vertical-align: middle; }
 .url-input-wrap { display: flex; align-items: center; gap: 6px; flex: 1; padding: 7px 10px; }
 .url-input-wrap input { flex: 1; border: none; outline: none; background: transparent; font-size: 13px; color: var(--ink); font-family: 'DM Sans', sans-serif; }
 .url-input-wrap input::placeholder { color: var(--ink3); }
 .btn-extract { background: var(--red); color: var(--red-soft); border: none; border-radius: var(--radius-pill); padding: 4px 12px; font-size: 11px; font-weight: 500; cursor: pointer; white-space: nowrap; font-family: 'DM Sans', sans-serif; flex-shrink: 0; transition: background 0.2s; }
 .btn-extract:hover { background: #7a2e14; }
 .btn-extract.loading { background: var(--ink3); cursor: not-allowed; }
-
-/* info tooltip */
-.info-btn { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--ink3); color: var(--ink3); font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; position: relative; font-family: 'DM Sans', sans-serif; background: transparent; margin-left: 4px; vertical-align: middle; }
+.info-btn { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--ink3); color: var(--ink3); font-size: 9px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; position: relative; font-family: 'DM Sans', sans-serif; background: transparent; margin-left: 3px; vertical-align: middle; }
 .info-btn:hover .info-tooltip { display: block; }
-.info-tooltip {
-  display: none; position: absolute; left: 24px; top: -4px; width: 220px;
-  background: var(--ink); color: var(--white); font-size: 11px; line-height: 1.6;
-  border-radius: var(--radius-sm); padding: 8px 10px; z-index: 99;
-  font-weight: 400; pointer-events: none;
-}
+.info-tooltip { display: none; position: absolute; left: 22px; top: -4px; width: 210px; background: var(--ink); color: var(--white); font-size: 11px; line-height: 1.6; border-radius: var(--radius-sm); padding: 8px 10px; z-index: 99; font-weight: 400; pointer-events: none; }
 .info-tooltip::before { content: ''; position: absolute; left: -5px; top: 8px; width: 0; height: 0; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-right: 5px solid var(--ink); }
 .info-tooltip ol { padding-left: 14px; }
 .info-tooltip li { margin-bottom: 3px; }
-
-/* cat toggle */
 .cat-toggle { display: flex; gap: 5px; padding: 8px 10px; }
-.cat-btn { flex: 1; padding: 7px 0; text-align: center; font-size: 12px; border: 1px solid var(--border); border-radius: var(--radius-pill); cursor: pointer; color: var(--ink2); background: var(--cream); transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
+.cat-btn { flex: 1; padding: 6px 0; text-align: center; font-size: 11px; border: 1px solid var(--border); border-radius: var(--radius-pill); cursor: pointer; color: var(--ink2); background: var(--cream); transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
 .cat-btn.on { background: var(--red); color: var(--red-soft); border-color: var(--red); font-weight: 500; }
-
-/* tag picker */
 .tag-picker { padding: 8px 10px; }
-.tp-hint { font-size: 10px; color: var(--ink3); margin-bottom: 7px; }
 .tp-presets { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
 .tp-tag { padding: 5px 11px; border-radius: var(--radius-pill); font-size: 11px; border: 1px solid var(--border); color: var(--ink2); cursor: pointer; background: var(--cream); transition: all 0.15s; user-select: none; font-family: 'DM Sans', sans-serif; }
 .tp-tag.on { background: rgba(153,60,29,0.1); border-color: rgba(216,90,48,0.5); color: #712B13; }
@@ -206,46 +184,24 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
 .tp-add-row { display: flex; gap: 6px; }
 .tp-inp { flex: 1; border: 1px solid var(--border); border-radius: var(--radius-pill); padding: 5px 12px; font-size: 11px; outline: none; font-family: 'DM Sans', sans-serif; background: var(--white); color: var(--ink); transition: border-color 0.2s; }
 .tp-inp:focus { border-color: var(--red-mid); }
-.tp-add-btn { background: var(--red); color: var(--red-soft); border: none; border-radius: var(--radius-pill); padding: 5px 12px; font-size: 11px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.2s; }
-.tp-add-btn:hover { background: #7a2e14; }
-
-/* hours grid */
-.hours-wrap { padding: 10px 12px; }
-.hours-hint { font-size: 10px; color: var(--ink3); margin-bottom: 8px; line-height: 1.5; }
-.hours-grid { display: flex; flex-direction: column; gap: 4px; }
-.day-row { display: flex; align-items: center; gap: 4px; }
-.day-check { width: 14px; height: 14px; accent-color: var(--red); cursor: pointer; flex-shrink: 0; }
-.day-lbl { font-size: 11px; color: var(--ink); min-width: 26px; flex-shrink: 0; }
-.t-inp { flex: 1; border: 1px solid var(--border); border-radius: 5px; padding: 3px 4px; font-size: 10px; color: var(--ink); background: var(--white); outline: none; font-family: 'DM Sans', sans-serif; min-width: 0; text-align: center; transition: border-color 0.2s; }
-.t-inp:focus { border-color: var(--red-mid); }
-.t-sep { font-size: 9px; color: var(--ink3); flex-shrink: 0; }
-.day-closed { font-size: 10px; color: var(--ink3); font-style: italic; flex: 1; text-align: center; }
-.day-closed-btn { padding: 4px 10px; border-radius: 20px; font-size: 11px; border: 1px solid var(--border); color: var(--ink2); cursor: pointer; background: var(--cream); transition: all 0.15s; }
-.day-closed-btn.closed { background: #FCEBEB; border-color: #F7C1C1; color: #791F1F; text-decoration: line-through; }
-
-/* sp footer */
+.tp-add-btn { background: var(--red); color: var(--red-soft); border: none; border-radius: var(--radius-pill); padding: 5px 12px; font-size: 11px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
 .sp-footer { padding: 12px 14px; border-top: 1px solid var(--border); background: var(--white); display: flex; gap: 8px; }
 .btn-primary { flex: 1; background: var(--red); color: var(--red-soft); border: none; border-radius: var(--radius-pill); padding: 11px 0; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.2s; }
 .btn-primary:hover { background: #7a2e14; }
 .btn-secondary { padding: 11px 16px; border: 1px solid var(--border); border-radius: var(--radius-pill); font-size: 12px; color: var(--ink3); cursor: pointer; background: var(--cream); font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
 .btn-secondary:hover { border-color: var(--red-mid); color: var(--red); }
 
-/* ── PIN POPUP ── */
-.leaflet-popup-content-wrapper {
-  background: var(--white); border: 1px solid var(--border); border-radius: var(--radius) !important;
-  box-shadow: var(--shadow) !important; padding: 0 !important;
-}
+/* ── POPUP ── */
+.leaflet-popup-content-wrapper { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius) !important; box-shadow: var(--shadow) !important; padding: 0 !important; }
 .leaflet-popup-content { margin: 0 !important; min-width: 180px; }
 .leaflet-popup-tip { background: var(--white) !important; }
 .popup-inner { padding: 12px 14px; }
 .popup-name { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
 .popup-dist { font-size: 11px; color: var(--red); font-weight: 500; }
-.popup-time { font-size: 10px; color: var(--ink3); }
 .popup-tags { display: flex; flex-wrap: wrap; gap: 3px; margin: 6px 0; }
 .popup-tag { font-size: 9px; padding: 2px 7px; border-radius: 8px; background: var(--red-soft); color: #712B13; border: 1px solid var(--red-border); }
-.popup-tag.a { background: #E6F1FB; color: #042C53; border-color: #85B7EB; }
-.popup-status-open { font-size: 10px; color: var(--green); font-weight: 500; margin-bottom: 6px; }
-.popup-status-closed { font-size: 10px; color: var(--ink3); margin-bottom: 6px; }
+.popup-tag.a { background: #E0F2FE; color: #0369A1; border-color: #7DD3FC; }
+.popup-tag.e { background: #FEF3C7; color: #92400E; border-color: #FDE68A; }
 .popup-btns { display: flex; gap: 5px; }
 .popup-btn { flex: 1; padding: 5px 0; text-align: center; font-size: 10px; border-radius: var(--radius-pill); border: 1px solid var(--border); color: var(--ink2); cursor: pointer; background: var(--cream); font-family: 'DM Sans', sans-serif; transition: all 0.15s; text-decoration: none; display: block; }
 .popup-btn:hover { border-color: var(--red-mid); color: var(--red); }
@@ -254,89 +210,64 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
 .popup-btn.del { color: #791F1F; border-color: #F7C1C1; background: #FCEBEB; }
 .popup-btn.del:hover { background: #F09595; }
 
-/* toast */
-#toast {
-  position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%) translateY(20px);
-  background: var(--ink); color: var(--white); padding: 10px 18px; border-radius: var(--radius-pill);
-  font-size: 13px; z-index: 2000; opacity: 0; transition: all 0.3s; pointer-events: none;
-}
-#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* ── DELETE CONFIRM MODAL ── */
+#delete-modal { display: none; position: fixed; inset: 0; background: rgba(42,31,20,0.5); z-index: 3000; align-items: center; justify-content: center; padding: 20px; }
+#delete-modal.open { display: flex; }
+.dm-box { background: var(--white); border: 1px solid var(--border); border-radius: 16px; max-width: 320px; width: 100%; overflow: hidden; box-shadow: var(--shadow-lg); }
+.dm-head { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.dm-title { font-size: 14px; font-weight: 500; color: var(--ink); }
+.dm-sub { font-size: 11px; color: var(--ink3); margin-top: 2px; }
+.dm-body { padding: 14px 16px; }
+.dm-place-name { font-size: 13px; font-weight: 500; color: var(--ink); background: var(--cream2); border-radius: var(--radius-sm); padding: 8px 12px; margin-bottom: 10px; }
+.dm-note { font-size: 11px; color: var(--ink3); line-height: 1.5; margin-bottom: 12px; }
+.dm-btns { display: flex; gap: 8px; }
+.dm-cancel { flex: 1; padding: 10px 0; border: 1px solid var(--border); border-radius: var(--radius-pill); font-size: 12px; color: var(--ink2); cursor: pointer; background: var(--cream); font-family: 'DM Sans', sans-serif; }
+.dm-delete { flex: 1; padding: 10px 0; border: none; border-radius: var(--radius-pill); font-size: 12px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; background: #DC2626; color: white; transition: all 0.2s; }
+.dm-delete:disabled { background: var(--border2); color: var(--ink3); cursor: not-allowed; }
+.dm-countdown { font-size: 10px; color: var(--ink3); text-align: center; margin-top: 6px; min-height: 14px; }
 
-/* user pin pulsing */
-.user-pin-pulse { animation: pulse 2s infinite; }
+/* ── EVENTS PANEL ── */
+#events-panel { position: fixed; bottom: 0; left: 0; right: 0; background: var(--cream); border-top: 2px solid #D97706; border-radius: 16px 16px 0 0; z-index: 700; transform: translateY(100%); transition: transform 0.3s ease; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 -4px 24px rgba(42,31,20,0.15); }
+#events-panel.open { transform: translateY(0); }
+
+/* ── PROFILE MODAL ── */
+#profile-modal { display: none; position: fixed; inset: 0; background: rgba(42,31,20,0.55); z-index: 2500; align-items: center; justify-content: center; padding: 20px; }
+#profile-modal.open { display: flex; }
+.pm-box { background: var(--cream); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 400px; box-shadow: var(--shadow-lg); overflow: hidden; }
+.pm-head { padding: 14px 16px; border-bottom: 1px solid var(--border); background: var(--white); display: flex; align-items: center; justify-content: space-between; }
+.pm-title { font-size: 14px; font-weight: 500; color: var(--ink); }
+.pm-close-btn { background: var(--cream2); border: 1px solid var(--border); border-radius: 50%; width: 26px; height: 26px; cursor: pointer; font-size: 13px; color: var(--ink2); display: flex; align-items: center; justify-content: center; }
+.pm-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.pm-label { font-size: 10px; font-weight: 600; color: var(--ink3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px; }
+.pm-input { width: 100%; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 12px; font-size: 13px; color: var(--ink); background: var(--white); outline: none; font-family: 'DM Sans', sans-serif; transition: border-color 0.2s; }
+.pm-input:focus { border-color: var(--red-mid); }
+.pm-dropzone { border: 2px dashed var(--border); border-radius: var(--radius); padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--white); }
+.pm-dropzone:hover, .pm-dropzone.drag { border-color: var(--red-mid); background: var(--red-soft); }
+.pm-footer { padding: 12px 16px; border-top: 1px solid var(--border); background: var(--white); display: flex; gap: 8px; }
+.pm-error { font-size: 11px; color: #991B1B; min-height: 14px; }
+
+/* ── TOAST ── */
+#toast { position: fixed; bottom: 74px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--ink); color: var(--white); padding: 9px 18px; border-radius: var(--radius-pill); font-size: 12px; z-index: 4000; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; }
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(153,60,29,0.4)} 50%{box-shadow:0 0 0 10px rgba(153,60,29,0)} }
 
-/* activity tag blue variant */
-.popup-tag.a { background: #E0F2FE; color: #0369A1; border-color: #7DD3FC; }
-.popup-tag.e { background: #FEF3C7; color: #92400E; border-color: #FDE68A; }
-.pctag.a { background: #E0F2FE; color: #0369A1; border-color: #7DD3FC; }
-.pctag.e { background: #FEF3C7; color: #92400E; border-color: #FDE68A; }
-#events-panel.open { transform: translateY(0) !important; }
+/* ── OVERLAYS ── */
+#token-overlay, #manual-loc-overlay, #import-panel { display: none; position: fixed; inset: 0; z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
+#token-overlay.open, #manual-loc-overlay.open { display: flex; background: rgba(42,31,20,0.6); }
+#import-panel.open { display: flex; flex-direction: column; background: var(--cream); z-index: 1500; }
 
 /* ── MOBILE ── */
 @media(max-width:640px){
-
-  /* topbar: hide search bar text, shrink */
-  #topbar { padding: 0 10px; gap: 7px; height: 52px; }
-  .logo { font-size: 14px; }
-  #search-bar { min-width: 0; }
-  #search-bar input { font-size: 12px; }
-  #btn-save { padding: 0 12px; font-size: 12px; height: 34px; }
-  #map { top: 52px; }
-
-  /* filter panel: hidden by default, slides up from bottom as sheet */
-  #filter-panel {
-    top: auto;
-    bottom: 0; left: 0; right: 0;
-    width: 100%;
-    border-radius: 16px 16px 0 0;
-    border-bottom: none;
-    max-height: 75vh;
-    overflow-y: auto;
-    transform: translateY(100%);
-    transition: transform 0.3s ease;
-    z-index: 600;
-  }
-  #filter-panel.mobile-open {
-    transform: translateY(0);
-  }
-
-  /* filter toggle button — floating above places strip */
-  #filter-toggle-btn {
-    display: flex !important;
-  }
-
-  /* places strip: shorter, cards smaller */
-  #places-strip {
-    padding: 8px 10px 10px;
-    bottom: 0;
-  }
-  .ps-head { margin-bottom: 6px; }
-  .pcard { width: 130px; padding: 7px 9px; }
-  .pc-name { font-size: 11px; }
-
-  /* save panel: full screen */
-  #save-panel {
-    width: 100%;
-    top: 0;
-    border-left: none;
-    border-top: 1px solid var(--border);
-  }
-  #save-panel.open { transform: translateX(0); }
-
-  /* map legend hidden */
-  #map-legend { display: none; }
-
-  /* drag hint hidden on mobile — too obvious already */
-  #drag-hint { display: none; }
-
-  /* filter overlay backdrop */
-  #filter-backdrop {
-    display: none;
-    position: fixed; inset: 0;
-    background: rgba(42,31,20,0.4);
-    z-index: 595;
-  }
+  #topbar { padding: 0 10px; gap: 5px; height: 50px; }
+  .logo { font-size: 13px; }
+  #btn-save { padding: 0 10px; font-size: 11px; height: 32px; }
+  .topbar-btn { width: 32px; height: 32px; font-size: 13px; }
+  #map { top: 50px; }
+  #filter-panel { top: auto; bottom: 0; left: 0; right: 0; width: 100%; border-radius: 16px 16px 0 0; border-bottom: none; max-height: 75vh; overflow-y: auto; transform: translateY(100%); transition: transform 0.3s ease; z-index: 600; }
+  #filter-panel.mobile-open { transform: translateY(0); }
+  #filter-toggle-btn { display: flex !important; }
+  #save-panel { width: 100%; top: 0; border-left: none; }
+  #filter-backdrop { display: none; position: fixed; inset: 0; background: rgba(42,31,20,0.4); z-index: 595; }
   #filter-backdrop.show { display: block; }
 }
 </style>
@@ -345,225 +276,150 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
 
 <div id="topbar">
   <div class="logo">bah, <span>jalan mana?</span></div>
-  <div id="search-bar">
-    <div class="search-ico"></div>
-    <input id="search-input" placeholder="search your saved places..." oninput="searchPlaces(this.value)"/>
+  <div id="profile-switcher" onclick="toggleProfileDropdown()">
+    <span id="profile-name-display" class="placeholder">pick a map…</span>
+    <span class="profile-caret" id="profile-caret">▼</span>
   </div>
-  <button id="btn-save" onclick="openSavePanel()">+ save place</button>
-  <button onclick="openImportPanel()" style="
-    background:transparent;border:1px solid #e0d8cc;border-radius:var(--radius-pill);
-    padding:0 12px;height:36px;font-size:12px;font-weight:500;cursor:pointer;flex-shrink:0;
-    color:#6b5c4e;font-family:inherit;white-space:nowrap;transition:all 0.2s;display:flex;align-items:center;gap:5px;
-  " onmouseover="this.style.borderColor='#993C1D';this.style.color='#993C1D'" onmouseout="this.style.borderColor='#e0d8cc';this.style.color='#6b5c4e'">
-    <span style="font-size:14px">⬆</span> import
-  </button>
-  <button id="route-labels-toggle" onclick="toggleRouteLabels()" title="toggle route labels" style="
-    background:transparent;border:1px solid #e0d8cc;border-radius:var(--radius-pill);
-    padding:0 10px;height:36px;font-size:11px;font-weight:500;cursor:pointer;flex-shrink:0;
-    color:#6b5c4e;font-family:inherit;white-space:nowrap;transition:all 0.2s;
-  ">labels on</button>
-  <button onclick="exportPlacesList()" title="export list" style="
-    background:transparent;border:1px solid #e0d8cc;border-radius:50%;
-    width:36px;height:36px;font-size:15px;cursor:pointer;flex-shrink:0;
-    display:flex;align-items:center;justify-content:center;color:#6b5c4e;
-    transition:border-color 0.2s;
-  " title="copy/download list" onmouseover="this.style.borderColor='#993C1D'" onmouseout="this.style.borderColor='#e0d8cc'">📋</button>
-  <button onclick="openSettings()" title="github settings" style="
-    background:transparent;border:1px solid #e0d8cc;border-radius:50%;
-    width:36px;height:36px;font-size:15px;cursor:pointer;flex-shrink:0;
-    display:flex;align-items:center;justify-content:center;color:#6b5c4e;
-    transition:border-color 0.2s;
-  " onmouseover="this.style.borderColor='#7C3AED'" onmouseout="this.style.borderColor='#e0d8cc'">⚙</button>
+  <button id="btn-save" onclick="openSavePanel()">+ save</button>
+  <button class="topbar-btn" onclick="openImportPanel()" title="import">⬆</button>
+  <button class="topbar-btn pill" id="route-labels-toggle" onclick="toggleRouteLabels()">labels</button>
+  <button class="topbar-btn" onclick="exportPlacesList()" title="copy list">📋</button>
+  <button class="topbar-btn" onclick="openSettings()" title="settings">⚙</button>
 </div>
 
 <div id="map"></div>
 
+<!-- Profile dropdown -->
+<div id="profile-dropdown">
+  <div class="pd-header">your maps</div>
+  <div class="pd-list" id="pd-list"><div class="pd-empty">no maps yet — create one below</div></div>
+  <div class="pd-actions">
+    <div class="pd-btn" onclick="openProfileModal()">+ new map</div>
+    <div class="pd-btn danger" id="pd-delete-btn" style="display:none" onclick="deleteCurrentProfile()">🗑 delete map</div>
+  </div>
+</div>
+<div id="dropdown-backdrop" style="display:none;position:fixed;inset:0;z-index:899;" onclick="closeProfileDropdown()"></div>
+
 <!-- Mobile filter backdrop -->
 <div id="filter-backdrop" onclick="closeMobileFilter()"></div>
 
-<!-- Mobile filter toggle button — only visible on mobile -->
-<button id="filter-toggle-btn" onclick="toggleMobileFilter()" style="
-  display:none;
-  position:fixed;bottom:130px;right:14px;
-  background:var(--red);color:var(--red-soft);
-  border:none;border-radius:var(--radius-pill);
-  padding:10px 16px;font-size:13px;font-weight:500;
-  font-family:'DM Sans',sans-serif;
-  box-shadow:0 4px 14px rgba(153,60,29,0.4);
-  z-index:550;cursor:pointer;
-  align-items:center;gap:6px;
-">
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 3h12M3 7h8M5 11h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-  filter
+<!-- Mobile filter toggle -->
+<button id="filter-toggle-btn" onclick="toggleMobileFilter()" style="display:none;position:fixed;bottom:52px;right:14px;background:var(--red);color:var(--red-soft);border:none;border-radius:var(--radius-pill);padding:8px 14px;font-size:12px;font-weight:500;font-family:'DM Sans',sans-serif;box-shadow:0 4px 14px rgba(153,60,29,0.4);z-index:550;cursor:pointer;align-items:center;gap:5px;">
+  <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M1 3h12M3 7h8M5 11h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> filter
 </button>
-
-<!-- Map legend -->
-
-  <div>🧍 <span style="color:#2a1f14">you (drag to move)</span></div>
-  <div>🍴 <span style="color:#7C3AED;font-weight:500">eatery</span></div>
-  <div>⭐ <span style="color:#0EA5E9;font-weight:500">activity</span></div>
-  <div style="display:flex;align-items:center;gap:5px;margin-top:2px">
-    <div style="width:18px;height:2px;background:#7C3AED;border-radius:1px"></div>
-    <span>within filter</span>
-  </div>
-  <div style="display:flex;align-items:center;gap:5px">
-    <div style="width:18px;height:2px;background:#c8b8a0;border-radius:1px;opacity:0.5"></div>
-    <span>outside filter</span>
-  </div>
-</div>
-
-<!-- Drag hint -->
-<div id="drag-hint" style="
-  position:fixed;bottom:118px;right:12px;
-  background:rgba(42,31,20,0.75);color:#fff;
-  border-radius:20px;padding:6px 12px;font-size:11px;
-  z-index:500;pointer-events:none;
-  opacity:1;transition:opacity 1s;
-">drag 🧍 to change location</div>
 
 <!-- FILTER PANEL -->
 <div id="filter-panel">
   <div class="fp-section">
-    <div class="seg" id="cat-seg">
-      <button class="seg-btn on" onclick="setCat('all',this)">all</button>
-      <button class="seg-btn" onclick="setCat('eatery',this)">eateries</button>
-      <button class="seg-btn" onclick="setCat('activity',this)">activities</button>
-      <button class="seg-btn" onclick="setCat('event',this)">events</button>
+    <div class="fp-toggle" onclick="toggleFpSection(this)">
+      <span class="fp-toggle-label">category</span>
+      <div class="fp-toggle-meta"><span class="fp-val" id="fp-cat-val">all</span><span class="fp-caret open">▲</span></div>
+    </div>
+    <div class="fp-body open">
+      <div class="seg" id="cat-seg">
+        <button class="seg-btn on" onclick="setCat('all',this)">all</button>
+        <button class="seg-btn" onclick="setCat('eatery',this)">eat</button>
+        <button class="seg-btn" onclick="setCat('activity',this)">do</button>
+        <button class="seg-btn" onclick="setCat('event',this)">event</button>
+      </div>
     </div>
   </div>
-
   <div class="fp-section">
-    <div class="fp-label">tags</div>
-    <div class="tags-wrap" id="filter-tags"></div>
+    <div class="fp-toggle" onclick="toggleFpSection(this)">
+      <span class="fp-toggle-label">tags</span>
+      <div class="fp-toggle-meta"><span class="fp-val" id="fp-tags-val"></span><span class="fp-caret">▼</span></div>
+    </div>
+    <div class="fp-body"><div class="tags-wrap" id="filter-tags"><span style="font-size:11px;color:var(--ink3)">no tags yet</span></div></div>
   </div>
-
   <div class="fp-section">
-    <div class="fp-label">distance</div>
-    <div class="mode-row">
-      <button class="mchip on" id="mc-r" onclick="setMode('r')">by km</button>
-      <button class="mchip" id="mc-t" onclick="setMode('t')">by time</button>
-      <button class="mchip" id="mc-b" onclick="setMode('b')">both</button>
+    <div class="fp-toggle" onclick="toggleFpSection(this)">
+      <span class="fp-toggle-label">distance</span>
+      <div class="fp-toggle-meta"><span class="fp-val" id="fp-dist-val">12 km</span><span class="fp-caret">▼</span></div>
     </div>
-    <div class="sl-row" id="sl-r">
-      <div class="sl-top"><span>radius</span><b id="rv-label">12 km</b></div>
-      <input type="range" min="1" max="100" value="12" step="1" id="sl-km" oninput="updateSlider('km',this.value)">
+    <div class="fp-body">
+      <div class="mode-row">
+        <button class="mchip on" id="mc-r" onclick="setMode('r')">by km</button>
+        <button class="mchip" id="mc-t" onclick="setMode('t')">by time</button>
+        <button class="mchip" id="mc-b" onclick="setMode('b')">both</button>
+      </div>
+      <div class="sl-row" id="sl-r">
+        <div class="sl-top"><span>radius</span><b id="rv-label">12 km</b></div>
+        <input type="range" min="1" max="100" value="12" step="1" id="sl-km" oninput="updateSlider('km',this.value)">
+      </div>
+      <div class="sl-row off" id="sl-t">
+        <div class="sl-top"><span>travel time</span><b id="tv-label">20 min</b></div>
+        <input type="range" min="5" max="120" value="20" step="5" id="sl-min" oninput="updateSlider('min',this.value)">
+      </div>
+      <div class="both-note" id="both-note">within km AND within drive time</div>
     </div>
-    <div class="sl-row off" id="sl-t">
-      <div class="sl-top"><span>travel time up to</span><b id="tv-label">20 min</b></div>
-      <input type="range" min="5" max="120" value="20" step="5" id="sl-min" oninput="updateSlider('min',this.value)">
-    </div>
-    <div class="both-note" id="both-note">must be within km AND within travel time</div>
   </div>
-
   <div class="fp-section">
-    <div style="display:flex;flex-direction:column;gap:5px">
-      <button class="loc-btn" onclick="useMyLocation()">
-        <div class="loc-dot"></div>use my location (GPS)
-      </button>
-      <button class="loc-btn" onclick="openManualLocation()" style="border-color:var(--border2)">
-        <div class="loc-dot" style="background:var(--ink3)"></div>set location manually
-      </button>
+    <div class="fp-toggle" onclick="toggleFpSection(this)">
+      <span class="fp-toggle-label">location</span>
+      <div class="fp-toggle-meta"><span class="fp-caret">▼</span></div>
+    </div>
+    <div class="fp-body">
+      <button class="loc-btn" onclick="useMyLocation()"><div class="loc-dot"></div>use GPS</button>
+      <button class="loc-btn" onclick="openManualLocation()"><div class="loc-dot" style="background:var(--ink3)"></div>set manually</button>
     </div>
   </div>
 </div>
 
 <!-- PLACES STRIP -->
 <div id="places-strip">
-  <div class="ps-head" onclick="togglePlacesStrip()" style="cursor:pointer;user-select:none">
-    <span class="ps-title">your saved places</span>
-    <div style="display:flex;align-items:center;gap:8px">
-      <span class="ps-count" id="ps-count">0 saved</span>
-      <span id="ps-chevron" style="font-size:12px;color:var(--ink3);transition:transform 0.2s">▲</span>
+  <div class="ps-head" onclick="togglePlacesStrip()">
+    <span class="ps-title">saved places</span>
+    <div class="ps-right">
+      <span class="ps-count" id="ps-count"></span>
+      <span class="ps-chevron" id="ps-chevron">▲</span>
     </div>
   </div>
-  <div class="ps-list" id="ps-list">
-    <div class="pcard no-places">no places saved yet — tap + save place to start</div>
+  <div id="ps-body">
+    <div class="ps-list" id="ps-list">
+      <div class="pcard no-places">no places yet — tap + save to start</div>
+    </div>
   </div>
 </div>
 
+<!-- Events toggle button -->
+<button id="events-toggle-btn" onclick="toggleEventsPanel()" style="position:fixed;bottom:46px;right:12px;background:#D97706;color:#FEF3C7;border:none;border-radius:var(--radius-pill);padding:7px 12px;font-size:11px;font-weight:500;font-family:'DM Sans',sans-serif;box-shadow:0 3px 10px rgba(217,119,6,0.35);z-index:550;cursor:pointer;display:flex;align-items:center;gap:4px;">📅 events</button>
+
 <!-- EVENTS PANEL -->
-<div id="events-panel" style="
-  position:fixed;bottom:0;left:0;right:0;
-  background:var(--cream);border-top:2px solid #D97706;
-  border-radius:16px 16px 0 0;
-  z-index:700;
-  transform:translateY(100%);transition:transform 0.3s ease;
-  max-height:80vh;display:flex;flex-direction:column;
-  box-shadow:0 -4px 24px rgba(42,31,20,0.15);
-">
+<div id="events-panel">
   <div style="padding:12px 14px;border-bottom:1px solid var(--border);background:var(--white);border-radius:16px 16px 0 0;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
     <div style="display:flex;align-items:center;gap:8px">
       <span style="font-size:18px">📅</span>
-      <div>
-        <div style="font-size:14px;font-weight:500;color:var(--ink)">upcoming events</div>
-        <div style="font-size:10px;color:var(--ink3)">sorted by earliest first</div>
-      </div>
+      <div><div style="font-size:14px;font-weight:500;color:var(--ink)">upcoming events</div><div style="font-size:10px;color:var(--ink3)">earliest first</div></div>
     </div>
     <div style="display:flex;align-items:center;gap:6px">
-      <button id="events-map-toggle" onclick="toggleEventsOnMap()" style="
-        background:#FEF3C7;border:1px solid #FDE68A;border-radius:20px;
-        padding:5px 10px;font-size:11px;color:#92400E;cursor:pointer;
-        font-family:inherit;font-weight:500;white-space:nowrap;
-      ">📍 on map</button>
+      <button id="events-map-toggle" onclick="toggleEventsOnMap()" style="background:#FEF3C7;border:1px solid #FDE68A;border-radius:20px;padding:4px 10px;font-size:11px;color:#92400E;cursor:pointer;font-family:inherit;font-weight:500">📍 on map</button>
       <button onclick="toggleEventsPanel()" style="background:var(--cream2);border:1px solid var(--border);border-radius:50%;width:28px;height:28px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink2)">✕</button>
     </div>
   </div>
   <div style="flex:1;overflow-y:auto;padding:10px 14px" id="events-list"></div>
   <div style="padding:0 14px 14px;flex-shrink:0">
-    <button id="events-seemore" onclick="document.getElementById('events-panel').dataset.showAll='true';renderEventsPanel()" style="
-      display:none;width:100%;padding:10px 0;background:transparent;
-      border:1px solid var(--border);border-radius:var(--radius-pill);
-      font-size:12px;color:var(--ink2);cursor:pointer;font-family:inherit;
-    "></button>
+    <button id="events-seemore" onclick="document.getElementById('events-panel').dataset.showAll='true';renderEventsPanel()" style="display:none;width:100%;padding:9px 0;background:transparent;border:1px solid var(--border);border-radius:var(--radius-pill);font-size:12px;color:var(--ink2);cursor:pointer;font-family:inherit;"></button>
   </div>
 </div>
-
-<!-- Events toggle button — bottom right -->
-<button id="events-toggle-btn" onclick="toggleEventsPanel()" style="
-  position:fixed;bottom:130px;right:12px;
-  background:#D97706;color:#FEF3C7;
-  border:none;border-radius:var(--radius-pill);
-  padding:8px 13px;font-size:12px;font-weight:500;
-  font-family:'DM Sans',sans-serif;
-  box-shadow:0 3px 10px rgba(217,119,6,0.35);
-  z-index:550;cursor:pointer;
-  display:flex;align-items:center;gap:4px;
-">📅 events</button>
 
 <!-- SAVE PANEL -->
 <div id="save-panel">
   <div class="sp-head">
     <button class="sp-back" onclick="closeSavePanel()">← back</button>
-    <div class="sp-title">save a place</div>
+    <div class="sp-title" id="save-panel-title">save a place</div>
   </div>
   <div class="sp-steps">
     <div class="sp-step on" id="step-tab-1" onclick="goStep(1)">1 · link</div>
     <div class="sp-step" id="step-tab-2" onclick="goStep(2)">2 · details</div>
-    <div class="sp-step" id="step-tab-3" onclick="goStep(3)">3 · hours</div>
   </div>
 
   <!-- STEP 1 -->
   <div class="sp-body" id="step-1">
     <div class="form-block">
       <div class="form-row">
-        <div class="row-label">
-          maps link
-          <span class="info-btn" tabindex="0">i
-            <div class="info-tooltip">
-              <b>how to get the link:</b><br>
-              <ol>
-                <li>open Google Maps</li>
-                <li>find the place</li>
-                <li>tap <b>Share</b> → <b>Copy link</b></li>
-                <li>paste here</li>
-              </ol>
-              <b>short link not working?</b><br>
-              open the place in your browser instead — copy the full URL from the address bar (it starts with maps.google.com/...).
-            </div>
-          </span>
-        </div>
+        <div class="row-label">link <span class="info-btn" tabindex="0">i<div class="info-tooltip"><b>how to get the link:</b><br><ol><li>open Google Maps</li><li>find the place</li><li>tap Share → Copy link</li><li>paste here</li></ol>Short link not working? Copy the full URL from your browser address bar.</div></span></div>
         <div class="url-input-wrap">
-          <input id="url-input" placeholder="paste your Google Maps link..." oninput="onUrlInput(this.value)"/>
+          <input id="url-input" placeholder="paste Google Maps link…" oninput="onUrlInput(this.value)"/>
           <button class="btn-extract" id="btn-extract" onclick="extractUrl()">get info</button>
         </div>
       </div>
@@ -572,13 +428,11 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
         <div class="row-val auto" id="extracted-name">— paste a link above</div>
       </div>
       <div class="form-row">
-        <div class="row-label">pin location <span class="badge-auto">auto</span></div>
-        <div class="row-val auto" id="extracted-coords">— extracted from link</div>
+        <div class="row-label">pin <span class="badge-auto">auto</span></div>
+        <div class="row-val auto" id="extracted-coords">— from link</div>
       </div>
     </div>
-    <div style="font-size:11px;color:var(--ink3);line-height:1.7;padding:0 2px;">
-      paste the share link from Google Maps. the name and map pin fill in automatically — that's all you need for the map to work.
-    </div>
+    <div style="font-size:11px;color:var(--ink3);line-height:1.7">paste a Google Maps share link — name and pin fill in automatically.</div>
     <div class="sp-footer" style="margin-top:auto;padding:0;border:none;background:transparent">
       <button class="btn-primary" onclick="goStep(2)">next →</button>
     </div>
@@ -590,8 +444,8 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
       <div class="form-row" style="flex-direction:column;padding:0">
         <div style="padding:9px 10px;font-size:10px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border)">category</div>
         <div class="cat-toggle">
-          <button class="cat-btn on" id="cat-eatery" onclick="setCategory('eatery')">eatery</button>
-          <button class="cat-btn" id="cat-activity" onclick="setCategory('activity')">activity</button>
+          <button class="cat-btn on" id="cat-eatery" onclick="setCategory('eatery')">🍴 eatery</button>
+          <button class="cat-btn" id="cat-activity" onclick="setCategory('activity')">⭐ activity</button>
           <button class="cat-btn" id="cat-event" onclick="setCategory('event')">📅 event</button>
         </div>
       </div>
@@ -599,7 +453,7 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
 
     <div class="form-block" id="eat-tag-block">
       <div class="form-row" style="flex-direction:column;padding:0">
-        <div style="padding:9px 10px 0;font-size:10px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:0.06em">tags <span style="text-transform:none;font-weight:400;color:var(--ink3);letter-spacing:0;font-size:10px">pick as many as you want</span></div>
+        <div style="padding:9px 10px 0;font-size:10px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:0.06em">tags</div>
         <div class="tag-picker">
           <div class="tp-presets" id="eat-presets">
             <div class="tp-tag on" onclick="this.classList.toggle('on')">cafe</div>
@@ -615,10 +469,7 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
             <div class="tp-tag" onclick="this.classList.toggle('on')">date spot</div>
             <div class="tp-tag" onclick="this.classList.toggle('on')">pet-friendly</div>
           </div>
-          <div class="tp-add-row">
-            <input class="tp-inp" id="eat-custom" placeholder="type your own tag..." onkeydown="if(event.key==='Enter')addCustomTag('eat-presets','eat-custom')"/>
-            <button class="tp-add-btn" onclick="addCustomTag('eat-presets','eat-custom')">+ add</button>
-          </div>
+          <div class="tp-add-row"><input class="tp-inp" id="eat-custom" placeholder="add your own tag…" onkeydown="if(event.key==='Enter')addCustomTag('eat-presets','eat-custom')"/><button class="tp-add-btn" onclick="addCustomTag('eat-presets','eat-custom')">+ add</button></div>
         </div>
       </div>
     </div>
@@ -637,18 +488,14 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
             <div class="tp-tag" onclick="this.classList.toggle('on')">outdoor</div>
             <div class="tp-tag" onclick="this.classList.toggle('on')">indoor</div>
           </div>
-          <div class="tp-add-row">
-            <input class="tp-inp" id="act-custom" placeholder="type your own tag..." onkeydown="if(event.key==='Enter')addCustomTag('act-presets','act-custom')"/>
-            <button class="tp-add-btn" onclick="addCustomTag('act-presets','act-custom')">+ add</button>
-          </div>
+          <div class="tp-add-row"><input class="tp-inp" id="act-custom" placeholder="add your own tag…" onkeydown="if(event.key==='Enter')addCustomTag('act-presets','act-custom')"/><button class="tp-add-btn" onclick="addCustomTag('act-presets','act-custom')">+ add</button></div>
         </div>
       </div>
     </div>
 
-    <!-- EVENT tag block -->
     <div class="form-block" id="event-tag-block" style="display:none">
       <div class="form-row" style="flex-direction:column;padding:0">
-        <div style="padding:9px 10px 0;font-size:10px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:0.06em">tags <span style="text-transform:none;font-weight:400;font-size:10px;color:var(--ink3);letter-spacing:0">optional</span></div>
+        <div style="padding:9px 10px 0;font-size:10px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:0.06em">tags <span style="text-transform:none;font-weight:400;font-size:10px;letter-spacing:0">optional</span></div>
         <div class="tag-picker">
           <div class="tp-presets" id="evt-presets">
             <div class="tp-tag on" onclick="this.classList.toggle('on')">market</div>
@@ -661,55 +508,47 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
             <div class="tp-tag" onclick="this.classList.toggle('on')">night market</div>
             <div class="tp-tag" onclick="this.classList.toggle('on')">exhibition</div>
           </div>
-          <div class="tp-add-row">
-            <input class="tp-inp" id="evt-custom" placeholder="type your own tag..." onkeydown="if(event.key==='Enter')addCustomTag('evt-presets','evt-custom')"/>
-            <button class="tp-add-btn" onclick="addCustomTag('evt-presets','evt-custom')">+ add</button>
-          </div>
+          <div class="tp-add-row"><input class="tp-inp" id="evt-custom" placeholder="add your own tag…" onkeydown="if(event.key==='Enter')addCustomTag('evt-presets','evt-custom')"/><button class="tp-add-btn" onclick="addCustomTag('evt-presets','evt-custom')">+ add</button></div>
         </div>
       </div>
     </div>
 
-    <!-- EVENT date/time fields -->
     <div class="form-block" id="event-fields" style="display:none">
-      <div class="form-row" style="flex-direction:column;padding:10px 12px;gap:10px">
-        <div style="font-size:10px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:0.06em">when is it?</div>
-        <!-- one-time vs recurring -->
-        <div style="display:flex;gap:8px">
-          <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer">
-            <input type="radio" name="evtype" value="once" checked onchange="toggleEventType()" style="accent-color:var(--red)"> one-time
-          </label>
-          <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer">
-            <input type="radio" name="evtype" value="recurring" onchange="toggleEventType()" style="accent-color:var(--red)"> recurring (weekly)
-          </label>
+      <div style="padding:10px 12px;display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:10px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:0.06em">when?</div>
+        <div style="display:flex;gap:10px">
+          <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="radio" name="evtype" value="once" checked onchange="toggleEventType()" style="accent-color:var(--red)"> one-time</label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="radio" name="evtype" value="recurring" onchange="toggleEventType()" style="accent-color:var(--red)"> recurring</label>
         </div>
-        <!-- one-time date -->
         <div id="ev-once-row">
-          <div style="font-size:10px;color:var(--ink3);margin-bottom:4px">date</div>
-          <input type="date" id="ev-date" class="t-inp" style="width:100%;padding:7px 10px;font-size:13px;border-radius:var(--radius-sm)">
+          <div style="display:flex;gap:8px;align-items:flex-end">
+            <div style="flex:1">
+              <div style="font-size:10px;color:var(--ink3);margin-bottom:4px">start date</div>
+              <input type="date" id="ev-date-start" style="width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 8px;font-size:12px;color:var(--ink);background:var(--white);outline:none;font-family:inherit">
+            </div>
+            <div style="font-size:12px;color:var(--ink3);padding-bottom:9px">–</div>
+            <div style="flex:1">
+              <div style="font-size:10px;color:var(--ink3);margin-bottom:4px">end date <span style="opacity:0.6">(opt)</span></div>
+              <input type="date" id="ev-date-end" style="width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 8px;font-size:12px;color:var(--ink);background:var(--white);outline:none;font-family:inherit">
+            </div>
+          </div>
         </div>
-        <!-- recurring day -->
         <div id="ev-recur-row" style="display:none">
           <div style="font-size:10px;color:var(--ink3);margin-bottom:4px">every</div>
-          <select id="ev-day" class="wsel" style="width:100%;padding:7px 10px;font-size:13px">
-            <option value="0">Sunday</option>
-            <option value="1">Monday</option>
-            <option value="2">Tuesday</option>
-            <option value="3">Wednesday</option>
-            <option value="4">Thursday</option>
-            <option value="5">Friday</option>
-            <option value="6">Saturday</option>
+          <select id="ev-day" style="width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 10px;font-size:13px;color:var(--ink);background:var(--white);outline:none;font-family:inherit">
+            <option value="0">Sunday</option><option value="1">Monday</option><option value="2">Tuesday</option>
+            <option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option><option value="6">Saturday</option>
           </select>
         </div>
-        <!-- time -->
-        <div style="display:flex;gap:8px;align-items:center">
+        <div style="display:flex;gap:8px;align-items:flex-end">
           <div style="flex:1">
-            <div style="font-size:10px;color:var(--ink3);margin-bottom:4px">start time</div>
-            <input type="time" id="ev-start" class="t-inp" style="width:100%;padding:7px 8px;font-size:13px">
+            <div style="font-size:10px;color:var(--ink3);margin-bottom:4px">start time <span style="opacity:0.6">(opt)</span></div>
+            <input type="time" id="ev-start" style="width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 8px;font-size:12px;color:var(--ink);background:var(--white);outline:none;font-family:inherit">
           </div>
-          <div style="font-size:13px;color:var(--ink3);margin-top:18px">–</div>
+          <div style="font-size:12px;color:var(--ink3);padding-bottom:9px">–</div>
           <div style="flex:1">
-            <div style="font-size:10px;color:var(--ink3);margin-bottom:4px">end time <span style="color:var(--ink3);font-weight:400">(optional)</span></div>
-            <input type="time" id="ev-end" class="t-inp" style="width:100%;padding:7px 8px;font-size:13px">
+            <div style="font-size:10px;color:var(--ink3);margin-bottom:4px">end time <span style="opacity:0.6">(opt)</span></div>
+            <input type="time" id="ev-end" style="width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 8px;font-size:12px;color:var(--ink);background:var(--white);outline:none;font-family:inherit">
           </div>
         </div>
       </div>
@@ -717,127 +556,45 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
 
     <div class="form-block">
       <div class="form-row">
-        <div class="row-label">note <span class="badge-opt">optional</span></div>
-        <div class="row-val"><textarea id="place-note" rows="2" placeholder="e.g. great matcha, good wifi, go early on weekends..."></textarea></div>
+        <div class="row-label">note <span class="badge-opt">opt</span></div>
+        <div class="row-val"><textarea id="place-note" rows="2" placeholder="e.g. great matcha, go early…"></textarea></div>
       </div>
     </div>
 
     <div style="display:flex;gap:8px">
       <button class="btn-secondary" onclick="goStep(1)">← back</button>
-      <button class="btn-primary" id="step2-next-btn" onclick="goStep(3)">next: hours →</button>
-    </div>
-  </div>
-
-  <!-- STEP 3 -->
-  <div class="sp-body" id="step-3" style="display:none">
-    <div style="font-size:12px;color:var(--ink3);line-height:1.7;padding:0 2px;">
-      fill in what you know. leave blank if unsure — the "open in maps" button always shows live hours.
-    </div>
-    <div class="form-block">
-      <div class="hours-wrap">
-        <div class="hours-hint" style="margin-bottom:10px">set opening hours. use "every day" for same hours, or "custom" for different hours per day.</div>
-        <div style="display:flex;gap:5px;margin-bottom:10px">
-          <button class="mchip on" id="hmode-every" onclick="setHoursMode('every')">every day</button>
-          <button class="mchip" id="hmode-custom" onclick="setHoursMode('custom')">custom per day</button>
-        </div>
-        <div id="hours-everyday">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-            <span style="font-size:11px;color:var(--ink2);min-width:60px">open</span>
-            <input class="t-inp" id="hevery-s" value="08:00" style="width:75px">
-            <span class="t-sep">–</span>
-            <input class="t-inp" id="hevery-e" value="22:00" style="width:75px">
-          </div>
-          <div style="font-size:10px;color:var(--ink3);margin-bottom:5px">tap to mark closed:</div>
-          <div style="display:flex;flex-wrap:wrap;gap:4px">
-            <div class="day-closed-btn" id="dc-1" onclick="toggleClosedDay(1)">Mon</div>
-            <div class="day-closed-btn" id="dc-2" onclick="toggleClosedDay(2)">Tue</div>
-            <div class="day-closed-btn" id="dc-3" onclick="toggleClosedDay(3)">Wed</div>
-            <div class="day-closed-btn" id="dc-4" onclick="toggleClosedDay(4)">Thu</div>
-            <div class="day-closed-btn" id="dc-5" onclick="toggleClosedDay(5)">Fri</div>
-            <div class="day-closed-btn" id="dc-6" onclick="toggleClosedDay(6)">Sat</div>
-            <div class="day-closed-btn" id="dc-0" onclick="toggleClosedDay(0)">Sun</div>
-          </div>
-        </div>
-        <div id="hours-custom" style="display:none">
-          <div class="hours-grid" id="hours-grid">
-            <div class="day-row"><input type="checkbox" class="day-check" data-day="1" checked onchange="toggleDay(this)"><span class="day-lbl">Mon</span><input class="t-inp" id="h1s" value="08:00"><span class="t-sep">–</span><input class="t-inp" id="h1e" value="22:00"></div>
-            <div class="day-row"><input type="checkbox" class="day-check" data-day="2" checked onchange="toggleDay(this)"><span class="day-lbl">Tue</span><input class="t-inp" id="h2s" value="08:00"><span class="t-sep">–</span><input class="t-inp" id="h2e" value="22:00"></div>
-            <div class="day-row"><input type="checkbox" class="day-check" data-day="3" checked onchange="toggleDay(this)"><span class="day-lbl">Wed</span><input class="t-inp" id="h3s" value="08:00"><span class="t-sep">–</span><input class="t-inp" id="h3e" value="22:00"></div>
-            <div class="day-row"><input type="checkbox" class="day-check" data-day="4" checked onchange="toggleDay(this)"><span class="day-lbl">Thu</span><input class="t-inp" id="h4s" value="08:00"><span class="t-sep">–</span><input class="t-inp" id="h4e" value="22:00"></div>
-            <div class="day-row"><input type="checkbox" class="day-check" data-day="5" checked onchange="toggleDay(this)"><span class="day-lbl">Fri</span><input class="t-inp" id="h5s" value="08:00"><span class="t-sep">–</span><input class="t-inp" id="h5e" value="23:00"></div>
-            <div class="day-row"><input type="checkbox" class="day-check" data-day="6" checked onchange="toggleDay(this)"><span class="day-lbl">Sat</span><input class="t-inp" id="h6s" value="09:00"><span class="t-sep">–</span><input class="t-inp" id="h6e" value="23:00"></div>
-            <div class="day-row"><input type="checkbox" class="day-check" data-day="0" onchange="toggleDay(this)"><span class="day-lbl">Sun</span><input class="t-inp" id="h0s" placeholder="closed" disabled><span class="t-sep">–</span><input class="t-inp" id="h0e" placeholder="closed" disabled></div>
-          </div>
-          <div class="hours-hint" style="margin-top:6px">uncheck = closed that day</div>
-        </div>
-      </div>
-    </div>
-
-    <div style="display:flex;gap:8px">
-      <button class="btn-secondary" onclick="goStep(2)">← back</button>
-      <button class="btn-primary" onclick="savePlace()">save to my map ✓</button>
+      <button class="btn-primary" onclick="savePlace()">save to map ✓</button>
     </div>
   </div>
 </div>
 
 <!-- IMPORT PANEL -->
-<div id="import-panel" style="
-  display:none;position:fixed;inset:0;
-  background:var(--cream);z-index:1500;
-  flex-direction:column;overflow:hidden;
-">
-  <!-- Header -->
+<div id="import-panel">
   <div style="padding:12px 16px;border-bottom:1px solid var(--border);background:var(--white);display:flex;align-items:center;gap:10px;flex-shrink:0">
     <button onclick="closeImportPanel()" style="background:var(--cream2);border:1px solid var(--border);border-radius:var(--radius-pill);padding:5px 12px;font-size:12px;color:var(--ink2);cursor:pointer;font-family:inherit">← back</button>
     <div style="font-size:14px;font-weight:500;color:var(--ink);flex:1">import from Google Maps</div>
-    <div id="import-save-wrap" style="display:none">
-      <button onclick="saveImportedPlaces()" style="background:var(--red);color:var(--red-soft);border:none;border-radius:var(--radius-pill);padding:7px 16px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit">save all selected ✓</button>
-    </div>
+    <div id="import-save-wrap" style="display:none"><button onclick="saveImportedPlaces()" style="background:var(--red);color:var(--red-soft);border:none;border-radius:var(--radius-pill);padding:7px 16px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit">save selected ✓</button></div>
   </div>
-
-  <!-- Step indicator -->
   <div id="import-steps" style="display:flex;border-bottom:1px solid var(--border);background:var(--white);flex-shrink:0">
     <div id="istep-1" style="flex:1;padding:8px 0;text-align:center;font-size:11px;color:var(--red);border-bottom:2px solid var(--red);font-weight:500">1 · upload file</div>
     <div id="istep-2" style="flex:1;padding:8px 0;text-align:center;font-size:11px;color:var(--ink3);border-bottom:2px solid transparent">2 · review & tag</div>
   </div>
-
-  <!-- Step 1: Upload -->
   <div id="import-step1" style="flex:1;overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;gap:14px">
-    <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;flex-direction:column;gap:10px">
-      <div style="font-size:13px;font-weight:500;color:var(--ink)">how to get your file</div>
-      <div style="font-size:12px;color:var(--ink2);line-height:1.8">
-        1. go to <b>myaccount.google.com</b><br>
-        2. Data &amp; privacy → Download your data<br>
-        3. Deselect all → tick only <b>Maps</b><br>
-        4. Next → Create export<br>
-        5. Wait for Google's email (10–30 min)<br>
-        6. Download zip → open it → find <b>Takeout/Maps/Saved Places/</b><br>
-        7. Upload the <b>Saved Places.json</b> file below
-      </div>
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;font-size:12px;color:var(--ink2);line-height:1.8">
+      1. go to <b>myaccount.google.com</b> → Data &amp; privacy → Download your data<br>
+      2. Deselect all → tick only <b>Maps</b> → Create export<br>
+      3. Download zip → find <b>Takeout/Maps/Saved Places/</b><br>
+      4. Upload <b>Saved Places.json</b> below
     </div>
-
-    <div id="import-dropzone" onclick="document.getElementById('import-file-input').click()" style="
-      border:2px dashed var(--border);border-radius:var(--radius);
-      padding:32px 20px;text-align:center;cursor:pointer;
-      transition:all 0.2s;background:var(--white);
-    " ondragover="event.preventDefault();this.style.borderColor='var(--red)';this.style.background='var(--red-soft)'"
-       ondragleave="this.style.borderColor='var(--border)';this.style.background='var(--white)'"
-       ondrop="handleImportDrop(event)">
+    <div id="import-dropzone" onclick="document.getElementById('import-file-input').click()" style="border:2px dashed var(--border);border-radius:var(--radius);padding:32px 20px;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--white);" ondragover="event.preventDefault();this.style.borderColor='var(--red)';this.style.background='var(--red-soft)'" ondragleave="this.style.borderColor='var(--border)';this.style.background='var(--white)'" ondrop="handleImportDrop(event)">
       <div style="font-size:28px;margin-bottom:8px">📂</div>
       <div style="font-size:13px;font-weight:500;color:var(--ink);margin-bottom:4px">tap to choose file</div>
-      <div style="font-size:11px;color:var(--ink3)">or drag and drop your Saved Places.json here</div>
+      <div style="font-size:11px;color:var(--ink3)">or drag and drop Saved Places.json</div>
       <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="handleImportFile(this)"/>
     </div>
-
-    <div style="font-size:11px;color:var(--ink3);text-align:center;line-height:1.6">
-      file is read entirely in your browser — nothing is uploaded anywhere
-    </div>
+    <div style="font-size:11px;color:var(--ink3);text-align:center">file is read in your browser — nothing is uploaded</div>
   </div>
-
-  <!-- Step 2: Review & Tag -->
   <div id="import-step2" style="flex:1;overflow-y:auto;display:none;flex-direction:column">
-
-    <!-- Batch actions bar -->
     <div id="import-batch-bar" style="padding:10px 14px;border-bottom:1px solid var(--border);background:var(--white);flex-shrink:0">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
         <input type="checkbox" id="import-select-all" onchange="toggleSelectAll(this.checked)" style="width:15px;height:15px;accent-color:var(--red);cursor:pointer">
@@ -845,39 +602,29 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
         <div style="flex:1"></div>
         <div style="font-size:11px;color:var(--ink3)" id="import-total-count"></div>
       </div>
-      <!-- Batch category -->
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-        <span style="font-size:11px;color:var(--ink3);flex-shrink:0">set selected as:</span>
+        <span style="font-size:11px;color:var(--ink3)">set selected as:</span>
         <button onclick="batchSetCategory('eatery')" style="padding:4px 10px;border-radius:20px;font-size:11px;border:1px solid var(--border);background:var(--cream);color:var(--ink2);cursor:pointer;font-family:inherit">🍴 eatery</button>
         <button onclick="batchSetCategory('activity')" style="padding:4px 10px;border-radius:20px;font-size:11px;border:1px solid var(--border);background:var(--cream);color:var(--ink2);cursor:pointer;font-family:inherit">⭐ activity</button>
         <button onclick="batchSetCategory('event')" style="padding:4px 10px;border-radius:20px;font-size:11px;border:1px solid var(--border);background:var(--cream);color:var(--ink2);cursor:pointer;font-family:inherit">📅 event</button>
       </div>
     </div>
-
-    <!-- Place list -->
     <div id="import-place-list" style="flex:1;overflow-y:auto;padding:8px 14px;display:flex;flex-direction:column;gap:6px"></div>
   </div>
 </div>
 
 <!-- MANUAL LOCATION MODAL -->
-<div id="manual-loc-overlay" style="
-  display:none;position:fixed;inset:0;
-  background:rgba(42,31,20,0.55);z-index:2000;
-  align-items:center;justify-content:center;padding:20px;
-">
-  <div style="background:var(--cream);border:1px solid var(--border);border-radius:16px;width:100%;max-width:380px;box-shadow:0 12px 40px rgba(42,31,20,0.2);overflow:hidden">
+<div id="manual-loc-overlay">
+  <div style="background:var(--cream);border:1px solid var(--border);border-radius:16px;width:100%;max-width:380px;box-shadow:var(--shadow-lg);overflow:hidden">
     <div style="padding:14px 16px;border-bottom:1px solid var(--border);background:var(--white);display:flex;align-items:center;justify-content:space-between">
       <div style="font-size:14px;font-weight:500;color:var(--ink)">set your location</div>
-      <button onclick="document.getElementById('manual-loc-overlay').style.display='none'" style="background:var(--cream2);border:1px solid var(--border);border-radius:50%;width:26px;height:26px;cursor:pointer;font-size:13px;color:var(--ink2)">✕</button>
+      <button onclick="document.getElementById('manual-loc-overlay').classList.remove('open');document.getElementById('manual-loc-overlay').style.display=''" style="background:var(--cream2);border:1px solid var(--border);border-radius:50%;width:26px;height:26px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;color:var(--ink2)">✕</button>
     </div>
     <div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px">
-      <div style="font-size:12px;color:var(--ink2)">search for an area, neighbourhood, or landmark in Malaysia</div>
+      <div style="font-size:12px;color:var(--ink2)">search for an area or landmark</div>
       <div style="display:flex;gap:6px">
-        <input id="manual-loc-input" type="text" placeholder="e.g. Bangsar, KLCC, Taman Tun..."
-          style="flex:1;border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;font-size:13px;color:var(--ink);background:var(--white);outline:none;font-family:inherit"
-          onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--border)'"
-          onkeydown="if(event.key==='Enter')searchManualLocation()"/>
-        <button id="manual-loc-btn" onclick="searchManualLocation()" style="background:var(--red);color:var(--red-soft);border:none;border-radius:var(--radius-sm);padding:9px 14px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap">search</button>
+        <input id="manual-loc-input" type="text" placeholder="e.g. Bangsar, KLCC, Jakarta Selatan…" style="flex:1;border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;font-size:13px;color:var(--ink);background:var(--white);outline:none;font-family:inherit" onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--border)'" onkeydown="if(event.key==='Enter')searchManualLocation()"/>
+        <button id="manual-loc-btn" onclick="searchManualLocation()" style="background:var(--red);color:var(--red-soft);border:none;border-radius:var(--radius-sm);padding:9px 14px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit">search</button>
       </div>
       <div id="manual-loc-error" style="font-size:11px;color:#991B1B;min-height:14px"></div>
       <div id="manual-loc-results" style="display:none;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;max-height:200px;overflow-y:auto"></div>
@@ -886,74 +633,95 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
   </div>
 </div>
 
-<!-- SETUP / TOKEN MODAL -->
-<div id="token-overlay" style="
-  display:none;position:fixed;inset:0;
-  background:rgba(42,31,20,0.6);z-index:2000;
-  align-items:center;justify-content:center;padding:20px;
-">
-  <div style="
-    background:#f7f3ed;border:1px solid #e0d8cc;border-radius:16px;
-    width:100%;max-width:400px;box-shadow:0 12px 40px rgba(42,31,20,0.25);
-    overflow:hidden;
-  ">
+<!-- PROFILE MODAL (new / edit) -->
+<div id="profile-modal">
+  <div class="pm-box">
+    <div class="pm-head">
+      <div class="pm-title" id="pm-title">new map</div>
+      <button class="pm-close-btn" onclick="closeProfileModal()">✕</button>
+    </div>
+    <div class="pm-body">
+      <div>
+        <div class="pm-label">map name</div>
+        <input class="pm-input" id="pm-name" placeholder="e.g. Jakarta, Vietnam Trip, Must-Go KL…"/>
+      </div>
+      <div>
+        <div class="pm-label">file on GitHub <span style="text-transform:none;font-weight:400;font-size:10px;color:var(--ink3)">(auto-filled, you can edit)</span></div>
+        <input class="pm-input" id="pm-filename" placeholder="e.g. jakarta.json"/>
+      </div>
+      <div>
+        <div class="pm-label">import from Google Takeout <span style="text-transform:none;font-weight:400;font-size:10px;color:var(--ink3)">optional — skip to start empty</span></div>
+        <div class="pm-dropzone" id="pm-dropzone" onclick="document.getElementById('pm-file-input').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleProfileImportDrop(event)">
+          <div id="pm-dropzone-text" style="font-size:12px;color:var(--ink3);line-height:1.6">
+            <span style="font-size:22px">📂</span><br>
+            <b style="color:var(--ink)">Saved Places.json</b> from Google Takeout<br>
+            <span style="font-size:10px">tap to choose or drag here</span>
+          </div>
+          <input type="file" id="pm-file-input" accept=".json" style="display:none" onchange="handleProfileImportFile(this)"/>
+        </div>
+      </div>
+      <div class="pm-error" id="pm-error"></div>
+    </div>
+    <div class="pm-footer">
+      <button class="btn-secondary" onclick="closeProfileModal()">cancel</button>
+      <button class="btn-primary" onclick="saveNewProfile()">create map</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div id="delete-modal">
+  <div class="dm-box">
+    <div class="dm-head">
+      <div class="dm-title">remove this place?</div>
+      <div class="dm-sub">this can't be undone</div>
+    </div>
+    <div class="dm-body">
+      <div class="dm-place-name" id="dm-place-name"></div>
+      <div class="dm-note">wait 3 seconds — then the button activates so you can't accidentally tap it.</div>
+      <div class="dm-btns">
+        <button class="dm-cancel" onclick="closeDeleteModal()">keep it</button>
+        <button class="dm-delete" id="dm-delete-btn" disabled onclick="confirmDelete()">remove</button>
+      </div>
+      <div class="dm-countdown" id="dm-countdown"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SETUP / SETTINGS MODAL -->
+<div id="token-overlay">
+  <div style="background:#f7f3ed;border:1px solid #e0d8cc;border-radius:16px;width:100%;max-width:400px;box-shadow:0 12px 40px rgba(42,31,20,0.25);overflow:hidden">
     <div style="padding:16px 20px;border-bottom:1px solid #e0d8cc;background:#fff">
-      <div style="font-size:15px;font-weight:500;color:#2a1f14">connect to your map</div>
-      <div style="font-size:11px;color:#aaa;margin-top:2px">enter your github username to load your saved places on this device</div>
+      <div style="font-size:15px;font-weight:500;color:#2a1f14">connect to github</div>
+      <div style="font-size:11px;color:#aaa;margin-top:2px">enter your github username to load your maps</div>
     </div>
     <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px">
-
       <div style="background:#fff;border:1px solid #e0d8cc;border-radius:10px;padding:12px 14px;font-size:11px;color:#6b5c4e;line-height:1.8">
         <b style="color:#2a1f14">one-time setup:</b><br>
-        1. go to <b>github.com</b> → your profile → <b>Settings</b><br>
-        2. scroll to bottom → <b>Developer settings</b><br>
-        3. <b>Personal access tokens</b> → <b>Tokens (classic)</b><br>
-        4. <b>Generate new token</b> → tick <b>repo</b> → generate<br>
-        5. copy the token (shown once!) and paste below
+        1. github.com → Settings → Developer settings<br>
+        2. Personal access tokens → Tokens (classic)<br>
+        3. Generate → tick <b>repo</b> → generate<br>
+        4. Copy token → paste below
       </div>
-
       <div>
-        <div style="font-size:10px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">your github username</div>
-        <input id="setup-user" type="text" placeholder="e.g. elgzermaluda"
-          style="width:100%;border:1px solid #e0d8cc;border-radius:8px;padding:9px 12px;font-size:13px;color:#2a1f14;background:#fff;outline:none;font-family:inherit"
-          onfocus="this.style.borderColor='#7C3AED'" onblur="this.style.borderColor='#e0d8cc'"/>
+        <div style="font-size:10px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">github username</div>
+        <input id="setup-user" type="text" placeholder="your github username" style="width:100%;border:1px solid #e0d8cc;border-radius:8px;padding:9px 12px;font-size:13px;color:#2a1f14;background:#fff;outline:none;font-family:inherit" onfocus="this.style.borderColor='#993C1D'" onblur="this.style.borderColor='#e0d8cc'"/>
       </div>
-
       <div>
-        <div style="font-size:10px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">repo name <span style="font-weight:400;text-transform:none;font-size:10px;color:#bbb">(leave as "bahjalan" if that's what you named it)</span></div>
-        <input id="setup-repo" type="text" placeholder="bahjalan" value="bahjalan"
-          style="width:100%;border:1px solid #e0d8cc;border-radius:8px;padding:9px 12px;font-size:13px;color:#2a1f14;background:#fff;outline:none;font-family:inherit"
-          onfocus="this.style.borderColor='#7C3AED'" onblur="this.style.borderColor='#e0d8cc'"/>
+        <div style="font-size:10px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">repo name</div>
+        <input id="setup-repo" type="text" placeholder="bahjalan" value="bahjalan" style="width:100%;border:1px solid #e0d8cc;border-radius:8px;padding:9px 12px;font-size:13px;color:#2a1f14;background:#fff;outline:none;font-family:inherit" onfocus="this.style.borderColor='#993C1D'" onblur="this.style.borderColor='#e0d8cc'"/>
       </div>
-
       <div>
-        <div style="font-size:10px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">
-          github token
-          <span style="text-transform:none;font-weight:400;font-size:10px;color:#bbb;letter-spacing:0"> — only needed to add/remove places</span>
-        </div>
-        <input id="token-input" type="password" placeholder="ghp_... (leave blank to view only)"
-          style="width:100%;border:1px solid #e0d8cc;border-radius:8px;padding:9px 12px;font-size:13px;color:#2a1f14;background:#fff;outline:none;font-family:inherit"
-          onfocus="this.style.borderColor='#7C3AED'" onblur="this.style.borderColor='#e0d8cc'"/>
-        <div style="font-size:10px;color:#bbb;margin-top:3px">stored only in your browser — leave blank if you just want to browse</div>
+        <div style="font-size:10px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">github token <span style="text-transform:none;font-weight:400;font-size:10px;color:#bbb">— only needed to save/delete</span></div>
+        <input id="token-input" type="password" placeholder="ghp_… (blank = view only)" style="width:100%;border:1px solid #e0d8cc;border-radius:8px;padding:9px 12px;font-size:13px;color:#2a1f14;background:#fff;outline:none;font-family:inherit" onfocus="this.style.borderColor='#993C1D'" onblur="this.style.borderColor='#e0d8cc'"/>
+        <div style="font-size:10px;color:#bbb;margin-top:3px">stored only in your browser</div>
       </div>
-
       <div id="token-error" style="font-size:11px;color:#991B1B;min-height:14px;margin-top:-6px"></div>
-
       <div style="display:flex;gap:8px;margin-top:2px">
-        <button id="token-cancel-btn" style="
-          flex:1;padding:10px 0;border:1px solid #e0d8cc;border-radius:100px;
-          font-size:12px;color:#aaa;cursor:pointer;background:#f0ebe3;font-family:inherit;
-        ">cancel</button>
-        <button id="token-save-btn" style="
-          flex:2;padding:10px 0;border:none;border-radius:100px;
-          font-size:13px;font-weight:500;cursor:pointer;
-          background:#7C3AED;color:#fff;font-family:inherit;
-        ">connect &amp; save</button>
+        <button id="token-cancel-btn" style="flex:1;padding:10px 0;border:1px solid #e0d8cc;border-radius:100px;font-size:12px;color:#aaa;cursor:pointer;background:#f0ebe3;font-family:inherit">cancel</button>
+        <button id="token-save-btn" style="flex:2;padding:10px 0;border:none;border-radius:100px;font-size:13px;font-weight:500;cursor:pointer;background:#993C1D;color:#FAECE7;font-family:inherit">connect & save</button>
       </div>
-
-      <div style="text-align:center">
-        <span onclick="resetGitHubSettings()" style="font-size:10px;color:#bbb;cursor:pointer;text-decoration:underline">reset saved settings</span>
-      </div>
+      <div style="text-align:center"><span onclick="resetGitHubSettings()" style="font-size:10px;color:#bbb;cursor:pointer;text-decoration:underline">reset saved settings</span></div>
     </div>
   </div>
 </div>
@@ -961,26 +729,6 @@ input[type=range] { width: 100%; accent-color: var(--red); cursor: pointer; }
 <div id="toast"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-// Set floating button positions based on places strip height after load
-function initButtonPositions() {
-  const strip = document.getElementById('places-strip');
-  const evBtn = document.getElementById('events-toggle-btn');
-  const fBtn = document.getElementById('filter-toggle-btn');
-  if (!strip) return;
-  const h = strip.offsetHeight + 10;
-  if (evBtn) evBtn.style.bottom = h + 'px';
-  if (fBtn) fBtn.style.bottom = h + 'px';
-}
-window.addEventListener('load', () => setTimeout(initButtonPositions, 500));
-</script>
 <script src="app.js"></script>
-<script>
-  // fade out drag hint after 4 seconds
-  setTimeout(() => {
-    const hint = document.getElementById('drag-hint');
-    if (hint) { hint.style.opacity = '0'; setTimeout(() => hint.remove(), 1000); }
-  }, 4000);
-</script>
 </body>
 </html>
