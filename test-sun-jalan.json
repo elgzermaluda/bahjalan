@@ -1,3 +1,17 @@
 {
-  "places": []
+  "places": [
+    {
+      "id": "1778831894610",
+      "name": "Sunway Lagoon",
+      "lat": 3.0692108,
+      "lng": 101.6018768,
+      "mapsUrl": "https://www.google.com/maps/place/Sunway+Lagoon/@3.0692108,101.6018768,16z/data=!3m1!4b1!4m6!3m5!1s0x31cc4c88dded3125:0xdb654cc77af0cdbc!8m2!3d3.0693932!4d101.6067533!16zL20vMGQ1NXh0?entry=ttu&g_ep=EgoyMDI2MDUxMy4wIKXMDSoASAFQAw%3D%3D",
+      "category": "activity",
+      "tags": [
+        "theme park"
+      ],
+      "note": "",
+      "savedAt": "2026-05-15T07:58:14.610Z"
+    }
+  ]
 }
