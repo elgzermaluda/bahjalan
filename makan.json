@@ -1,0 +1,19 @@
+{
+  "places": [
+    {
+      "id": "1778831241377",
+      "name": "Ayam Gepuk Top Global Wangsa Delima",
+      "lat": 3.1937422,
+      "lng": 101.7328845,
+      "mapsUrl": "https://www.google.com/maps/place/Ayam+Gepuk+Top+Global+Wangsa+Delima/@3.1937422,101.7328845,16z/data=!4m10!1m2!2m1!1sayam+gepuk!3m6!1s0x31cc390049b24b49:0x7a44ad168f88a0c5!8m2!3d3.1994317!4d101.7462382!15sCgpheWFtIGdlcHVrWgwiCmF5YW0gZ2VwdWuSAQpyZXN0YXVyYW50mgFEQ2k5RFFVbFJRVU52WkVOb2RIbGpSamx2VDJ4YU5rNHhaekJhUmtwWldsaE5lRlZFWkVoamFURnBVVzVrVmsxSVl4QULgAQD6AQUIiwEQKA!16s%2Fg%2F11z118d4j1?entry=ttu&g_ep=EgoyMDI2MDUxMy4wIKXMDSoASAFQAw%3D%3D",
+      "category": "eatery",
+      "tags": [
+        "study-friendly",
+        "date spot",
+        "ayam gepuk"
+      ],
+      "note": "",
+      "savedAt": "2026-05-15T07:47:21.377Z"
+    }
+  ]
+}
