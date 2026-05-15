@@ -1,6 +1,19 @@
 {
   "places": [
     {
+      "id": "1778831308899",
+      "name": "Ole Ayam Gepuk Wangsa Delima",
+      "lat": 3.1992436,
+      "lng": 101.737281,
+      "mapsUrl": "https://www.google.com/maps/place/Ole+Ayam+Gepuk+Wangsa+Delima/@3.1992436,101.737281,16z/data=!4m10!1m2!2m1!1sayam+gepuk!3m6!1s0x31cc392f96788663:0xb610925f09346558!8m2!3d3.1992436!4d101.7455207!15sCgpheWFtIGdlcHVrWgwiCmF5YW0gZ2VwdWuSARRmYXN0X2Zvb2RfcmVzdGF1cmFudJoBRENpOURRVWxSUVVOdlpFTm9kSGxqUmpsdlQycEtNV1JxYUVkYU1HUjRXa2h3YWxGNlZtRk1XR2hzVFZkR2NGUXpZeEFC4AEA-gEECCwQSQ!16s%2Fg%2F11z4dqkg36?entry=ttu&g_ep=EgoyMDI2MDUxMy4wIKXMDSoASAFQAw%3D%3D",
+      "category": "eatery",
+      "tags": [
+        "cafe"
+      ],
+      "note": "",
+      "savedAt": "2026-05-15T07:48:28.899Z"
+    },
+    {
       "id": "1778831241377",
       "name": "Ayam Gepuk Top Global Wangsa Delima",
       "lat": 3.1937422,
