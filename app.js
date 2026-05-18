@@ -815,41 +815,27 @@ function parseImp(file){
         const rows = lines.slice(1).filter(l=>{const c=l.split(sep);return c[titleIdx]&&c[titleIdx].trim().length>0;});
         if(!rows.length){showToast('no places found in file');return;}
 
-        // show a loading screen immediately — DO NOT block UI with sync loop
-        showImpLoading(rows.length);
+        // Parse instantly — NO geocoding here, show list immediately
+        const parsed = rows.map((row,i)=>{
+          const cols = row.split(sep).map(c=>c.trim().replace(/^["']|["']$/g,''));
+          const name = (cols[titleIdx]||'').trim();
+          const url  = urlIdx>-1?(cols[urlIdx]||'').trim():'';
+          const note = noteIdx>-1?(cols[noteIdx]||'').trim():'';
+          // try coords in URL
+          let lat=null,lng=null;
+          const cm = url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+          if(cm){lat=parseFloat(cm[1]);lng=parseFloat(cm[2]);}
+          return {_id:'imp_'+i, name, lat, lng, mapsUrl:url, address: (!lat||!lng)?'\u26a0\ufe0f coords will be looked up on save':'', note, _noCoords:(!lat||!lng)};
+        }).filter(p=>p.name);
 
-        // process asynchronously so UI stays responsive
-        setTimeout(async()=>{
-          const parsed=[];
-          for(let ri=0;ri<rows.length;ri++){
-            const cols=rows[ri].split(sep).map(c=>c.trim().replace(/^["']|["']$/g,''));
-            const name=(cols[titleIdx]||'').trim();
-            const url=urlIdx>-1?(cols[urlIdx]||'').trim():'';
-            const note=noteIdx>-1?(cols[noteIdx]||'').trim():'';
-            if(!name) continue;
-            let lat=null,lng=null;
-            // try coords in URL
-            const cm=url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
-            if(cm){lat=parseFloat(cm[1]);lng=parseFloat(cm[2]);}
-            // geocode by name if no coords
-            if((!lat||!lng)&&name){
-              updateImpLoading(ri+1, rows.length, name);
-              try{
-                await new Promise(r=>setTimeout(r,1200));
-                const gr=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(name)}&format=json&limit=1`,{headers:{'Accept-Language':'en','User-Agent':'BahJalanMana/1.0'}});
-                const gd=await gr.json();
-                if(gd.length){lat=parseFloat(gd[0].lat);lng=parseFloat(gd[0].lon);}
-              }catch{}
-            }
-            parsed.push({_id:'imp_'+parsed.length,name,lat:lat||3.139,lng:lng||101.687,mapsUrl:url,address:(!lat||!lng)?'\u26a0 location estimated':'',note,_noCoords:(!lat||!lng)});
-          }
-          impPlaces=parsed;
-          impPlaces.forEach(p=>{impState[p._id]={selected:true,category:curMode==='makan'?'eatery':'activity',tags:[]};});
-          hideImpLoading(); renderImpList(); showImpStep(2);
-          document.getElementById('imptotcnt').textContent=`${impPlaces.length} places found`;
-          document.getElementById('impall').checked=true; updateImpCnt();
-          showToast(`${impPlaces.length} places loaded \u2713`);
-        },50);
+        if(!parsed.length){showToast('no places found in file');return;}
+        impPlaces=parsed;
+        impPlaces.forEach(p=>{impState[p._id]={selected:true,category:curMode==='makan'?'eatery':'activity',tags:[]};});
+        hideImpLoading(); renderImpList(); showImpStep(2);
+        document.getElementById('imptotcnt').textContent=`${impPlaces.length} places found`;
+        document.getElementById('impall').checked=true; updateImpCnt();
+        const needsGeo = parsed.filter(p=>p._noCoords).length;
+        showToast(`${impPlaces.length} places loaded ✓${needsGeo?' ('+needsGeo+' need location lookup)':''}`);
         return;
       }
 
@@ -932,15 +918,47 @@ function remImpTag(id,tag){impState[id].tags=impState[id].tags.filter(t=>t!==tag
 async function saveImported(){
   const toSave=impPlaces.filter(p=>impState[p._id].selected);
   if(!toSave.length){showToast('select at least one');return;}
-  showToast(`saving ${toSave.length} places…`);
-  const newP=toSave.map(p=>({id:Date.now()+'_'+Math.random().toString(36).slice(2,6),name:p.name,lat:p.lat,lng:p.lng,mapsUrl:p.mapsUrl||`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.name)}`,category:impState[p._id].category,tags:impState[p._id].tags,note:'',savedAt:new Date().toISOString()}));
-  const keys=new Set(places.map(p=>`${p.name}|${p.lat.toFixed(4)}|${p.lng.toFixed(4)}`));
-  const deduped=newP.filter(p=>!keys.has(`${p.name}|${p.lat.toFixed(4)}|${p.lng.toFixed(4)}`));
-  if(deduped.length<newP.length)showToast(`${newP.length-deduped.length} duplicates skipped`);
+  const newP=toSave.map(p=>({
+    id:Date.now()+'_'+Math.random().toString(36).slice(2,6),
+    name:p.name, lat:p.lat||0, lng:p.lng||0,
+    mapsUrl:p.mapsUrl||`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.name)}`,
+    category:impState[p._id].category, tags:impState[p._id].tags,
+    note:p.note||'', savedAt:new Date().toISOString(),
+    _needsGeo:(!p.lat||!p.lng)
+  }));
+  const keys=new Set(places.map(p=>p.name));
+  const deduped=newP.filter(p=>!keys.has(p.name));
+  if(deduped.length<newP.length) showToast(`${newP.length-deduped.length} duplicates skipped`);
   places=[...deduped,...places];
   const ok=await saveData();
-  if(ok){showToast(`${deduped.length} places saved ✓`);closeImp();renderPlaces();renderFpTags();}
-  else showToast('save failed — check ⚙');
+  if(!ok){places=places.filter(p=>!deduped.find(d=>d.id===p.id));return;}
+  closeImp(); renderPlaces(); renderFpTags();
+  const needsGeo=deduped.filter(p=>p._needsGeo);
+  if(needsGeo.length){
+    showToast(`saved ✓ — finding locations for ${needsGeo.length} place${needsGeo.length!==1?'s':''} in background…`,true);
+    geocodeInBackground(needsGeo);
+  }
+}
+
+async function geocodeInBackground(toGeocode){
+  let updated=0;
+  for(const p of toGeocode){
+    try{
+      await new Promise(r=>setTimeout(r,1300));
+      const r=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(p.name)}&format=json&limit=1`,{headers:{'Accept-Language':'en','User-Agent':'BahJalanMana/1.0'}});
+      const d=await r.json();
+      if(d.length){
+        const lat=parseFloat(d[0].lat),lng=parseFloat(d[0].lon);
+        const idx=places.findIndex(x=>x.id===p.id);
+        if(idx>-1){places[idx].lat=lat;places[idx].lng=lng;delete places[idx]._needsGeo;updated++;}
+      }
+    }catch{}
+  }
+  if(updated){
+    await saveData();
+    renderPlaces();renderFpTags();
+    showToast(`✓ locations found for ${updated} place${updated!==1?'s':''}`,true);
+  }
 }
 
 // ── EXPORT ────────────────────────────
