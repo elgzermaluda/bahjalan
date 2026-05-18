@@ -361,7 +361,6 @@ function askToken() {
 }
 
 async function saveData(retry=true) {
-  // Always read active file fresh from localStorage — never use a stale closure value
   const file = localStorage.getItem(K.active) || '';
   if(!file){showToast('no map selected — pick one first');return false;}
   let tok=getToken(); if(!tok){tok=await askToken();if(!tok)return false;}
@@ -369,12 +368,16 @@ async function saveData(retry=true) {
     const url=`https://api.github.com/repos/${getUser()}/${getRepo()}/contents/${file}`;
     const gr=await fetch(url,{headers:{'Authorization':`token ${tok}`,'Accept':'application/vnd.github.v3+json'}});
     if(gr.status===401){localStorage.removeItem(K.token);if(retry){tok=await askToken();if(!tok)return false;return saveData(false);}return false;}
-    let sha=null; if(gr.ok){const j=await gr.json();sha=j.sha;}
+    let sha=null;
+    if(gr.ok){const j=await gr.json();sha=j.sha;}
+    else if(gr.status!==404){showToast(`read error ${gr.status} — check ⚙`);return false;}
     const content=btoa(unescape(encodeURIComponent(JSON.stringify({places},null,2))));
     const pr=await fetch(url,{method:'PUT',headers:{'Authorization':`token ${tok}`,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify({message:'Update places',content,...(sha&&{sha})})});
-    if(!pr.ok){const e=await pr.json().catch(()=>{});showToast('save failed — '+(e?.message||pr.status));return false;}
+    if(!pr.ok){const e=await pr.json().catch(()=>{});showToast('❌ save failed — '+(e?.message||pr.status));return false;}
+    const prof=getProfiles().find(p=>p.file===file);
+    showToast(`✓ saved to "${prof?.name||file}" — ${places.length} places`);
     return true;
-  } catch {showToast('network error');return false;}
+  } catch(err){showToast('network error: '+err.message);return false;}
 }
 
 // ── USER LOCATION ─────────────────────
@@ -776,35 +779,47 @@ function handleImpFile(inp){const f=inp.files[0];if(f)parseImp(f);}
 function parseImp(file){
   const r=new FileReader(); r.onload=async e=>{
     try {
-      const raw = e.target.result;
-      // CSV from Google Maps list export
-      if(file.name.endsWith('.csv') || raw.trimStart().startsWith('Title')) {
+      // Strip BOM and normalize line endings
+      let raw = e.target.result.replace(/^\uFEFF/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim();
+
+      // Detect tab-separated by looking at first line
+      const firstLine = raw.split('\n')[0];
+      const isTSV = firstLine.includes('\t');
+      const hasTitle = firstLine.toLowerCase().includes('title');
+
+      if(isTSV && hasTitle) {
         const lines = raw.split('\n').filter(l=>l.trim());
-        const header = lines[0].split('\t').map(h=>h.trim());
-        const titleIdx = header.indexOf('Title');
-        const urlIdx   = header.indexOf('URL');
-        const noteIdx  = header.indexOf('Note');
-        if(titleIdx===-1){showToast('CSV format not recognised');return;}
+        // case-insensitive header matching
+        const header = lines[0].split('\t').map(h=>h.trim().toLowerCase());
+        const titleIdx = header.findIndex(h=>h==='title');
+        const urlIdx   = header.findIndex(h=>h==='url');
+        const noteIdx  = header.findIndex(h=>h==='note');
+        if(titleIdx===-1){showToast('CSV: no Title column found');return;}
         const rows = lines.slice(1).filter(l=>l.trim());
         const parsed = [];
+        showToast(`reading ${rows.length} rows…`);
         for(const row of rows){
           const cols = row.split('\t');
           const name = (cols[titleIdx]||'').trim();
-          const url  = (cols[urlIdx]||'').trim();
-          const note = (cols[noteIdx]||'').trim();
+          const url  = urlIdx>-1?(cols[urlIdx]||'').trim():'';
+          const note = noteIdx>-1?(cols[noteIdx]||'').trim():'';
           if(!name) continue;
-          // try to get coords from URL
           let lat=null,lng=null;
+          // extract coords embedded in Maps URL
           const cm = url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
           if(cm){lat=parseFloat(cm[1]);lng=parseFloat(cm[2]);}
           // fallback: geocode by name
           if(!lat&&name){
-            try{const gr=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(name)}&format=json&limit=1`,{headers:{'Accept-Language':'en','User-Agent':'BahJalanMana/1.0'}});const gd=await gr.json();if(gd.length){lat=parseFloat(gd[0].lat);lng=parseFloat(gd[0].lon);}}catch{}
+            try{
+              const gr=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(name)}&format=json&limit=1`,{headers:{'Accept-Language':'en','User-Agent':'BahJalanMana/1.0'}});
+              const gd=await gr.json();
+              if(gd.length){lat=parseFloat(gd[0].lat);lng=parseFloat(gd[0].lon);}
+            }catch{}
           }
           if(!lat||!lng||isNaN(lat)||isNaN(lng)) continue;
           parsed.push({_id:'imp_'+parsed.length, name, lat, lng, mapsUrl:url, address:'', note});
         }
-        if(!parsed.length){showToast('no places found in CSV');return;}
+        if(!parsed.length){showToast('no places with coords found in CSV');return;}
         impPlaces=parsed;
         impPlaces.forEach(p=>{impState[p._id]={selected:true,category:curMode==='makan'?'eatery':'activity',tags:[]};});
         renderImpList(); showImpStep(2);
@@ -813,17 +828,22 @@ function parseImp(file){
         showToast(`${impPlaces.length} places loaded ✓`);
         return;
       }
+
       // JSON from Google Takeout
       const rawJ=JSON.parse(raw);
       const feats=rawJ.features||(Array.isArray(rawJ)?rawJ:[]);
-      impPlaces=feats.filter(f=>f.geometry&&f.geometry.coordinates).map((f,i)=>{const p=f.properties||{},c=f.geometry.coordinates;const name=(p['Title']||p['name']||(p['Location']&&p['Location']['Address'])||'Unnamed').trim();return{_id:'imp_'+i,name,lat:parseFloat(c[1]),lng:parseFloat(c[0]),mapsUrl:p['Google Maps URL']||'',address:p['Location']?.Address||''};}).filter(p=>p.lat&&p.lng&&!isNaN(p.lat)&&!isNaN(p.lng));
-      if(!impPlaces.length){showToast('no places found');return;}
+      impPlaces=feats.filter(f=>f.geometry&&f.geometry.coordinates).map((f,i)=>{
+        const p=f.properties||{},c=f.geometry.coordinates;
+        const name=(p['Title']||p['name']||(p['Location']&&p['Location']['Address'])||'Unnamed').trim();
+        return{_id:'imp_'+i,name,lat:parseFloat(c[1]),lng:parseFloat(c[0]),mapsUrl:p['Google Maps URL']||'',address:p['Location']?.Address||''};
+      }).filter(p=>p.lat&&p.lng&&!isNaN(p.lat)&&!isNaN(p.lng));
+      if(!impPlaces.length){showToast('no places found in JSON');return;}
       impPlaces.forEach(p=>{impState[p._id]={selected:true,category:curMode==='makan'?'eatery':'activity',tags:[]};});
       renderImpList(); showImpStep(2);
       document.getElementById('imptotcnt').textContent=`${impPlaces.length} places found`;
       document.getElementById('impall').checked=true; updateImpCnt();
       showToast(`${impPlaces.length} places loaded ✓`);
-    } catch(err){console.error(err);showToast("couldn't read file");}
+    } catch(err){console.error(err);showToast("couldn't read file: "+err.message);}
   };r.readAsText(file);
 }
 
