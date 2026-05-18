@@ -1,17 +1,18 @@
 {
   "places": [
     {
-      "id": "1779072472615",
-      "name": "Sunway Lagoon Theme Park",
-      "lat": 3.0690075,
-      "lng": 101.6041874,
-      "mapsUrl": "https://www.google.com/maps/place/Sunway+Lagoon+Theme+Park,+Bandar+Sunway,+47500+Subang+Jaya,+Selangor,+Malaysia/@3.0690075,101.6041874,17z/data=!3m1!4b1!4m6!3m5!1s0x31cc4c8661cd6bf7:0x62208af8c3269ba5!8m2!3d3.0690075!4d101.6067623!16s%2Fg%2F12hmlbcs2?entry=ttu&g_ep=EgoyMDI2MDUxMy4wIKXMDSoASAFQAw%3D%3D",
+      "id": "1779072622050",
+      "name": "Noto Cafe & Bakery",
+      "lat": 3.0651283,
+      "lng": 101.57726,
+      "mapsUrl": "https://www.google.com/maps/place/Noto+Cafe+%26+Bakery/@3.0651283,101.57726,17z/data=!3m1!4b1!4m6!3m5!1s0x4b9c2ab503ee0ab1:0xad65f875906c145b!8m2!3d3.0651283!4d101.5798349!16s%2Fg%2F11vxqp32s1?entry=ttu&g_ep=EgoyMDI2MDUxMy4wIKXMDSoASAFQAw%3D%3D",
       "category": "eatery",
       "tags": [
-        "cafe"
+        "cafe",
+        "study-friendly"
       ],
       "note": "",
-      "savedAt": "2026-05-18T02:47:52.615Z"
+      "savedAt": "2026-05-18T02:50:22.050Z"
     }
   ]
 }
