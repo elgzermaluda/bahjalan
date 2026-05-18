@@ -219,6 +219,7 @@ input[type=range]{width:100%;accent-color:var(--A);cursor:pointer;}
 .mbadge.makan{background:#FEF1EC;color:#993C1D;border:1px solid #F5C4B3;}
 .mbadge.jalan{background:#F2EFFE;color:#5B21B6;border:1px solid #C4B5FD;}
 /* toast */
+#prog-bar{position:fixed;top:0;left:0;height:3px;width:0%;background:var(--A);z-index:9999;opacity:0;transition:width 8s cubic-bezier(.1,0,.2,1),opacity .3s;}
 #toast{position:fixed;bottom:74px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--white);padding:9px 18px;border-radius:var(--radius-pill);font-size:12px;z-index:4000;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 /* overlays */
@@ -259,6 +260,7 @@ input[type=range]{width:100%;accent-color:var(--A);cursor:pointer;}
   <button class="tbtn" onclick="exportList()" title="copy list">📋</button>
   <button class="tbtn" onclick="openSettings()" title="settings">⚙</button>
 </div>
+<div id="prog-bar"></div>
 <div id="map"></div>
 
 <!-- Profile dropdown -->

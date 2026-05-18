@@ -375,7 +375,7 @@ async function saveData(retry=true) {
     const pr=await fetch(url,{method:'PUT',headers:{'Authorization':`token ${tok}`,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify({message:'Update places',content,...(sha&&{sha})})});
     if(!pr.ok){const e=await pr.json().catch(()=>{});showToast('❌ save failed — '+(e?.message||pr.status));return false;}
     const prof=getProfiles().find(p=>p.file===file);
-    showToast(`✓ saved to "${prof?.name||file}" — ${places.length} places`);
+    showToast(`✓ saved to "${prof?.name||file}" — ${places.length} places`,true);
     return true;
   } catch(err){showToast('network error: '+err.message);return false;}
 }
@@ -581,10 +581,14 @@ async function savePlace() {
   }
   const place={id:editId||Date.now().toString(),name,lat:exLat,lng:exLng,mapsUrl:exUrl,category,tags,note,...(category==='event'&&{eventType:evType,eventDay:evDay,eventDateStart:evD1,eventDateEnd:evD2,eventStart:evT1,eventEnd:evT2}),savedAt:new Date().toISOString()};
   if(editId) places=places.map(p=>p.id===editId?place:p); else places.unshift(place);
-  showToast('saving…');
+  const saveBtn=document.querySelector('#step2 .bpri');
+  if(saveBtn){saveBtn.disabled=true;saveBtn.textContent='saving…';saveBtn.style.opacity='.6';}
+  startProgress();
   const ok=await saveData();
-  if(ok){showToast(`"${name}" saved ✓`);closeSavePanel();renderPlaces();renderFpTags();}
-  else{if(!editId)places=places.filter(p=>p.id!==place.id);showToast('save failed — check ⚙');}
+  stopProgress(ok);
+  if(saveBtn){saveBtn.disabled=false;saveBtn.textContent='save to map ✓';saveBtn.style.opacity='';}
+  if(ok){closeSavePanel();renderPlaces();renderFpTags();}
+  else{if(!editId)places=places.filter(p=>p.id!==place.id);}
 }
 
 // ── DELETE MODAL ──────────────────────
@@ -782,7 +786,7 @@ function parseImp(file){
       // Strip BOM and normalize line endings
       let raw = e.target.result.replace(/^\uFEFF/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim();
 
-      // Detect tab-separated by looking at first line
+      // Detect tab-separated FIRST (before any JSON.parse attempt)
       const firstLine = raw.split('\n')[0];
       const isTSV = firstLine.includes('\t');
       const hasTitle = firstLine.toLowerCase().includes('title');
@@ -829,8 +833,9 @@ function parseImp(file){
         return;
       }
 
-      // JSON from Google Takeout
-      const rawJ=JSON.parse(raw);
+      // Only try JSON if it didn't look like TSV
+      let rawJ;
+      try { rawJ=JSON.parse(raw); } catch(je) { showToast("couldn't read file — wrong format?"); return; }
       const feats=rawJ.features||(Array.isArray(rawJ)?rawJ:[]);
       impPlaces=feats.filter(f=>f.geometry&&f.geometry.coordinates).map((f,i)=>{
         const p=f.properties||{},c=f.geometry.coordinates;
@@ -924,5 +929,24 @@ function toggleMobFp(){const p=document.getElementById('fp'),b=document.getEleme
 function closeMobFp(){document.getElementById('fp').classList.remove('mob-open');document.getElementById('fback').classList.remove('show');}
 
 // ── TOAST ─────────────────────────────
+// ── PROGRESS BAR ──────────────────────
+let progressTimer;
+function startProgress(){
+  const bar=document.getElementById('prog-bar');
+  if(!bar)return;
+  bar.style.transition='none';bar.style.width='0%';bar.style.opacity='1';
+  requestAnimationFrame(()=>{
+    bar.style.transition='width 8s cubic-bezier(.1,0,.2,1)';
+    bar.style.width='85%';
+  });
+}
+function stopProgress(ok){
+  const bar=document.getElementById('prog-bar');
+  if(!bar)return;
+  bar.style.transition='width .2s ease';
+  bar.style.width='100%';
+  setTimeout(()=>{bar.style.opacity='0';setTimeout(()=>{bar.style.width='0%';},300);},400);
+}
+
 let toastT;
-function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2800);}
+function showToast(msg,long=false){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),long?6000:2800);}
