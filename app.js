@@ -361,7 +361,9 @@ function askToken() {
 }
 
 async function saveData(retry=true) {
-  const file=getActive(); if(!file){showToast('pick a map first');return false;}
+  // Always read active file fresh from localStorage — never use a stale closure value
+  const file = localStorage.getItem(K.active) || '';
+  if(!file){showToast('no map selected — pick one first');return false;}
   let tok=getToken(); if(!tok){tok=await askToken();if(!tok)return false;}
   try {
     const url=`https://api.github.com/repos/${getUser()}/${getRepo()}/contents/${file}`;
@@ -639,7 +641,7 @@ async function renderPlaces() {
     lines.push(cas,ln);
     if(showLabels){
       const mid=coords[Math.floor(coords.length/2)];
-      const li=L.divIcon({className:'',html:`<div style="pointer-events:none"><div style="background:#fff;border:2px solid ${lineColor};border-radius:6px;padding:4px 9px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:#1a1a1a;white-space:nowrap;box-shadow:0 2px 10px rgba(0,0,0,.22);text-align:center;line-height:1.25"><div style="color:${lineColor}">${rd.minutes} min</div><div style="font-size:9px;font-weight:500;color:#666">${p.dist.toFixed(1)} km</div></div></div>`,iconAnchor:[35,46]});
+      const li=L.divIcon({className:'',html:`<div style="pointer-events:none;display:inline-block"><div style="background:#fff;border:2px solid ${lineColor};border-radius:8px;padding:5px 10px;font-family:'DM Sans',sans-serif;white-space:nowrap;box-shadow:0 2px 10px rgba(0,0,0,.22);text-align:center;line-height:1.3"><div style="font-size:12px;font-weight:700;color:${lineColor}">${rd.minutes} min</div><div style="font-size:10px;font-weight:500;color:#888">${p.dist.toFixed(1)} km</div></div></div>`,iconSize:[80,42],iconAnchor:[40,42]});
       lines.push(L.marker(mid,{icon:li,interactive:false}).addTo(map));
     }
   }
@@ -772,10 +774,48 @@ function handleImpDrop(e){e.preventDefault();document.getElementById('impdrop').
 function handleImpFile(inp){const f=inp.files[0];if(f)parseImp(f);}
 
 function parseImp(file){
-  const r=new FileReader(); r.onload=e=>{
+  const r=new FileReader(); r.onload=async e=>{
     try {
-      const raw=JSON.parse(e.target.result);
-      const feats=raw.features||(Array.isArray(raw)?raw:[]);
+      const raw = e.target.result;
+      // CSV from Google Maps list export
+      if(file.name.endsWith('.csv') || raw.trimStart().startsWith('Title')) {
+        const lines = raw.split('\n').filter(l=>l.trim());
+        const header = lines[0].split('\t').map(h=>h.trim());
+        const titleIdx = header.indexOf('Title');
+        const urlIdx   = header.indexOf('URL');
+        const noteIdx  = header.indexOf('Note');
+        if(titleIdx===-1){showToast('CSV format not recognised');return;}
+        const rows = lines.slice(1).filter(l=>l.trim());
+        const parsed = [];
+        for(const row of rows){
+          const cols = row.split('\t');
+          const name = (cols[titleIdx]||'').trim();
+          const url  = (cols[urlIdx]||'').trim();
+          const note = (cols[noteIdx]||'').trim();
+          if(!name) continue;
+          // try to get coords from URL
+          let lat=null,lng=null;
+          const cm = url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+          if(cm){lat=parseFloat(cm[1]);lng=parseFloat(cm[2]);}
+          // fallback: geocode by name
+          if(!lat&&name){
+            try{const gr=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(name)}&format=json&limit=1`,{headers:{'Accept-Language':'en','User-Agent':'BahJalanMana/1.0'}});const gd=await gr.json();if(gd.length){lat=parseFloat(gd[0].lat);lng=parseFloat(gd[0].lon);}}catch{}
+          }
+          if(!lat||!lng||isNaN(lat)||isNaN(lng)) continue;
+          parsed.push({_id:'imp_'+parsed.length, name, lat, lng, mapsUrl:url, address:'', note});
+        }
+        if(!parsed.length){showToast('no places found in CSV');return;}
+        impPlaces=parsed;
+        impPlaces.forEach(p=>{impState[p._id]={selected:true,category:curMode==='makan'?'eatery':'activity',tags:[]};});
+        renderImpList(); showImpStep(2);
+        document.getElementById('imptotcnt').textContent=`${impPlaces.length} places found`;
+        document.getElementById('impall').checked=true; updateImpCnt();
+        showToast(`${impPlaces.length} places loaded ✓`);
+        return;
+      }
+      // JSON from Google Takeout
+      const rawJ=JSON.parse(raw);
+      const feats=rawJ.features||(Array.isArray(rawJ)?rawJ:[]);
       impPlaces=feats.filter(f=>f.geometry&&f.geometry.coordinates).map((f,i)=>{const p=f.properties||{},c=f.geometry.coordinates;const name=(p['Title']||p['name']||(p['Location']&&p['Location']['Address'])||'Unnamed').trim();return{_id:'imp_'+i,name,lat:parseFloat(c[1]),lng:parseFloat(c[0]),mapsUrl:p['Google Maps URL']||'',address:p['Location']?.Address||''};}).filter(p=>p.lat&&p.lng&&!isNaN(p.lat)&&!isNaN(p.lng));
       if(!impPlaces.length){showToast('no places found');return;}
       impPlaces.forEach(p=>{impState[p._id]={selected:true,category:curMode==='makan'?'eatery':'activity',tags:[]};});
@@ -783,7 +823,7 @@ function parseImp(file){
       document.getElementById('imptotcnt').textContent=`${impPlaces.length} places found`;
       document.getElementById('impall').checked=true; updateImpCnt();
       showToast(`${impPlaces.length} places loaded ✓`);
-    } catch {showToast("couldn't read file");}
+    } catch(err){console.error(err);showToast("couldn't read file");}
   };r.readAsText(file);
 }
 

@@ -441,8 +441,8 @@ input[type=range]{width:100%;accent-color:var(--A);cursor:pointer;}
     <div id="impdrop" onclick="document.getElementById('impfile').click()" style="border:2px dashed var(--border);border-radius:var(--radius);padding:32px 20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--white);" ondragover="event.preventDefault();this.style.borderColor='var(--A)';this.style.background='var(--As)'" ondragleave="this.style.borderColor='var(--border)';this.style.background='var(--white)'" ondrop="handleImpDrop(event)">
       <div style="font-size:28px;margin-bottom:8px">📂</div>
       <div style="font-size:13px;font-weight:500;color:var(--ink);margin-bottom:4px">tap to choose file</div>
-      <div style="font-size:11px;color:var(--ink3)">or drag and drop Saved Places.json</div>
-      <input type="file" id="impfile" accept=".json" style="display:none" onchange="handleImpFile(this)"/>
+      <div style="font-size:11px;color:var(--ink3)">or drag and drop Saved Places.json or Google Maps .csv</div>
+      <input type="file" id="impfile" accept=".json,.csv" style="display:none" onchange="handleImpFile(this)"/>
     </div>
     <div style="font-size:11px;color:var(--ink3);text-align:center">file is read in your browser — nothing uploaded</div>
   </div>
