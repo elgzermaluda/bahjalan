@@ -32,6 +32,9 @@ let profEditFile = null; // when editing existing profile name
 const routeCache = {};
 
 // ── INIT ──────────────────────────────
+// inject spin keyframe
+(function(){const s=document.createElement('style');s.textContent='@keyframes spin{to{transform:rotate(360deg)}}';document.head.appendChild(s);})();
+
 window.onload = async () => {
   curMode = getMode();
   applyMode(curMode, false);
@@ -313,13 +316,20 @@ async function migrateOldData() {
 // ── GITHUB STORAGE ────────────────────
 async function loadData(file) {
   if (!file||!getUser()) { places=[]; return; }
-  showToast('loading…');
+  startProgress();
+  showStripLoading('loading your places…');
   try {
     const r = await fetch(`https://raw.githubusercontent.com/${getUser()}/${getRepo()}/main/${file}?t=${Date.now()}`);
-    if (!r.ok) { showToast(`load failed ${r.status}`); places=[]; return; }
+    if (!r.ok) { stopProgress(false); showToast(`load failed ${r.status}`); places=[]; renderStrip([],new Set()); return; }
     const d = await r.json(); places=d.places||[];
-    showToast(`${places.length} place${places.length!==1?'s':''} loaded ✓`);
-  } catch { showToast('network error'); places=[]; }
+    stopProgress(true);
+    showToast(`${places.length} place${places.length!==1?'s':''} loaded ✓`, true);
+  } catch(e) { stopProgress(false); showToast('network error: '+e.message); places=[]; renderStrip([],new Set()); }
+}
+
+function showStripLoading(msg) {
+  const list = document.getElementById('splist');
+  if(list) list.innerHTML = `<div class="pcard empty" style="min-width:220px;display:flex;align-items:center;gap:8px"><div style="width:16px;height:16px;border-radius:50%;border:2px solid var(--A);border-top-color:transparent;animation:spin .7s linear infinite;flex-shrink:0"></div>${msg}</div>`;
 }
 
 function showSetup() {
@@ -581,14 +591,17 @@ async function savePlace() {
   }
   const place={id:editId||Date.now().toString(),name,lat:exLat,lng:exLng,mapsUrl:exUrl,category,tags,note,...(category==='event'&&{eventType:evType,eventDay:evDay,eventDateStart:evD1,eventDateEnd:evD2,eventStart:evT1,eventEnd:evT2}),savedAt:new Date().toISOString()};
   if(editId) places=places.map(p=>p.id===editId?place:p); else places.unshift(place);
+  // show save queue — all pending place names
+  const pending = places.map(p=>p.name);
+  showSaveQueue(pending, null);
   const saveBtn=document.querySelector('#step2 .bpri');
   if(saveBtn){saveBtn.disabled=true;saveBtn.textContent='saving…';saveBtn.style.opacity='.6';}
   startProgress();
   const ok=await saveData();
   stopProgress(ok);
   if(saveBtn){saveBtn.disabled=false;saveBtn.textContent='save to map ✓';saveBtn.style.opacity='';}
-  if(ok){closeSavePanel();renderPlaces();renderFpTags();}
-  else{if(!editId)places=places.filter(p=>p.id!==place.id);}
+  if(ok){showSaveQueue(pending, true);closeSavePanel();renderPlaces();renderFpTags();}
+  else{hideSaveQueue();if(!editId)places=places.filter(p=>p.id!==place.id);}
 }
 
 // ── DELETE MODAL ──────────────────────
@@ -786,44 +799,50 @@ function parseImp(file){
       // Strip BOM and normalize line endings
       let raw = e.target.result.replace(/^\uFEFF/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim();
 
-      // Detect tab-separated FIRST (before any JSON.parse attempt)
+      // Detect CSV/TSV FIRST (before any JSON.parse attempt)
       const firstLine = raw.split('\n')[0];
-      const isTSV = firstLine.includes('\t');
-      const hasTitle = firstLine.toLowerCase().includes('title');
+      // Support both tab-separated and comma-separated
+      const sep = firstLine.includes('\t') ? '\t' : ',';
+      const hasTitle = firstLine.toLowerCase().replace(/["\']/g,'').includes('title');
 
-      if(isTSV && hasTitle) {
+      if(hasTitle) {
         const lines = raw.split('\n').filter(l=>l.trim());
-        // case-insensitive header matching
-        const header = lines[0].split('\t').map(h=>h.trim().toLowerCase());
-        const titleIdx = header.findIndex(h=>h==='title');
-        const urlIdx   = header.findIndex(h=>h==='url');
-        const noteIdx  = header.findIndex(h=>h==='note');
-        if(titleIdx===-1){showToast('CSV: no Title column found');return;}
-        const rows = lines.slice(1).filter(l=>l.trim());
+        // case-insensitive, strip quotes from headers
+        const header = lines[0].split(sep).map(h=>h.trim().replace(/^["\']|["\']$/g,'').toLowerCase());
+        const titleIdx = header.findIndex(h=>h==='title'||h==='name'||h==='place name');
+        const urlIdx   = header.findIndex(h=>h==='url'||h==='link'||h==='google maps url');
+        const noteIdx  = header.findIndex(h=>h==='note'||h==='notes'||h==='comment');
+        if(titleIdx===-1){showToast('CSV: no Title/Name column found — check your file');return;}
+        // filter blank rows
+        const rows = lines.slice(1).filter(l=>{const cols=l.split(sep);return cols[titleIdx]&&cols[titleIdx].trim().replace(/^["'\u2019]|["'\u2019]$/g,'').length>0;});
         const parsed = [];
-        showToast(`reading ${rows.length} rows…`);
-        for(const row of rows){
-          const cols = row.split('\t');
+        showToast(`found ${rows.length} places \u2014 looking up locations\u2026`);
+        for(let ri=0;ri<rows.length;ri++){
+          const row=rows[ri];
+          const cols = row.split(sep).map(c=>c.trim().replace(/^["'\u2019]|["'\u2019]$/g,''));
           const name = (cols[titleIdx]||'').trim();
           const url  = urlIdx>-1?(cols[urlIdx]||'').trim():'';
           const note = noteIdx>-1?(cols[noteIdx]||'').trim():'';
           if(!name) continue;
           let lat=null,lng=null;
-          // extract coords embedded in Maps URL
           const cm = url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
           if(cm){lat=parseFloat(cm[1]);lng=parseFloat(cm[2]);}
-          // fallback: geocode by name
-          if(!lat&&name){
+          if((!lat||!lng)&&name){
+            showToast(`looking up ${ri+1}/${rows.length}: ${name}`);
             try{
+              await new Promise(r=>setTimeout(r,1100));
               const gr=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(name)}&format=json&limit=1`,{headers:{'Accept-Language':'en','User-Agent':'BahJalanMana/1.0'}});
               const gd=await gr.json();
               if(gd.length){lat=parseFloat(gd[0].lat);lng=parseFloat(gd[0].lon);}
             }catch{}
           }
-          if(!lat||!lng||isNaN(lat)||isNaN(lng)) continue;
-          parsed.push({_id:'imp_'+parsed.length, name, lat, lng, mapsUrl:url, address:'', note});
+          if(!lat||!lng||isNaN(lat)||isNaN(lng)){
+            parsed.push({_id:'imp_'+parsed.length,name,lat:3.139,lng:101.687,mapsUrl:url,address:'\u26a0\ufe0f location not found',note,_noCoords:true});
+            continue;
+          }
+          parsed.push({_id:'imp_'+parsed.length,name,lat,lng,mapsUrl:url,address:'',note});
         }
-        if(!parsed.length){showToast('no places with coords found in CSV');return;}
+        if(!parsed.length){showToast('no places found \u2014 check your file');return;}
         impPlaces=parsed;
         impPlaces.forEach(p=>{impState[p._id]={selected:true,category:curMode==='makan'?'eatery':'activity',tags:[]};});
         renderImpList(); showImpStep(2);
@@ -947,6 +966,20 @@ function stopProgress(ok){
   bar.style.width='100%';
   setTimeout(()=>{bar.style.opacity='0';setTimeout(()=>{bar.style.width='0%';},300);},400);
 }
+
+// ── SAVE QUEUE BOX ────────────────────
+function showSaveQueue(names, done) {
+  let box = document.getElementById('save-queue');
+  if(!box){ box=document.createElement('div'); box.id='save-queue'; box.style.cssText='position:fixed;bottom:80px;right:14px;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;box-shadow:var(--shadow-lg);z-index:3000;min-width:220px;max-width:280px;font-family:'DM Sans',sans-serif;transition:opacity .3s'; document.body.appendChild(box); }
+  box.style.opacity='1'; box.style.pointerEvents='auto';
+  const icon = done===null ? `<div style="width:14px;height:14px;border-radius:50%;border:2px solid var(--A);border-top-color:transparent;animation:spin .7s linear infinite;flex-shrink:0"></div>` : done ? `<span style="color:var(--green);font-size:14px">✓</span>` : `<span style="color:#DC2626;font-size:14px">✕</span>`;
+  const label = done===null ? `saving ${names.length} place${names.length!==1?'s':''}…` : done ? `saved ✓` : `save failed`;
+  const nameList = names.slice(0,5).map((n,i)=>`<div style="display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid var(--border);font-size:11px;color:var(--ink2)">${done===null&&i===0?'<span style="color:var(--A)">&#9656;</span>':'<span style="color:var(--ink3)">&middot;</span>'} <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${n}</span></div>`).join('');
+  const more = names.length>5 ? `<div style="font-size:10px;color:var(--ink3);padding-top:4px">+${names.length-5} more</div>` : '';
+  box.innerHTML = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">${icon}<span style="font-size:12px;font-weight:600;color:var(--ink)">${label}</span></div>${nameList}${more}`;
+  if(done!==null) setTimeout(hideSaveQueue, done?3000:5000);
+}
+function hideSaveQueue(){ const b=document.getElementById('save-queue'); if(b){b.style.opacity='0';setTimeout(()=>b.remove(),300);} }
 
 let toastT;
 function showToast(msg,long=false){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),long?6000:2800);}
