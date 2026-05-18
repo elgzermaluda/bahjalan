@@ -1,6 +1,19 @@
 {
   "places": [
     {
+      "id": "1779071907303",
+      "name": "Sunway Lagoon Theme Park",
+      "lat": 3.0690075,
+      "lng": 101.6041874,
+      "mapsUrl": "https://www.google.com/maps/place/Sunway+Lagoon+Theme+Park,+Bandar+Sunway,+47500+Subang+Jaya,+Selangor,+Malaysia/@3.0690075,101.6041874,17z/data=!3m1!4b1!4m6!3m5!1s0x31cc4c8661cd6bf7:0x62208af8c3269ba5!8m2!3d3.0690075!4d101.6067623!16s%2Fg%2F12hmlbcs2?entry=ttu&g_ep=EgoyMDI2MDUxMy4wIKXMDSoASAFQAw%3D%3D",
+      "category": "eatery",
+      "tags": [
+        "cafe"
+      ],
+      "note": "",
+      "savedAt": "2026-05-18T02:38:27.303Z"
+    },
+    {
       "id": "1778831308899",
       "name": "Ole Ayam Gepuk Wangsa Delima",
       "lat": 3.1992436,
