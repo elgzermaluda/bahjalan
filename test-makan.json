@@ -1,18 +1,17 @@
 {
   "places": [
     {
-      "id": "1779078370697",
+      "id": "1779078402214",
       "name": "The Messengers by JWC",
       "lat": 3.1261403,
       "lng": 101.5633011,
       "mapsUrl": "https://www.google.com/maps/place/The+Messengers+by+JWC/@3.1261403,101.5633011,12z/data=!4m7!3m6!1s0x31cc3700fb75febb:0xd87a1b2a66541d7c!8m2!3d3.1472495!4d101.7138979!15sCgNqd2NaBSIDandjkgEEY2FmZeABAA!16s%2Fg%2F11jz8lt_nr?entry=tts&g_ep=EgoyMDI2MDQwMS4wIPu8ASoASAFQAw%3D%3D&skid=ebf522d7-971a-4e29-acb2-9250e4ec5f98",
       "category": "eatery",
       "tags": [
-        "cafe",
-        "bakery"
+        "cafe"
       ],
       "note": "",
-      "savedAt": "2026-05-18T04:26:10.697Z"
+      "savedAt": "2026-05-18T04:26:42.214Z"
     },
     {
       "id": "1779072622050",
