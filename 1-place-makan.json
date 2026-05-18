@@ -1,3 +1,17 @@
 {
-  "places": []
+  "places": [
+    {
+      "id": "1779079053760",
+      "name": "Ayam Gepuk Express Wangsa Maju",
+      "lat": 3.1994317,
+      "lng": 101.7379985,
+      "mapsUrl": "https://www.google.com/maps/place/Ayam+Gepuk+Express+Wangsa+Maju/@3.1994317,101.7379985,16z/data=!4m10!1m2!2m1!1sayam+gepuk!3m6!1s0x31cc390c0be7815f:0x58386298eb1453ee!8m2!3d3.1918957!4d101.7349674!15sCgpheWFtIGdlcHVrWgwiCmF5YW0gZ2VwdWuSAQpyZXN0YXVyYW50mgEjQ2haRFNVaE5NRzluUzBWSlEwRm5TVU4yZWxrMmIxcEJFQUXgAQD6AQQIABBG!16s%2Fg%2F11w8gjby5t?entry=ttu&g_ep=EgoyMDI2MDUxMy4wIKXMDSoASAFQAw%3D%3D",
+      "category": "eatery",
+      "tags": [
+        "cafe"
+      ],
+      "note": "",
+      "savedAt": "2026-05-18T04:37:33.760Z"
+    }
+  ]
 }
