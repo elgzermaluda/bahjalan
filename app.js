@@ -789,7 +789,7 @@ let impPlaces=[],impState={};
 
 function openImportPanel(){if(!getActive()){showToast('pick a map first');toggleDrop();return;}impPlaces=[];impState={};showImpStep(1);document.getElementById('imppanel').classList.add('open');}
 function closeImp(){document.getElementById('imppanel').classList.remove('open');}
-function showImpStep(n){document.getElementById('imps1').style.display=n===1?'flex':'none';document.getElementById('imps2').style.display=n===2?'flex':'none';document.getElementById('impsavewrap').style.display=n===2?'block':'none';document.getElementById('istep1').style.color=n===1?'var(--A)':'var(--green)';document.getElementById('istep1').style.borderBottomColor=n===1?'var(--A)':'var(--green)';document.getElementById('istep2').style.color=n===2?'var(--A)':'var(--ink3)';document.getElementById('istep2').style.borderBottomColor=n===2?'var(--A)':'transparent';}
+function showImpStep(n){const il=document.getElementById('imp-loading');if(il)il.style.display='none';document.getElementById('imps1').style.display=n===1?'flex':'none';document.getElementById('imps2').style.display=n===2?'flex':'none';document.getElementById('impsavewrap').style.display=n===2?'block':'none';document.getElementById('istep1').style.color=n===1?'var(--A)':'var(--green)';document.getElementById('istep1').style.borderBottomColor=n===1?'var(--A)':'var(--green)';document.getElementById('istep2').style.color=n===2?'var(--A)':'var(--ink3)';document.getElementById('istep2').style.borderBottomColor=n===2?'var(--A)':'transparent';}
 function handleImpDrop(e){e.preventDefault();document.getElementById('impdrop').style.borderColor='var(--border)';document.getElementById('impdrop').style.background='var(--white)';const f=e.dataTransfer.files[0];if(f)parseImp(f);}
 function handleImpFile(inp){const f=inp.files[0];if(f)parseImp(f);}
 
@@ -807,48 +807,49 @@ function parseImp(file){
 
       if(hasTitle) {
         const lines = raw.split('\n').filter(l=>l.trim());
-        // case-insensitive, strip quotes from headers
-        const header = lines[0].split(sep).map(h=>h.trim().replace(/^["\']|["\']$/g,'').toLowerCase());
+        const header = lines[0].split(sep).map(h=>h.trim().replace(/^["']|["']$/g,'').toLowerCase());
         const titleIdx = header.findIndex(h=>h==='title'||h==='name'||h==='place name');
         const urlIdx   = header.findIndex(h=>h==='url'||h==='link'||h==='google maps url');
         const noteIdx  = header.findIndex(h=>h==='note'||h==='notes'||h==='comment');
-        if(titleIdx===-1){showToast('CSV: no Title/Name column found — check your file');return;}
-        // filter blank rows
-        const rows = lines.slice(1).filter(l=>{const cols=l.split(sep);return cols[titleIdx]&&cols[titleIdx].trim().replace(/^["'\u2019]|["'\u2019]$/g,'').length>0;});
-        const parsed = [];
-        showToast(`found ${rows.length} places \u2014 looking up locations\u2026`);
-        for(let ri=0;ri<rows.length;ri++){
-          const row=rows[ri];
-          const cols = row.split(sep).map(c=>c.trim().replace(/^["'\u2019]|["'\u2019]$/g,''));
-          const name = (cols[titleIdx]||'').trim();
-          const url  = urlIdx>-1?(cols[urlIdx]||'').trim():'';
-          const note = noteIdx>-1?(cols[noteIdx]||'').trim():'';
-          if(!name) continue;
-          let lat=null,lng=null;
-          const cm = url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
-          if(cm){lat=parseFloat(cm[1]);lng=parseFloat(cm[2]);}
-          if((!lat||!lng)&&name){
-            showToast(`looking up ${ri+1}/${rows.length}: ${name}`);
-            try{
-              await new Promise(r=>setTimeout(r,1100));
-              const gr=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(name)}&format=json&limit=1`,{headers:{'Accept-Language':'en','User-Agent':'BahJalanMana/1.0'}});
-              const gd=await gr.json();
-              if(gd.length){lat=parseFloat(gd[0].lat);lng=parseFloat(gd[0].lon);}
-            }catch{}
+        if(titleIdx===-1){showToast('CSV: no Title column found');return;}
+        const rows = lines.slice(1).filter(l=>{const c=l.split(sep);return c[titleIdx]&&c[titleIdx].trim().length>0;});
+        if(!rows.length){showToast('no places found in file');return;}
+
+        // show a loading screen immediately — DO NOT block UI with sync loop
+        showImpLoading(rows.length);
+
+        // process asynchronously so UI stays responsive
+        setTimeout(async()=>{
+          const parsed=[];
+          for(let ri=0;ri<rows.length;ri++){
+            const cols=rows[ri].split(sep).map(c=>c.trim().replace(/^["']|["']$/g,''));
+            const name=(cols[titleIdx]||'').trim();
+            const url=urlIdx>-1?(cols[urlIdx]||'').trim():'';
+            const note=noteIdx>-1?(cols[noteIdx]||'').trim():'';
+            if(!name) continue;
+            let lat=null,lng=null;
+            // try coords in URL
+            const cm=url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+            if(cm){lat=parseFloat(cm[1]);lng=parseFloat(cm[2]);}
+            // geocode by name if no coords
+            if((!lat||!lng)&&name){
+              updateImpLoading(ri+1, rows.length, name);
+              try{
+                await new Promise(r=>setTimeout(r,1200));
+                const gr=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(name)}&format=json&limit=1`,{headers:{'Accept-Language':'en','User-Agent':'BahJalanMana/1.0'}});
+                const gd=await gr.json();
+                if(gd.length){lat=parseFloat(gd[0].lat);lng=parseFloat(gd[0].lon);}
+              }catch{}
+            }
+            parsed.push({_id:'imp_'+parsed.length,name,lat:lat||3.139,lng:lng||101.687,mapsUrl:url,address:(!lat||!lng)?'\u26a0 location estimated':'',note,_noCoords:(!lat||!lng)});
           }
-          if(!lat||!lng||isNaN(lat)||isNaN(lng)){
-            parsed.push({_id:'imp_'+parsed.length,name,lat:3.139,lng:101.687,mapsUrl:url,address:'\u26a0\ufe0f location not found',note,_noCoords:true});
-            continue;
-          }
-          parsed.push({_id:'imp_'+parsed.length,name,lat,lng,mapsUrl:url,address:'',note});
-        }
-        if(!parsed.length){showToast('no places found \u2014 check your file');return;}
-        impPlaces=parsed;
-        impPlaces.forEach(p=>{impState[p._id]={selected:true,category:curMode==='makan'?'eatery':'activity',tags:[]};});
-        renderImpList(); showImpStep(2);
-        document.getElementById('imptotcnt').textContent=`${impPlaces.length} places found`;
-        document.getElementById('impall').checked=true; updateImpCnt();
-        showToast(`${impPlaces.length} places loaded ✓`);
+          impPlaces=parsed;
+          impPlaces.forEach(p=>{impState[p._id]={selected:true,category:curMode==='makan'?'eatery':'activity',tags:[]};});
+          hideImpLoading(); renderImpList(); showImpStep(2);
+          document.getElementById('imptotcnt').textContent=`${impPlaces.length} places found`;
+          document.getElementById('impall').checked=true; updateImpCnt();
+          showToast(`${impPlaces.length} places loaded \u2713`);
+        },50);
         return;
       }
 
@@ -869,6 +870,41 @@ function parseImp(file){
       showToast(`${impPlaces.length} places loaded ✓`);
     } catch(err){console.error(err);showToast("couldn't read file: "+err.message);}
   };r.readAsText(file);
+}
+
+function showImpLoading(total) {
+  // Show a progress screen in the import panel instead of blocking
+  document.getElementById('imps1').style.display='none';
+  document.getElementById('imps2').style.display='none';
+  let screen = document.getElementById('imp-loading');
+  if(!screen){
+    screen = document.createElement('div');
+    screen.id = 'imp-loading';
+    screen.style.cssText='flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:30px 20px;';
+    document.getElementById('imppanel').appendChild(screen);
+  }
+  screen.style.display='flex';
+  screen.innerHTML=`
+    <div style="width:48px;height:48px;border-radius:50%;border:4px solid var(--As);border-top-color:var(--A);animation:spin .8s linear infinite"></div>
+    <div style="text-align:center">
+      <div style="font-size:14px;font-weight:500;color:var(--ink);margin-bottom:4px">looking up ${total} places</div>
+      <div id="imp-load-status" style="font-size:12px;color:var(--ink3)">starting…</div>
+    </div>
+    <div style="width:100%;max-width:280px;background:var(--border);border-radius:100px;height:4px;overflow:hidden">
+      <div id="imp-load-bar" style="height:100%;background:var(--A);width:0%;transition:width .3s;border-radius:100px"></div>
+    </div>
+    <div style="font-size:11px;color:var(--ink3);text-align:center;max-width:260px;line-height:1.6">your places are being looked up on the map — this takes a few seconds, you can still use the app</div>
+  `;
+}
+function updateImpLoading(current, total, name) {
+  const status = document.getElementById('imp-load-status');
+  const bar    = document.getElementById('imp-load-bar');
+  if(status) status.textContent = `${current}/${total}: ${name}`;
+  if(bar)    bar.style.width = `${Math.round((current/total)*100)}%`;
+}
+function hideImpLoading() {
+  const screen = document.getElementById('imp-loading');
+  if(screen) screen.style.display='none';
 }
 
 function renderImpList(){
