@@ -1,0 +1,322 @@
+{
+  "places": [
+    {
+      "id": "1775959272156",
+      "name": "Sunway Resort Hotel",
+      "lat": 3.0711234,
+      "lng": 101.6061772,
+      "mapsUrl": "https://www.google.com/maps/place/Sunway+Resort+Hotel/@3.0711234,101.6061772,17z/data=!4m9!3m8!1s0x31cc4c812c0a18cb:0x96bc62906ec10444!5m2!4m1!1i2!8m2!3d3.071118!4d101.6087575!16s%2Fg%2F11hbr87gq9?entry=ttu&g_ep=EgoyMDI2MDQwOC4wIKXMDSoASAFQAw%3D%3D",
+      "category": "event",
+      "tags": [
+        "festival",
+        "stalls"
+      ],
+      "note": "",
+      "hours": null,
+      "eventType": "once",
+      "eventDay": null,
+      "eventDate": "2026-07-11",
+      "eventStart": null,
+      "eventEnd": null,
+      "savedAt": "2026-04-12T02:01:12.156Z"
+    },
+    {
+      "id": "1775458581402",
+      "name": "FARM FRESH",
+      "lat": 2.9896883,
+      "lng": 101.7283569,
+      "mapsUrl": "https://www.google.com/maps/place/FARM+FRESH+@+UPM/@2.9896883,101.7283569,17z/data=!3m1!4b1!4m6!3m5!1s0x31cdcbdea4e0a575:0xff02b5f416af0e9c!8m2!3d2.9896883!4d101.7309318!16s%2Fg%2F11fr0b56xy?entry=ttu&g_ep=EgoyMDI2MDQwMS4wIKXMDSoASAFQAw%3D%3D",
+      "category": "activity",
+      "tags": [
+        "theme park",
+        "outdoor",
+        "animal"
+      ],
+      "note": "",
+      "hours": {
+        "0": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "1": {
+          "open": "10:00",
+          "close": "17:00"
+        },
+        "2": {
+          "open": "10:00",
+          "close": "17:00"
+        },
+        "3": {
+          "open": "10:00",
+          "close": "17:00"
+        },
+        "4": {
+          "open": "10:00",
+          "close": "17:00"
+        },
+        "5": {
+          "open": "10:00",
+          "close": "17:00"
+        },
+        "6": {
+          "open": "09:00",
+          "close": "18:00"
+        }
+      },
+      "savedAt": "2026-04-06T06:56:21.402Z"
+    },
+    {
+      "id": "1775457238895",
+      "name": "Saloma Link",
+      "lat": 3.1609739,
+      "lng": 101.7081703,
+      "mapsUrl": "https://www.google.com/maps/place/Saloma+Link/@3.1609739,101.7081703,3a,75y,90t/data=!3m8!1e2!3m6!1sCIABIhBpdIWOIQfTiX-cbwAGwIbS!2e10!3e12!6shttps:%2F%2Flh3.googleusercontent.com%2Fgps-cs-s%2FAHVAweropfOEAg2pSobs8qlgNrWMDH56pRLe3bghR2HoP7eFSPrx45pk6VIDG4WPoLbYf9PxyUAOHc2Xd2Xu-Bi_cHCZRwZyxl0uxYJOyLS5NMsJi3PUksoqih_Tlr2GUHXX2B-l_7BCEA8iXSw%3Dw109-h86-k-no!7i1374!8i1080!4m7!3m6!1s0x31cc375f66d6c8d5:0x239fcd8025b03e50!8m2!3d3.1607526!4d101.708301!10e5!16s%2Fg%2F11hdqvp5ph?entry=ttu&g_ep=EgoyMDI2MDQwMS4wIKXMDSoASAFQAw%3D%3D",
+      "category": "activity",
+      "tags": [
+        "outdoor"
+      ],
+      "note": "",
+      "hours": {
+        "0": {
+          "open": "05:00",
+          "close": "23:59"
+        },
+        "1": {
+          "open": "05:00",
+          "close": "23:59"
+        },
+        "2": {
+          "open": "05:00",
+          "close": "23:59"
+        },
+        "3": {
+          "open": "05:00",
+          "close": "23:59"
+        },
+        "4": {
+          "open": "05:00",
+          "close": "23:59"
+        },
+        "5": {
+          "open": "05:00",
+          "close": "23:59"
+        },
+        "6": {
+          "open": "05:00",
+          "close": "23:59"
+        }
+      },
+      "savedAt": "2026-04-06T06:33:58.895Z"
+    },
+    {
+      "id": "1775457137626",
+      "name": "Ilham Gallery",
+      "lat": 3.159106,
+      "lng": 101.7187716,
+      "mapsUrl": "https://www.google.com/maps/place/Ilham+Gallery/@3.159106,101.7187716,17z/data=!4m6!3m5!1s0x31cc37cfd0d81ea7:0xbb65ef8331445c49!8m2!3d3.1590704!4d101.7187176!16s%2Fg%2F11c57ydqmr?entry=ttu&g_ep=EgoyMDI2MDQwMS4wIKXMDSoASAFQAw%3D%3D",
+      "category": "activity",
+      "tags": [
+        "museum"
+      ],
+      "note": "",
+      "hours": {
+        "0": "unknown",
+        "1": null,
+        "2": {
+          "open": "11:00",
+          "close": "19:00"
+        },
+        "3": {
+          "open": "11:00",
+          "close": "19:00"
+        },
+        "4": {
+          "open": "11:00",
+          "close": "19:00"
+        },
+        "5": {
+          "open": "11:00",
+          "close": "19:00"
+        },
+        "6": {
+          "open": "11:00",
+          "close": "17:00"
+        }
+      },
+      "savedAt": "2026-04-06T06:32:17.626Z"
+    },
+    {
+      "id": "1775457055898",
+      "name": "Perdana Botanical Gardens",
+      "lat": 3.143678,
+      "lng": 101.686073,
+      "mapsUrl": "https://www.google.com/maps/place/Perdana+Botanical+Gardens,+Kuala+Lumpur,+Federal+Territory+of+Kuala+Lumpur,+Malaysia/@3.143678,101.686073,15z/data=!4m6!3m5!1s0x31cc49c84fc1a605:0x803fd2fe37eb3542!8m2!3d3.143678!4d101.686073!16s%2Fg%2F1td7wl3w?entry=ttu&g_ep=EgoyMDI2MDQwMS4wIKXMDSoASAFQAw%3D%3D",
+      "category": "activity",
+      "tags": [
+        "theme park",
+        "outdoor"
+      ],
+      "note": "",
+      "hours": {
+        "0": {
+          "open": "08:00",
+          "close": "22:00"
+        },
+        "1": {
+          "open": "08:00",
+          "close": "22:00"
+        },
+        "2": {
+          "open": "08:00",
+          "close": "22:00"
+        },
+        "3": {
+          "open": "08:00",
+          "close": "22:00"
+        },
+        "4": {
+          "open": "08:00",
+          "close": "22:00"
+        },
+        "5": {
+          "open": "08:00",
+          "close": "22:00"
+        },
+        "6": {
+          "open": "08:00",
+          "close": "22:00"
+        }
+      },
+      "savedAt": "2026-04-06T06:30:55.898Z"
+    },
+    {
+      "id": "1775457006189",
+      "name": "National Art Gallery",
+      "lat": 3.1733177,
+      "lng": 101.7053544,
+      "mapsUrl": "https://www.google.com/maps/place/National+Art+Gallery/@3.1733177,101.7053544,3a,75y,90t/data=!3m8!1e2!3m6!1sCIABIhAGbyfQ8wRH42f9AyEADeuX!2e10!3e12!6shttps:%2F%2Flh3.googleusercontent.com%2Fgps-cs-s%2FAHVAwepa_rR-ajpcMk4KtB35DL6gHEtN3N67vfG7Uks6VvvvN1s4zS-jsrzyd9RVAjE4vx-6Dx49nE6KAvc2CUlKoKdozY6HR31LYnmDmUAOpM7gcyKNVTr2Ce4HYyHvgumnfTZ79r08SaeOJ8jr%3Dw152-h86-k-no!7i1280!8i720!4m7!3m6!1s0x31cc486cea2db79f:0x33e4d7a469aff301!8m2!3d3.1736636!4d101.7052282!10e5!16s%2Fm%2F03gsj1l?entry=ttu&g_ep=EgoyMDI2MDQwMS4wIKXMDSoASAFQAw%3D%3D",
+      "category": "activity",
+      "tags": [
+        "museum"
+      ],
+      "note": "",
+      "hours": {
+        "0": {
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "1": {
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "2": {
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "3": {
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "4": {
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "5": {
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "6": {
+          "open": "09:00",
+          "close": "17:00"
+        }
+      },
+      "savedAt": "2026-04-06T06:30:06.189Z"
+    },
+    {
+      "id": "1775456939775",
+      "name": "SKYTREX Adventure Sg Congkak",
+      "lat": 3.2182556,
+      "lng": 101.8345423,
+      "mapsUrl": "https://www.google.com/maps/place/SKYTREX+Adventure+Sg+Congkak/@3.2182556,101.8345423,12.21z/data=!4m6!3m5!1s0x31cc3bd227352e1b:0x68fc775e5a5fd7c2!8m2!3d3.2089852!4d101.8422029!16s%2Fg%2F11h18d119n?entry=ttu&g_ep=EgoyMDI2MDQwMS4wIKXMDSoASAFQAw%3D%3D",
+      "category": "activity",
+      "tags": [
+        "outdoor"
+      ],
+      "note": "",
+      "hours": {
+        "0": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "1": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "2": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "3": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "4": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "5": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "6": {
+          "open": "09:00",
+          "close": "18:00"
+        }
+      },
+      "savedAt": "2026-04-06T06:28:59.775Z"
+    },
+    {
+      "id": "1775455037618",
+      "name": "Museum Of Illusions Kuala Lumpur",
+      "lat": 3.1472239,
+      "lng": 101.7122313,
+      "mapsUrl": "https://www.google.com/maps/place/Museum+Of+Illusions+Kuala+Lumpur/@3.1472239,101.7122313,3a,75y,90t/data=!3m8!1e2!3m6!1sCIHM0ogKEICAgIDs2fOmnAE!2e10!3e12!6shttps:%2F%2Flh3.googleusercontent.com%2Fgps-cs-s%2FAHVAweoZccVr4STVF6hugOXMqPkf_ud2Svtg-078UnNkpS6epBVYwwivQGnd6tbRSMXnjYdNby5ms2g8fY-JcUwXhJ0l5i6Nnxs3uVHLbbWH2LvvLkEMpQ0u7Wuv8qpny4hF9BMnc46mOg%3Dw203-h270-k-no!7i3000!8i4000!4m11!1m2!2m1!1sMuseum+of+Illusions!3m7!1s0x31cc362bfa300001:0xff54175d035086f8!8m2!3d3.1471339!4d101.7121372!10e5!15sChNNdXNldW0gb2YgSWxsdXNpb25zWhUiE211c2V1bSBvZiBpbGx1c2lvbnOSAQZtdXNldW2aASNDaFpEU1VoTk1HOW5TMFZKUTBGblNVUmxOVGQ1WTBWbkVBReABAPoBBAhwEEo!16s%2Fg%2F11hdb80cl4?entry=ttu&g_ep=EgoyMDI2MDQwMS4wIKXMDSoASAFQAw%3D%3D",
+      "category": "activity",
+      "tags": [
+        "museum"
+      ],
+      "note": "",
+      "hours": {
+        "0": {
+          "open": "10",
+          "close": "22:00"
+        },
+        "1": {
+          "open": "10",
+          "close": "22:00"
+        },
+        "2": {
+          "open": "10",
+          "close": "22:00"
+        },
+        "3": {
+          "open": "10",
+          "close": "22:00"
+        },
+        "4": {
+          "open": "10",
+          "close": "22:00"
+        },
+        "5": {
+          "open": "10",
+          "close": "22:00"
+        },
+        "6": {
+          "open": "10",
+          "close": "22:00"
+        }
+      },
+      "savedAt": "2026-04-06T05:57:17.618Z"
+    }
+  ]
+}
