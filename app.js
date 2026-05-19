@@ -589,19 +589,29 @@ async function savePlace() {
     evT1=document.getElementById('evt1').value||null;
     evT2=document.getElementById('evt2').value||null;
   }
-  const place={id:editId||Date.now().toString(),name,lat:exLat,lng:exLng,mapsUrl:exUrl,category,tags,note,...(category==='event'&&{eventType:evType,eventDay:evDay,eventDateStart:evD1,eventDateEnd:evD2,eventStart:evT1,eventEnd:evT2}),savedAt:new Date().toISOString()};
+  const placeId = editId||Date.now().toString();
+  const place={id:placeId,name,lat:exLat,lng:exLng,mapsUrl:exUrl,category,tags,note,...(category==='event'&&{eventType:evType,eventDay:evDay,eventDateStart:evD1,eventDateEnd:evD2,eventStart:evT1,eventEnd:evT2}),savedAt:new Date().toISOString(),_pending:true};
   if(editId) places=places.map(p=>p.id===editId?place:p); else places.unshift(place);
-  // show save queue — all pending place names
-  const pending = places.map(p=>p.name);
-  showSaveQueue(pending, null);
+  // show only THIS place in the save queue
+  showSaveQueue([name], null);
   const saveBtn=document.querySelector('#step2 .bpri');
   if(saveBtn){saveBtn.disabled=true;saveBtn.textContent='saving…';saveBtn.style.opacity='.6';}
   startProgress();
+  renderPlaces(); // show immediately with pending spinner
+  closeSavePanel();
   const ok=await saveData();
   stopProgress(ok);
   if(saveBtn){saveBtn.disabled=false;saveBtn.textContent='save to map ✓';saveBtn.style.opacity='';}
-  if(ok){showSaveQueue(pending, true);closeSavePanel();renderPlaces();renderFpTags();}
-  else{hideSaveQueue();if(!editId)places=places.filter(p=>p.id!==place.id);}
+  if(ok){
+    // clear pending flag
+    places=places.map(p=>p.id===placeId?{...p,_pending:false}:p);
+    showSaveQueue([name], true);
+    renderPlaces(); renderFpTags();
+  } else {
+    hideSaveQueue();
+    places=places.filter(p=>p.id!==placeId);
+    renderPlaces();
+  }
 }
 
 // ── DELETE MODAL ──────────────────────
@@ -697,9 +707,14 @@ function renderStrip(all,matchIds){
     const acol=p.category==='eatery'?'#993C1D':p.category==='event'?'#D97706':'#5B21B6';
     const tcls=p.category==='event'?'ev':'';
     const tags=(p.tags||[]).map(t=>`<span class="pctag ${tcls}">${t}</span>`).join('');
-    return `<div class="pcard ${isMatch?'match':'faded'}" style="${isMatch?`border-color:${acol}40;`:''}">
-      <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px" onclick="focusPlace('${p.id}')"><span style="font-size:13px">${icon}</span><div class="pcn">${p.name}</div></div>
-      <div class="pcd" onclick="focusPlace('${p.id}')">${p.dist.toFixed(1)} km · ~${p.travelMin} min</div>
+    const isPending = p._pending;
+    return `<div class="pcard ${isMatch?'match':'faded'}" style="${isMatch?`border-color:${acol}40;`:''} ${isPending?'opacity:.75;':''}">
+      <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px" onclick="focusPlace('${p.id}')">
+        <span style="font-size:13px">${icon}</span>
+        <div class="pcn">${p.name}</div>
+        ${isPending?`<div style="width:12px;height:12px;border-radius:50%;border:2px solid var(--A);border-top-color:transparent;animation:spin .7s linear infinite;flex-shrink:0;margin-left:auto"></div>`:''}
+      </div>
+      ${isPending?`<div style="font-size:10px;color:var(--ink3);margin-bottom:3px">saving…</div>`:`<div class="pcd" onclick="focusPlace('${p.id}')">${p.dist.toFixed(1)} km · ~${p.travelMin} min</div>`}
       <div class="pctags" onclick="focusPlace('${p.id}')">${tags}</div>
       <div style="display:flex;gap:4px;margin-top:6px">
         <div onclick="editPlace('${p.id}')" style="flex:1;text-align:center;font-size:10px;padding:3px 0;border:1px solid var(--border);border-radius:20px;color:var(--ink2);cursor:pointer;background:var(--cream)">edit</div>
@@ -896,15 +911,67 @@ function hideImpLoading() {
 function renderImpList(){
   const list=document.getElementById('implist');
   list.innerHTML=impPlaces.map(p=>{
-    const st=impState[p._id], dist=hav(uLat,uLng,p.lat,p.lng);
-    const tags=st.tags.map(t=>`<span onclick="remImpTag('${p._id}','${t}')" style="font-size:10px;padding:2px 7px;border-radius:10px;background:var(--As);color:var(--Atf);border:1px solid var(--Ab);cursor:pointer">${t} ×</span>`).join('');
+    const st=impState[p._id];
+    const hasCoords=p.lat&&p.lng&&!isNaN(p.lat)&&!isNaN(p.lng)&&(p.lat!==0||p.lng!==0);
+    const dist=hasCoords?hav(uLat,uLng,p.lat,p.lng):null;
+    const plausible=dist!==null&&dist<500;
+    let locTxt,locCol,locBg,locBorder;
+    if(!hasCoords){locTxt='📍 tap to set location';locCol='#DC2626';locBg='#FEF2F2';locBorder='#FCA5A5';}
+    else if(!plausible){locTxt=`⚠️ ${dist.toFixed(0)} km away — looks wrong? tap to fix`;locCol='#D97706';locBg='#FFFBEB';locBorder='#FDE68A';}
+    else{locTxt=`✓ ${dist.toFixed(1)} km away`;locCol='#059669';locBg='#ECFDF5';locBorder='#6EE7B7';}
     const cats=['eatery','activity','event'];
     const catC={eatery:'#993C1D',activity:'#5B21B6',event:'#D97706'};
     const catB={eatery:'#FAECE7',activity:'#EDE9FE',event:'#FEF3C7'};
     const catI={eatery:'🍴',activity:'⭐',event:'📅'};
     const catBtns=cats.map(c=>{const act=st.category===c;return`<div onclick="setImpCat('${p._id}','${c}')" style="padding:3px 9px;border-radius:20px;font-size:11px;cursor:pointer;border:1px solid ${act?catC[c]:'var(--border)'};background:${act?catB[c]:'var(--cream)'};color:${act?catC[c]:'var(--ink3)'}">${catI[c]}</div>`;}).join('');
-    return `<div id="irow-${p._id}" style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;opacity:${st.selected?'1':'.45'}"><div style="display:flex;align-items:flex-start;gap:8px"><input type="checkbox" ${st.selected?'checked':''} onchange="togImpSel('${p._id}',this.checked)" style="width:15px;height:15px;accent-color:var(--A);cursor:pointer;flex-shrink:0;margin-top:2px"><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><div style="font-size:13px;font-weight:500;color:var(--ink);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</div><div style="font-size:10px;color:var(--ink3)">${dist.toFixed(1)} km</div></div>${p.address?`<div style="font-size:10px;color:var(--ink3);margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.address}</div>`:''}<div style="display:flex;gap:4px;margin-bottom:7px">${catBtns}</div><div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center">${tags}<input placeholder="+ tag" onkeydown="if(event.key==='Enter'||event.key===','){addImpTag('${p._id}',this.value);this.value='';event.preventDefault()}" onblur="if(this.value.trim()){addImpTag('${p._id}',this.value);this.value=''}" style="border:1px dashed var(--border);border-radius:20px;padding:2px 8px;font-size:11px;width:60px;outline:none;background:transparent;font-family:inherit;color:var(--ink)"/></div></div></div></div>`;
+    const tags=st.tags.map(t=>`<span onclick="remImpTag('${p._id}','${t}')" style="font-size:10px;padding:2px 7px;border-radius:10px;background:var(--As);color:var(--Atf);border:1px solid var(--Ab);cursor:pointer">${t} ×</span>`).join('');
+    const mapPicker=st.fixingLocation?`<div style="margin:8px 0;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden"><div id="imp-map-${p._id}" style="height:160px"></div><div style="padding:6px 8px;display:flex;align-items:center;justify-content:space-between;background:var(--cream2)"><span style="font-size:11px;color:var(--ink2)">drag pin to correct spot</span><button onclick="confirmImpLoc('${p._id}')" style="background:var(--A);color:var(--As);border:none;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit">confirm ✓</button></div></div>`:'';
+    return `<div id="irow-${p._id}" style="background:var(--white);border:1px solid ${!plausible?locBorder:'var(--border)'};border-radius:var(--radius-sm);padding:10px 12px;opacity:${st.selected?'1':'.45'}">
+      <div style="display:flex;align-items:flex-start;gap:8px">
+        <input type="checkbox" ${st.selected?'checked':''} onchange="togImpSel('${p._id}',this.checked)" style="width:15px;height:15px;accent-color:var(--A);cursor:pointer;flex-shrink:0;margin-top:2px">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:500;color:var(--ink);margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name}</div>
+          <div onclick="toggleImpFix('${p._id}')" style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:500;background:${locBg};color:${locCol};cursor:pointer;margin-bottom:6px;max-width:100%;overflow:hidden;text-overflow:ellipsis">${locTxt}</div>
+          ${mapPicker}
+          <div style="display:flex;gap:4px;margin-bottom:6px">${catBtns}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center">${tags}<input placeholder="+ tag" onkeydown="if(event.key==='Enter'||event.key===','){addImpTag('${p._id}',this.value);this.value='';event.preventDefault()}" onblur="if(this.value.trim()){addImpTag('${p._id}',this.value);this.value=''}" style="border:1px dashed var(--border);border-radius:20px;padding:2px 8px;font-size:11px;width:60px;outline:none;background:transparent;font-family:inherit;color:var(--ink)"/></div>
+        </div>
+      </div>
+    </div>`;
   }).join('');
+  impPlaces.forEach(p=>{if(impState[p._id].fixingLocation)setTimeout(()=>initImpMap(p._id),50);});
+}
+
+let impMiniMaps={};
+
+function toggleImpFix(id){
+  impState[id].fixingLocation=!impState[id].fixingLocation;
+  renderImpList();
+}
+
+function initImpMap(id){
+  if(impMiniMaps[id]) return;
+  const el=document.getElementById(`imp-map-${id}`);
+  if(!el) return;
+  const p=impPlaces.find(x=>x._id===id);
+  const lat=(p.lat&&!isNaN(p.lat)&&p.lat!==0)?p.lat:uLat;
+  const lng=(p.lng&&!isNaN(p.lng)&&p.lng!==0)?p.lng:uLng;
+  const m=L.map(el,{zoomControl:true,scrollWheelZoom:true}).setView([lat,lng],14);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19}).addTo(m);
+  const icon=L.divIcon({className:'',html:`<div style="width:28px;height:28px;border-radius:50%;background:var(--A);border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:grab">📍</div>`,iconSize:[28,28],iconAnchor:[14,14]});
+  const marker=L.marker([lat,lng],{icon,draggable:true}).addTo(m);
+  impMiniMaps[id]={map:m,marker};
+}
+
+function confirmImpLoc(id){
+  const mm=impMiniMaps[id]; if(!mm) return;
+  const pos=mm.marker.getLatLng();
+  const p=impPlaces.find(x=>x._id===id);
+  if(p){p.lat=pos.lat;p.lng=pos.lng;}
+  impState[id].fixingLocation=false;
+  mm.map.remove(); delete impMiniMaps[id];
+  renderImpList();
+  showToast('location set ✓');
 }
 
 function togImpSel(id,v){impState[id].selected=v;updateImpCnt();const r=document.getElementById('irow-'+id);if(r)r.style.opacity=v?'1':'.45';}
