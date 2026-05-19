@@ -1,3 +1,28 @@
 {
-  "places": []
+  "places": [
+    {
+      "id": "1779160989465_xnk6",
+      "name": "LRT Sri Rampai",
+      "lat": 0,
+      "lng": 0,
+      "mapsUrl": "https://www.google.com/maps/place/LRT+Sri+Rampai/data=!4m2!3m1!1s0x31cc3824dcd0315f:0x3cfe3a1b4fc5f10",
+      "category": "activity",
+      "tags": [],
+      "note": "",
+      "savedAt": "2026-05-19T03:23:09.465Z",
+      "_needsGeo": true
+    },
+    {
+      "id": "1779160989465_vwdr",
+      "name": "Desa Villas Condominium",
+      "lat": 0,
+      "lng": 0,
+      "mapsUrl": "https://www.google.com/maps/place/Desa+Villas+Condominium/data=!4m2!3m1!1s0x31cc378850da67bf:0xa9216b60feeaeeb1",
+      "category": "activity",
+      "tags": [],
+      "note": "",
+      "savedAt": "2026-05-19T03:23:09.465Z",
+      "_needsGeo": true
+    }
+  ]
 }
