@@ -128,8 +128,10 @@ function renderDrop() {
   // async counts
   profiles.forEach(async p => {
     try {
-      const r = await fetch(`https://raw.githubusercontent.com/${getUser()}/${getRepo()}/main/${p.file}?t=${Date.now()}`);
-      if (r.ok) { const d=await r.json(); const n=(d.places||[]).length; const el=document.getElementById(`pdcnt-${p.file.replace(/\W/g,'_')}`); if(el) el.textContent=`${n} place${n!==1?'s':''}`; }
+      const tok2=getToken();
+      const h2=tok2?{'Authorization':`token ${tok2}`,'Accept':'application/vnd.github.v3+json'}:{'Accept':'application/vnd.github.v3+json'};
+      const r = await fetch(`https://api.github.com/repos/${getUser()}/${getRepo()}/contents/${p.file}`,{headers:h2});
+      if (r.ok) { const meta2=await r.json(); const dec2=decodeURIComponent(escape(atob(meta2.content.replace(/\n/g,'')))); const d=JSON.parse(dec2); const n=(d.places||[]).length; const el=document.getElementById(`pdcnt-${p.file.replace(/\W/g,'_')}`); if(el) el.textContent=`${n} place${n!==1?'s':''}`; }
     } catch {}
   });
 }
@@ -282,9 +284,12 @@ async function migrateOldData() {
   // check if data.json already migrated
   if (profiles.find(p=>p.file==='data.json'||p.file==='makan.json'||p.file==='jalan.json')) return;
   try {
-    const res = await fetch(`https://raw.githubusercontent.com/${getUser()}/${getRepo()}/main/data.json?t=${Date.now()}`);
+    const tok3=getToken();
+    const h3=tok3?{'Authorization':`token ${tok3}`,'Accept':'application/vnd.github.v3+json'}:{'Accept':'application/vnd.github.v3+json'};
+    const res = await fetch(`https://api.github.com/repos/${getUser()}/${getRepo()}/contents/data.json`,{headers:h3});
     if (!res.ok) return;
-    const d = await res.json();
+    const meta3=await res.json();
+    const d = JSON.parse(decodeURIComponent(escape(atob(meta3.content.replace(/\n/g,'')))));
     const all = d.places||[];
     if (!all.length) return;
     const makanPlaces = all.filter(p=>p.category==='eatery');
@@ -319,9 +324,20 @@ async function loadData(file) {
   startProgress();
   showStripLoading('loading your places…');
   try {
-    const r = await fetch(`https://raw.githubusercontent.com/${getUser()}/${getRepo()}/main/${file}?t=${Date.now()}`);
-    if (!r.ok) { stopProgress(false); showToast(`load failed ${r.status}`); places=[]; renderStrip([],new Set()); return; }
-    const d = await r.json(); places=d.places||[];
+    // Use GitHub API (not CDN) so we always get the latest file, not a cached version
+    const tok = getToken();
+    const headers = tok ? {'Authorization':`token ${tok}`,'Accept':'application/vnd.github.v3+json'} : {'Accept':'application/vnd.github.v3+json'};
+    const r = await fetch(`https://api.github.com/repos/${getUser()}/${getRepo()}/contents/${file}`, {headers});
+    if (!r.ok) {
+      // file doesn't exist yet — that's fine for new profiles
+      if(r.status===404){stopProgress(true);places=[];renderStrip([],new Set());return;}
+      stopProgress(false); showToast(`load failed ${r.status}`); places=[]; renderStrip([],new Set()); return;
+    }
+    const meta = await r.json();
+    // GitHub API returns base64 encoded content
+    const decoded = decodeURIComponent(escape(atob(meta.content.replace(/\n/g,''))));
+    const d = JSON.parse(decoded);
+    places = d.places||[];
     stopProgress(true);
     showToast(`${places.length} place${places.length!==1?'s':''} loaded ✓`, true);
   } catch(e) { stopProgress(false); showToast('network error: '+e.message); places=[]; renderStrip([],new Set()); }
