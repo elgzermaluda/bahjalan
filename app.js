@@ -1024,7 +1024,7 @@ function stopProgress(ok){
 // ── SAVE QUEUE BOX ────────────────────
 function showSaveQueue(names, done) {
   let box = document.getElementById('save-queue');
-  if(!box){ box=document.createElement('div'); box.id='save-queue'; box.style.cssText='position:fixed;bottom:80px;right:14px;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;box-shadow:var(--shadow-lg);z-index:3000;min-width:220px;max-width:280px;font-family:'DM Sans',sans-serif;transition:opacity .3s'; document.body.appendChild(box); }
+  if(!box){ box=document.createElement('div'); box.id='save-queue'; box.style.cssText='position:fixed;bottom:80px;right:14px;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;box-shadow:var(--shadow-lg);z-index:3000;min-width:220px;max-width:280px;font-family:sans-serif;transition:opacity .3s'; document.body.appendChild(box); }
   box.style.opacity='1'; box.style.pointerEvents='auto';
   const icon = done===null ? `<div style="width:14px;height:14px;border-radius:50%;border:2px solid var(--A);border-top-color:transparent;animation:spin .7s linear infinite;flex-shrink:0"></div>` : done ? `<span style="color:var(--green);font-size:14px">✓</span>` : `<span style="color:#DC2626;font-size:14px">✕</span>`;
   const label = done===null ? `saving ${names.length} place${names.length!==1?'s':''}…` : done ? `saved ✓` : `save failed`;
