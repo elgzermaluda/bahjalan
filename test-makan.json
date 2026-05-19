@@ -1,17 +1,28 @@
 {
   "places": [
     {
-      "id": "1779154619828",
-      "name": "Sunway Lagoon Theme Park",
-      "lat": 3.0690075,
-      "lng": 101.6041874,
-      "mapsUrl": "https://www.google.com/maps/place/Sunway+Lagoon+Theme+Park,+Bandar+Sunway,+47500+Subang+Jaya,+Selangor,+Malaysia/@3.0690075,101.6041874,17z/data=!3m1!4b1!4m6!3m5!1s0x31cc4c8661cd6bf7:0x62208af8c3269ba5!8m2!3d3.0690075!4d101.6067623!16s%2Fg%2F12hmlbcs2?entry=ttu&g_ep=EgoyMDI2MDUxMy4wIKXMDSoASAFQAw%3D%3D",
+      "id": "1779154651101_g8n4",
+      "name": "LRT Sri Rampai",
+      "lat": 0,
+      "lng": 0,
+      "mapsUrl": "https://www.google.com/maps/place/LRT+Sri+Rampai/data=!4m2!3m1!1s0x31cc3824dcd0315f:0x3cfe3a1b4fc5f10",
       "category": "eatery",
-      "tags": [
-        "cafe"
-      ],
+      "tags": [],
       "note": "",
-      "savedAt": "2026-05-19T01:36:59.828Z"
+      "savedAt": "2026-05-19T01:37:31.102Z",
+      "_needsGeo": true
+    },
+    {
+      "id": "1779154651102_h5ag",
+      "name": "Desa Villas Condominium",
+      "lat": 0,
+      "lng": 0,
+      "mapsUrl": "https://www.google.com/maps/place/Desa+Villas+Condominium/data=!4m2!3m1!1s0x31cc378850da67bf:0xa9216b60feeaeeb1",
+      "category": "eatery",
+      "tags": [],
+      "note": "",
+      "savedAt": "2026-05-19T01:37:31.102Z",
+      "_needsGeo": true
     },
     {
       "id": "1779078454526",
