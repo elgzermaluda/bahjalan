@@ -1,6 +1,20 @@
 {
   "places": [
     {
+      "id": "1779156132697",
+      "name": "Noto Cafe & Bakery",
+      "lat": 3.0651283,
+      "lng": 101.5798349,
+      "mapsUrl": "https://www.google.com/maps/place/Noto+Cafe+%26+Bakery/@3.0651283,101.5798349,17z/data=!3m1!4b1!4m6!3m5!1s0x4b9c2ab503ee0ab1:0xad65f875906c145b!8m2!3d3.0651283!4d101.5798349!16s%2Fg%2F11vxqp32s1?entry=ttu&g_ep=EgoyMDI2MDUxMy4wIKXMDSoASAFQAw%3D%3D",
+      "category": "activity",
+      "tags": [
+        "theme park"
+      ],
+      "note": "",
+      "savedAt": "2026-05-19T02:02:12.697Z",
+      "_pending": true
+    },
+    {
       "id": "1779071754611",
       "name": "Sunway Lagoon Theme Park",
       "lat": 3.0690075,
