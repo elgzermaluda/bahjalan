@@ -1,6 +1,20 @@
 {
   "places": [
     {
+      "id": "1779156781862",
+      "name": "LRT Sri Rampai",
+      "lat": 3.1937422,
+      "lng": 101.7328845,
+      "mapsUrl": "https://www.google.com/maps/place/LRT+Sri+Rampai/@3.1937422,101.7328845,16z/data=!4m6!3m5!1s0x31cc3824dcd0315f:0x3cfe3a1b4fc5f10!8m2!3d3.19918!4d101.73747!16s%2Fg%2F11vf8r6j94?entry=tts&g_ep=EgoyMDI2MDUxMy4wIPu8ASoASAFQAw%3D%3D&skid=cca1c95a-7537-48d1-8199-9f84e0d4ebce",
+      "category": "activity",
+      "tags": [
+        "theme park"
+      ],
+      "note": "",
+      "savedAt": "2026-05-19T02:13:01.863Z",
+      "_pending": true
+    },
+    {
       "id": "1779156132697",
       "name": "Noto Cafe & Bakery",
       "lat": 3.0651283,
