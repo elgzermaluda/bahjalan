@@ -1,3 +1,16 @@
 {
-  "places": []
+  "places": [
+    {
+      "id": "1779158845877_syye",
+      "name": "Sunway Velocity Mall",
+      "lat": 3.142580518181395,
+      "lng": 101.68807537948538,
+      "mapsUrl": "https://www.google.com/maps/place/Sunway+Velocity+Mall/data=!4m2!3m1!1s0x31cc3614023d8ac1:0x16c2db2b9f094ca2",
+      "category": "activity",
+      "tags": [],
+      "note": "",
+      "savedAt": "2026-05-19T02:47:25.877Z",
+      "_needsGeo": false
+    }
+  ]
 }
