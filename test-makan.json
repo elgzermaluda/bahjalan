@@ -3,14 +3,13 @@
     {
       "id": "1779154651101_g8n4",
       "name": "LRT Sri Rampai",
-      "lat": 0,
-      "lng": 0,
+      "lat": 3.1983516,
+      "lng": 101.7396423,
       "mapsUrl": "https://www.google.com/maps/place/LRT+Sri+Rampai/data=!4m2!3m1!1s0x31cc3824dcd0315f:0x3cfe3a1b4fc5f10",
       "category": "eatery",
       "tags": [],
       "note": "",
-      "savedAt": "2026-05-19T01:37:31.102Z",
-      "_needsGeo": true
+      "savedAt": "2026-05-19T01:37:31.102Z"
     },
     {
       "id": "1779154651102_h5ag",
